@@ -56,7 +56,9 @@ row_filter <- gfilter(data_set, cont=r_gp, expand=TRUE)
 #     cnms <<- svalue(c_names)
 #     idxs <<- which(rows)                  # move to global variable
 #     data_set_dim <<- dim(data_set[idxs, cnms])
-#     svalue(b_disp, append=T) <- data_set_dim[1]
+#         svalue(b_disp, append=T) <- paste('Display selection (', data_set_dim[1], 
+#                                      ' x ', data_set_dim[2], ')', sep='')
+#     font(b_disp) <- list(weight = "bold")
 # })
 ##!!add actual 'grepl' search
 
