@@ -15,7 +15,7 @@ library(gWidgets2) ## on github not CRAN. (require(devtools); install_github("gW
 w <- gwindow("edit me", visible=FALSE)
 pg <- gpanedgroup(w, horizontal=TRUE)
 
-f_side <- gvbox(cont=pg)
+f_side <- gvbox(cont=pg, use.scrollwindow=TRUE)
 df_side <- gvbox(cont = pg, expand=TRUE)
 
 df_box <- ggroup(cont=df_side, expand=TRUE) ## holds df instance
@@ -32,6 +32,7 @@ gs_df <- gstatusbar('', cont=df_side)
 ##??increase hight of selection box; use size()
 ##!!reload data.frame
 c_gp <- gframe("Select columns:", cont=f_side, horizontal=FALSE)
+#font(c_gp) <- list(weight = "bold")
 c_names <- gcheckboxgroup(names(data_set), cont=c_gp, use.table=TRUE, expand=TRUE)
 s_gp <- ggroup(cont=c_gp, horizontal=TRUE)
 gbutton("Invert", cont=ggroup(cont=s_gp), handler = function(h,...) {
@@ -56,8 +57,8 @@ row_filter <- gfilter(data_set, cont=r_gp, expand=TRUE)
 #     cnms <<- svalue(c_names)
 #     idxs <<- which(rows)                  # move to global variable
 #     data_set_dim <<- dim(data_set[idxs, cnms])
-#         svalue(b_disp, append=T) <- paste('Display selection (', data_set_dim[1], 
-#                                      ' x ', data_set_dim[2], ')', sep='')
+#     svalue(b_disp, append=T) <- paste('Display selection (', data_set_dim[1], 
+#                                       ' x ', data_set_dim[2], ')', sep='')
 #     font(b_disp) <- list(weight = "bold")
 # })
 ##!!add actual 'grepl' search
