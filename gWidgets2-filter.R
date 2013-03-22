@@ -4,18 +4,19 @@
 # idxs <- NULL                                # global set of indices that are being edited
 # cnms <- NULL                                # global column names
 
-##!!set up a function (optimize return() beahviour)
+##??optimize return() beahviour, confirmation, on-the-fly, etc.
 df_filter <- function(data_set, DF = NULL, idxs = NULL, cnms = NULL){
     library(gWidgets2) ## on github not CRAN. (require(devtools); install_github("gWidgets2", "jverzani")
     options(guiToolkit="RGtk2")
+    data_set_name <- deparse(substitute(data_set))
     
     ##??data frame selector (use data frame browser)
     data_set_dim_orig <- dim(data_set)
-    w <- gwindow(paste("Original dataset (", data_set_dim_orig[1], ' x ', 
+    w <- gwindow(paste(data_set_name, " (", data_set_dim_orig[1], ' x ', 
                        data_set_dim_orig[2], ')', sep=''), visible=FALSE, 
                  handler=function(h,...){
         #if(identical)
-        return(data_set)
+        #return(data_set)
     })
     pg <- gpanedgroup(w, horizontal=TRUE)
     
@@ -29,6 +30,8 @@ df_filter <- function(data_set, DF = NULL, idxs = NULL, cnms = NULL){
     ##!!close button (or discard/save&close)
     do_btn <- gbutton("Merge changes...", cont=btn_gp)
     visible(do_btn) <- FALSE
+    enabled(do_btn) <- FALSE
+    ##??mv statusbar to df_side container
     gs_df <- gstatusbar('', cont=df_side)
     
     ## set up filters.
@@ -36,7 +39,6 @@ df_filter <- function(data_set, DF = NULL, idxs = NULL, cnms = NULL){
     ##!!increase hight of selection box; use size()
     ##??reload data.frame
     c_gp <- gframe("<b> Select columns: </b>", markup=TRUE, cont=f_side, horizontal=FALSE)
-    #font(c_gp) <- list(weight = "bold")
     c_names <- gcheckboxgroup(names(data_set), cont=c_gp, use.table=TRUE, expand=TRUE)
     s_gp <- ggroup(cont=c_gp, horizontal=TRUE)
     # gbutton("Invert", cont=ggroup(cont=s_gp), handler = function(h,...) {
@@ -50,6 +52,7 @@ df_filter <- function(data_set, DF = NULL, idxs = NULL, cnms = NULL){
         svalue(c_names, index=TRUE) <- integer()
     })
     ##!!check dim() bug when 'atomic'
+    ##??bug in dim() when using buttons (select all)
     addHandlerChanged(c_names, function(h,...) {
         rows <- svalue(row_filter)
         cnms <<- svalue(c_names)
@@ -58,7 +61,7 @@ df_filter <- function(data_set, DF = NULL, idxs = NULL, cnms = NULL){
         blockHandler(b_disp)
         svalue(b_disp, append=T) <- paste('Display selection (', data_set_dim[1], 
                                           ' x ', data_set_dim[2], ')', sep='')
-        font(b_disp) <- list(weight = "bold")
+        #font(b_disp) <- list(weight = "bold")
         unblockHandler(b_disp)
     })
     
@@ -75,7 +78,7 @@ df_filter <- function(data_set, DF = NULL, idxs = NULL, cnms = NULL){
         blockHandler(b_disp)
         svalue(b_disp, append=T) <- paste('Display selection (', data_set_dim[1], 
                                           ' x ', data_set_dim[2], ')', sep='')
-        font(b_disp) <- list(weight = "bold")
+        #font(b_disp) <- list(weight = "bold")
         unblockHandler(b_disp)
     })
     ##!!add actual 'grepl' search
@@ -83,7 +86,8 @@ df_filter <- function(data_set, DF = NULL, idxs = NULL, cnms = NULL){
     
     ##!!editable checkbox (for(j in 1:ncol(DF)) set_editable=function(j, value=FALSE))
     ##!!automatic update checkbox
-    b_disp <- gbutton("Display selection", expand=TRUE, cont=ggroup(cont=f_side), handler=function(h,...) {
+    b_disp <- gbutton("Display selection", expand=TRUE, cont=ggroup(cont=f_side), 
+                      handler=function(h,...) {
         visible(do_btn) <- TRUE
         cnms <<- svalue(c_names)
         rows <- svalue(row_filter)
@@ -94,25 +98,38 @@ df_filter <- function(data_set, DF = NULL, idxs = NULL, cnms = NULL){
         delete(df_box, df_box[1])             # remove child
         DF <<- gdf(data_set[rows, cnms], cont=df_box, expand=TRUE)
         DF$set_selectmode("multiple")
+        addHandlerChanged(DF, handler=function(h,...){
+            if(!grepl('*', svalue(w), fixed=T)){
+                enabled(do_btn) <- TRUE
+                svalue(w) <- paste( svalue(w), '*', sep='')
+            }
+        })
+        if(grepl('*', svalue(w), fixed=T)){
+            enabled(do_btn) <- FALSE
+            svalue(w) <- paste( substr(svalue(w), 1, (nchar(svalue(w))-1)), sep='')
+        }
         data_set_dim <- dim(data_set[idxs, cnms])
-        svalue(gs_df) <- paste('Currently displaying a', data_set_dim[1], 'x', data_set_dim[2], 'selection.')
+        svalue(gs_df) <- paste('Currently displaying a ', data_set_dim[1], ' x ', 
+                               data_set_dim[2], ' subset of ', data_set_name, '.', sep='')
     })
-    font(b_disp) <- list(weight = "bold")
+    #font(b_disp) <- list(weight = "bold")
     
     size(w) <- c(600, 500)
     visible(w) <- TRUE
     svalue(pg) <- 0.33
     
     
-    ##!!detect changes in gdf() and activate button only then
     ##??undo/redo
     ## What to do when you do ...
     addHandlerClicked(do_btn, function(h,...) {
         ## change me to your liking
        if(gconfirm('Merge changes into the original data frame?', 'Confirm merge...', 
                 icon='question')) {
-           data_set[idxs, cnms] <<- DF[]
-           galert("The data frame has been modified.", parent=w)
+            data_set[idxs, cnms] <<- DF[]
+            assign(data_set_name, data_set, .GlobalEnv)
+            enabled(do_btn) <- FALSE
+            svalue(w) <- paste( substr(svalue(w), 1, (nchar(svalue(w))-1)), sep='')
+            galert("The original data frame has been modified.", parent=w)
        } else {
            #galert("Modifications cancelled.", parent=w)
        }
@@ -121,4 +138,4 @@ df_filter <- function(data_set, DF = NULL, idxs = NULL, cnms = NULL){
 
 require(MASS)
 Xa <- Cars93 ## this will be in a function... replace with your won
-Xb <- df_filter(Xa)
+df_filter(Xa)
