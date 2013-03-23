@@ -8,6 +8,7 @@
 df_filter <- function(data_set, DF = NULL, idxs = NULL, cnms = NULL){
     library(gWidgets2) ## on github not CRAN. (require(devtools); install_github("gWidgets2", "jverzani")
     options(guiToolkit="RGtk2")
+    ##!!test for data.frmae or matrix
     data_set_name <- deparse(substitute(data_set))
     
     ##??data frame selector (use data frame browser)
@@ -20,6 +21,8 @@ df_filter <- function(data_set, DF = NULL, idxs = NULL, cnms = NULL){
     })
     pg <- gpanedgroup(w, horizontal=TRUE)
     
+    ##??minimal scrollwindow width
+    ##??f4 to hide left pane
     f_side <- gvbox(cont=pg, use.scrollwindow=TRUE)
     df_side <- gvbox(cont = pg, expand=TRUE)
     
@@ -31,7 +34,6 @@ df_filter <- function(data_set, DF = NULL, idxs = NULL, cnms = NULL){
     do_btn <- gbutton("Merge changes...", cont=btn_gp)
     visible(do_btn) <- FALSE
     enabled(do_btn) <- FALSE
-    ##??mv statusbar to df_side container
     gs_df <- gstatusbar('', cont=df_side)
     
     ## set up filters.
@@ -45,15 +47,16 @@ df_filter <- function(data_set, DF = NULL, idxs = NULL, cnms = NULL){
     #     svalue(c_names, index=TRUE) <- setdiff(1:length(names(data_set)), 
     #                                            svalue(c_names, index=TRUE))
     # })
-    gbutton("Select all", cont=ggroup(cont=s_gp), handler = function(h,...) {
+    b_selall <- gbutton("Select all", cont=ggroup(cont=s_gp), handler = function(h,...) {
         svalue(c_names, index=TRUE) <- 1:length(names(data_set))
     })
-    gbutton("Clear", cont=ggroup(cont=s_gp), handler = function(h,...) {
+    b_clear <- gbutton("Clear", cont=ggroup(cont=s_gp), handler = function(h,...) {
         svalue(c_names, index=TRUE) <- integer()
     })
+    
     ##!!check dim() bug when 'atomic'
-    ##??bug in dim() when using buttons (select all)
-    addHandlerChanged(c_names, function(h,...) {
+    ## centralized handler helper fun for display button
+    b_disp <- function(h, ...) {
         rows <- svalue(row_filter)
         cnms <<- svalue(c_names)
         idxs <<- which(rows)                  # move to global variable
@@ -63,26 +66,18 @@ df_filter <- function(data_set, DF = NULL, idxs = NULL, cnms = NULL){
                                           ' x ', data_set_dim[2], ')', sep='')
         #font(b_disp) <- list(weight = "bold")
         unblockHandler(b_disp)
-    })
+    }
+    addHandlerChanged(c_names, b_disp)
+    addHandlerChanged(b_selall, b_disp)
+    addHandlerChanged(b_clear, b_disp)
     
     
     ## Filter rows by logical
     r_gp <- gframe("<b>Filter rows:</b>", markup=TRUE, cont=f_side, horizontal=FALSE)
-    ##!!inspect the code (logical vector selection, use spinners for 'range', have 'select all', rename radio/choice to single/multiple, head/tail/some, )
+    ##!!inspect the code (logical vector selection, use spinners for 'range', have 'select all', rename radio/choice to single/multiple, head/tail/some, use combo evern for 3 radio choices, )
     row_filter <- gfilter(data_set, cont=r_gp, expand=TRUE)
-    addHandlerChanged(row_filter, function(h,...) {
-        rows <- svalue(row_filter)
-        cnms <<- svalue(c_names)
-        idxs <<- which(rows)                  # move to global variable
-        data_set_dim <- dim(data_set[idxs, cnms])
-        blockHandler(b_disp)
-        svalue(b_disp, append=T) <- paste('Display selection (', data_set_dim[1], 
-                                          ' x ', data_set_dim[2], ')', sep='')
-        #font(b_disp) <- list(weight = "bold")
-        unblockHandler(b_disp)
-    })
+    addHandlerChanged(row_filter, b_disp)
     ##!!add actual 'grepl' search
-    
     
     ##!!editable checkbox (for(j in 1:ncol(DF)) set_editable=function(j, value=FALSE))
     ##!!automatic update checkbox
@@ -136,6 +131,6 @@ df_filter <- function(data_set, DF = NULL, idxs = NULL, cnms = NULL){
     }) 
 }
 
-require(MASS)
+#require(MASS)
 Xa <- Cars93 ## this will be in a function... replace with your won
 df_filter(Xa)
