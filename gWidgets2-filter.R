@@ -4,13 +4,14 @@
 # idxs <- NULL                                # global set of indices that are being edited
 # cnms <- NULL                                # global column names
 
-##!!inspect the code (logical vector selection, use spinners for 'range', have 'select all', rename radio/choice to single/multiple, head/tail/some, use combo evern for 3 radio choices, )
-##!!add actual 'grepl' search
+##!!inspect the gfilter code (logical vector selection, use spinners for 'range', have 'select all' and redefine 'clear', rename radio/choice to single/multiple, head/tail/some, use combo evern for 3 radio choices, )
+##!!hack 'grepl' search into gfilter()
 ##??optimize return() beahviour, confirmation, on-the-fly, discard/save&close button, undo/redo etc.
 ##??reload data.frame
 ##??data frame selector (use data frame browser)
+##??waht happens when alter 'other' variables (& robustness of editor)
 ##??f4 to hide left pane
-df_filter <- function(data_set, DF = NULL, idxs = NULL, cnms = NULL){
+dffilter <- function(data_set, DF = NULL, idxs = NULL, cnms = NULL){
     library(gWidgets2) ## on github not CRAN. (require(devtools); install_github("gWidgets2", "jverzani")
     options(guiToolkit="RGtk2")
     ## ensure we have a data frame of 1x2 dimensions
@@ -27,9 +28,7 @@ df_filter <- function(data_set, DF = NULL, idxs = NULL, cnms = NULL){
     })
     pg <- gpanedgroup(w, horizontal=TRUE)
     
-    ##??minimal scrollwindow width
     f_side <- gvbox(cont=pg, use.scrollwindow=TRUE)
-    print(size(f_side))
     df_side <- gvbox(cont = pg, expand=TRUE)
     
     df_box <- ggroup(cont=df_side, expand=TRUE) ## holds df instance
@@ -39,7 +38,7 @@ df_filter <- function(data_set, DF = NULL, idxs = NULL, cnms = NULL){
     do_btn <- gbutton("Merge changes...", cont=btn_gp)
     do_btn$set_icon("ok")
     enabled(do_btn) <- FALSE
-    ##!!editable checkbox (for(j in 1:ncol(DF)) set_editable=function(j, value=FALSE))
+    ##!!editable checkbox 
 #     cb_do_btn <- gcheckbox('Prevent merges', checked=TRUE, cont=btn_gp, 
 #                            handler=function(h,...){
 #                                if((grepl('*', svalue(w), fixed=T) & 
@@ -56,7 +55,6 @@ df_filter <- function(data_set, DF = NULL, idxs = NULL, cnms = NULL){
     
     ## set up filters.
     ## Select columns
-    ##??increase hight of selection box; use size() (bug)
     c_gp <- gframe("<b> Select columns: </b>", markup=TRUE, cont=f_side, 
                    horizontal=FALSE)
     c_names <- gcheckboxgroup(names(data_set), checked=TRUE, cont=c_gp, 
@@ -73,13 +71,13 @@ df_filter <- function(data_set, DF = NULL, idxs = NULL, cnms = NULL){
     b_clear <- gbutton("Clear", cont=ggroup(cont=s_gp), handler = function(h,...) {
         svalue(c_names, index=TRUE) <- integer()
     })
-    print(size(c_names))
     
     ## centralized handler helper fun for display button
     h_disp <- function(h, ...) {
         rows <- svalue(row_filter)
         cnms <<- svalue(c_names)
         idxs <<- which(rows)                  # move to global variable
+        
         ## detect size of data frame to be displayed
         if(length(cnms)==1){
             data_set_dim <- c(length(idxs), 1)
@@ -87,18 +85,19 @@ df_filter <- function(data_set, DF = NULL, idxs = NULL, cnms = NULL){
         if(any(data_set_dim < c(1,2))){
             enabled(b_disp) <- FALSE
         } else enabled(b_disp) <- TRUE
-        blockHandler(b_disp)
+        
+        ##!! autoupdate when false (bug when label doesn't change)
+        if( !svalue(cb_autoupdate) | !enabled(b_disp) ) blockHandler(b_disp)
         ## dynamically update 'display' button label given current selection
         svalue(b_disp, append=T) <- paste('Display selection (', data_set_dim[1], 
                                           ' x ', data_set_dim[2], ')', sep='')
         b_disp$set_icon("execute")
         #font(b_disp) <- list(weight = "bold")
-        unblockHandler(b_disp)
+        if( !svalue(cb_autoupdate) | !enabled(b_disp) ) unblockHandler(b_disp)
     }
     addHandlerChanged(c_names, h_disp)
     addHandlerChanged(b_selall, h_disp)
     addHandlerChanged(b_clear, h_disp)
-    
     
     ## Filter rows by logical
     r_gp <- gframe("<b>Filter rows:</b>", markup=TRUE, cont=f_side, horizontal=FALSE)
@@ -116,6 +115,7 @@ df_filter <- function(data_set, DF = NULL, idxs = NULL, cnms = NULL){
         delete(df_box, df_box[1])             # remove child
         DF <<- gdf(data_set[rows, cnms], cont=df_box, expand=TRUE)
         DF$set_selectmode("multiple")
+        
         ## use "edited" dirty flag
         addHandlerChanged(DF, handler=function(h,...){
             if(!grepl('*', svalue(w), fixed=T)){
@@ -128,6 +128,10 @@ df_filter <- function(data_set, DF = NULL, idxs = NULL, cnms = NULL){
             svalue(w) <- paste( substr(svalue(w), 1, (nchar(svalue(w))-1)), sep='')
         }
         data_set_dim <- dim(data_set[idxs, cnms])
+        
+        ##!!editable checkbox 
+        #sapply(1:data_set_dim[2], function(j) editable(DF, j) <- FALSE)
+        
         ## custom message when displaying full database.
         if(all(data_set_dim == data_set_dim_orig)){
             svalue(gs_df) <- paste("Currently displaying the full data set.", sep='')
@@ -139,8 +143,9 @@ df_filter <- function(data_set, DF = NULL, idxs = NULL, cnms = NULL){
     enabled(b_disp) <- TRUE
     b_disp$set_icon("execute")
     #font(b_disp) <- list(weight = "bold")
-    ##!!automatic update checkbox
-    #cb_autoupdate <- gcheckbox('Update automatically', cont=ggroup(cont=f_side))
+    ## allow to automatically update viewed subset
+    cb_autoupdate <- gcheckbox('Update automatically', cont=ggroup(cont=f_side))
+    tooltip(cb_autoupdate) <- "Check to refresh the displayed dataset \nas soon as the column or row selections change."
     
     size(w) <- c(600, 500)
     visible(w) <- TRUE
@@ -162,8 +167,14 @@ df_filter <- function(data_set, DF = NULL, idxs = NULL, cnms = NULL){
            #galert("Modifications cancelled.", parent=w)
        }
     }) 
+
+    ## use 4 lines as hight of selection box
+    size(c_names)[2] <- 4*25
+    #print(size(pg))
+    #print(size(c_names))
+    
 }
 
 require(MASS)
 Xa <- Cars93 ## this will be in a function... replace with your won
-df_filter(Xa)
+dffilter(Xa)
