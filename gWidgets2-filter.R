@@ -4,16 +4,21 @@
 # idxs <- NULL                                # global set of indices that are being edited
 # cnms <- NULL                                # global column names
 
-##!!inspect the gfilter code (logical vector selection, use spinners for 'range', have 'select all' and redefine 'clear', rename radio/choice to single/multiple, head/tail/some, use combo evern for 3 radio choices, )
+##!!inspect the gfilter code (logical vector selection, use spinners for 'range', have 'select all' and redefine 'clear', rename radio/choice to single/multiple, head/tail/some, use combo evern for 3 radio choices, automatically update filter items to reflect available choices, as an option?, what happens to 'Date' or 'other' classes, )
 ##!!hack 'grepl' search into gfilter()
-##??optimize return() beahviour, confirmation, on-the-fly, discard/save&close button, undo/redo etc.
+##!!bug when modifying a level it doesn't update the filters
+##??optimize return() beahviour, confirmation, on-the-fly, discard/save&close button, undo/redo, what 5gb dataset, etc.
 ##??reload data.frame
+##??sorting
+##??diff (papertrail) before save/ask confirmation
 ##??data frame selector (use data frame browser)
 ##??waht happens when alter 'other' variables (& robustness of editor)
 ##??f4 to hide left pane
 dffilter <- function(data_set, DF = NULL, idxs = NULL, cnms = NULL){
-    library(gWidgets2) ## on github not CRAN. (require(devtools); install_github("gWidgets2", "jverzani")
+    require(gWidgets2) ## on github not CRAN. (require(devtools); install_github("gWidgets2", "jverzani")
     options(guiToolkit="RGtk2")
+    #require(RGtk2)
+    
     ## ensure we have a data frame of 1x2 dimensions
     stopifnot(is.data.frame(data_set))
     stopifnot(all(dim(data_set) >= c(1,2)))
@@ -86,14 +91,16 @@ dffilter <- function(data_set, DF = NULL, idxs = NULL, cnms = NULL){
             enabled(b_disp) <- FALSE
         } else enabled(b_disp) <- TRUE
         
-        ##!! autoupdate when false (bug when label doesn't change)
-        if( !svalue(cb_autoupdate) | !enabled(b_disp) ) blockHandler(b_disp)
+        blockHandler(b_disp)
         ## dynamically update 'display' button label given current selection
         svalue(b_disp, append=T) <- paste('Display selection (', data_set_dim[1], 
                                           ' x ', data_set_dim[2], ')', sep='')
         b_disp$set_icon("execute")
         #font(b_disp) <- list(weight = "bold")
-        if( !svalue(cb_autoupdate) | !enabled(b_disp) ) unblockHandler(b_disp)
+        unblockHandler(b_disp)
+        
+        ## autoupdate when option checked and button enabled
+        if( svalue(cb_autoupdate) & enabled(b_disp) ) b_disp$invoke_change_handler()
     }
     addHandlerChanged(c_names, h_disp)
     addHandlerChanged(b_selall, h_disp)
@@ -143,13 +150,14 @@ dffilter <- function(data_set, DF = NULL, idxs = NULL, cnms = NULL){
     enabled(b_disp) <- TRUE
     b_disp$set_icon("execute")
     #font(b_disp) <- list(weight = "bold")
-    ## allow to automatically update viewed subset
+    ## allow to automatically update the viewed subset
     cb_autoupdate <- gcheckbox('Update automatically', cont=ggroup(cont=f_side))
     tooltip(cb_autoupdate) <- "Check to refresh the displayed dataset \nas soon as the column or row selections change."
     
     size(w) <- c(600, 500)
     visible(w) <- TRUE
     svalue(pg) <- 0.38
+    #pg$widget$setPosition(290)
     
     ## What to do when you do ...
     addHandlerClicked(do_btn, function(h,...) {
