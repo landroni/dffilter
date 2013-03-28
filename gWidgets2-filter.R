@@ -166,14 +166,14 @@ dffilter <- function(data_set, DF = NULL, idxs = NULL, cnms = NULL){
     tooltip(cb_autoupdate) <- "If checked refresh the displayed dataset \nas soon as the column or row selections change."
     
     ##!!editable checkbox (freeze_attributes=TRUE)
-        cb_do_btn <- gcheckbox('Allow editing', checked=FALSE, cont=ggroup(cont=f_side), 
-                               handler=function(h,...){
-                                   if((grepl('*', svalue(w), fixed=T) & 
-                                           svalue(cb_do_btn))){
-                                       enabled(do_btn) <- TRUE
-                                   }
-        })
-        tooltip(obj=cb_do_btn) <- "If checked allow editing of displayed subsets \nin a spreadsheet-like environment."
+#         cb_do_btn <- gcheckbox('Allow editing', checked=FALSE, cont=ggroup(cont=f_side), 
+#                                handler=function(h,...){
+#                                    if((grepl('*', svalue(w), fixed=T) & 
+#                                            svalue(cb_do_btn))){
+#                                        enabled(do_btn) <- TRUE
+#                                    }
+#         })
+#         tooltip(obj=cb_do_btn) <- "If checked allow editing of displayed subsets \nin a spreadsheet-like environment."
     
     size(w) <- c(600, 500)
     visible(w) <- TRUE
