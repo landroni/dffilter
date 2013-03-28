@@ -4,20 +4,20 @@
 # idxs <- NULL                                # global set of indices that are being edited
 # cnms <- NULL                                # global column names
 
-##!!inspect the gfilter code (logical vector selection, use spinners for 'range', have 'select all' and redefine 'clear', rename radio/choice to single/multiple, head/tail/some, use combo evern for 3 radio choices, automatically update filter items to reflect available choices, as an option?, what happens to 'Date' or 'other' classes, )
+##!!inspect the gfilter code (logical vector selection, use spinners for 'range', have 'select all' and redefine 'clear', rename radio/choice to single/multiple, head/tail/some, use combo evern for 3 radio choices, manually update filter items to reflect available choices as a 'update filters' button?, what happens to 'Date' or 'other' classes, use rgtk2editdf)
+##!!experiment with hide left pane layout
 ##!!hack 'grepl' search into gfilter()
 ##!!bug when modifying a level it doesn't update the filters
-##??optimize return() beahviour, confirmation, on-the-fly, discard/save&close button, undo/redo, what 5gb dataset, etc.
+##??optimize return() beahviour, confirmation, on-the-fly, discard/save&close button, undo/redo, what 5gb dataset, display diff before confirm merge, etc.
 ##??reload data.frame
-##??sorting
-##??diff (papertrail) before save/ask confirmation
-##??data frame selector (use data frame browser)
+##??sorting (in gdf()? or separately w/o loading the full data frame?)
+##??data frame selector (use data frame browser; what about matrix objs?) & label(..., self=T) in tooltip and make  label editable & describe()
+##??diff (papertrail; setdiff2 {prob} using github green/red & darkgreen/darkred colouring approach; 'dataview'; split-window with side-by-side display as in diffPDF; what happens when the two df have different nr of rows/columns?; )
 ##??waht happens when alter 'other' variables (& robustness of editor)
-##??f4 to hide left pane
 dffilter <- function(data_set, DF = NULL, idxs = NULL, cnms = NULL){
     require(gWidgets2) ## on github not CRAN. (require(devtools); install_github("gWidgets2", "jverzani")
     options(guiToolkit="RGtk2")
-    #require(RGtk2)
+    require(RGtk2)
     
     ## ensure we have a data frame of 1x2 dimensions
     stopifnot(is.data.frame(data_set))
@@ -43,15 +43,6 @@ dffilter <- function(data_set, DF = NULL, idxs = NULL, cnms = NULL){
     do_btn <- gbutton("Merge changes...", cont=btn_gp)
     do_btn$set_icon("ok")
     enabled(do_btn) <- FALSE
-    ##!!editable checkbox 
-#     cb_do_btn <- gcheckbox('Prevent merges', checked=TRUE, cont=btn_gp, 
-#                            handler=function(h,...){
-#                                if((grepl('*', svalue(w), fixed=T) & 
-#                                        svalue(cb_do_btn))){
-#                                    enabled(do_btn) <- TRUE
-#                                }
-#     })
-#     tooltip(obj=cb_do_btn) <- "Uncheck to allow merging changes into the original data frame."
     addSpring(btn_gp)
     close_btn <- gbutton("Close", cont=btn_gp, handler=function(h,...){
         dispose(w)
@@ -118,9 +109,32 @@ dffilter <- function(data_set, DF = NULL, idxs = NULL, cnms = NULL){
         rows <- svalue(row_filter)
         
         idxs <<- which(rows)                  # move to global variable
+        
         ## now add a data frame
         delete(df_box, df_box[1])             # remove child
-        DF <<- gdf(data_set[rows, cnms], cont=df_box, expand=TRUE)
+        
+        ##!!editable checkbox "disable editing"
+        #sapply(1:data_set_dim[2], function(j) editable(DF, j) <- FALSE)
+        
+        ## disallow row/col c-menu when not all columns/rows are displayed (freeze_attributes=TRUE)
+        if( all(c(length(idxs), length(cnms)) == data_set_dim_orig) ){
+            ## display full data set
+            DF <<- gdf(data_set[rows, cnms], cont=df_box, expand=TRUE)
+        } else if( all(c(length(idxs), length(cnms)) != data_set_dim_orig) ){
+            ## display subset (fewer rows/columns)
+            DF <<- gdf(data_set[rows, cnms], cont=df_box, expand=TRUE, 
+                       freeze_attributes=TRUE)
+        } else if( all(c(length(idxs) != data_set_dim_orig[1], 
+                         length(cnms) == data_set_dim_orig[2])) ){
+            ## display subset (fewer rows / all columns)
+            DF <<- gdf(data_set[rows, cnms], cont=df_box, expand=TRUE, 
+                       freeze_attributes="column")
+        } else if( all(c(length(idxs) == data_set_dim_orig[1], 
+                         length(cnms) != data_set_dim_orig[2])) ){
+            ## display subset (all rows / fewer columns)
+            DF <<- gdf(data_set[rows, cnms], cont=df_box, expand=TRUE, 
+                       freeze_attributes="row")
+        }
         DF$set_selectmode("multiple")
         
         ## use "edited" dirty flag
@@ -136,9 +150,6 @@ dffilter <- function(data_set, DF = NULL, idxs = NULL, cnms = NULL){
         }
         data_set_dim <- dim(data_set[idxs, cnms])
         
-        ##!!editable checkbox 
-        #sapply(1:data_set_dim[2], function(j) editable(DF, j) <- FALSE)
-        
         ## custom message when displaying full database.
         if(all(data_set_dim == data_set_dim_orig)){
             svalue(gs_df) <- paste("Currently displaying the full data set.", sep='')
@@ -152,20 +163,29 @@ dffilter <- function(data_set, DF = NULL, idxs = NULL, cnms = NULL){
     #font(b_disp) <- list(weight = "bold")
     ## allow to automatically update the viewed subset
     cb_autoupdate <- gcheckbox('Update automatically', cont=ggroup(cont=f_side))
-    tooltip(cb_autoupdate) <- "Check to refresh the displayed dataset \nas soon as the column or row selections change."
+    tooltip(cb_autoupdate) <- "If checked refresh the displayed dataset \nas soon as the column or row selections change."
+    
+    ##!!editable checkbox (freeze_attributes=TRUE)
+        cb_do_btn <- gcheckbox('Allow editing', checked=FALSE, cont=ggroup(cont=f_side), 
+                               handler=function(h,...){
+                                   if((grepl('*', svalue(w), fixed=T) & 
+                                           svalue(cb_do_btn))){
+                                       enabled(do_btn) <- TRUE
+                                   }
+        })
+        tooltip(obj=cb_do_btn) <- "If checked allow editing of displayed subsets \nin a spreadsheet-like environment."
     
     size(w) <- c(600, 500)
     visible(w) <- TRUE
-    svalue(pg) <- 0.38
-    #pg$widget$setPosition(290)
+    svalue(pg) <- 0.4
+    #svalue(pg) <- 250L
     
     ## What to do when you do ...
     addHandlerClicked(do_btn, function(h,...) {
         ## change me to your liking
        if(gconfirm('Merge changes into the original data frame?', 'Confirm merge...', 
                 icon='question')) {
-           ##!!graciously reintegrate when row/col deletion
-           ##!!disallow row/col delete when not all columns/rows are displayed
+           ##!!graciously reintegrate when row/col deletion/insertion 
             data_set[idxs, cnms] <<- DF[]
             assign(data_set_name, data_set, .GlobalEnv)
             enabled(do_btn) <- FALSE
