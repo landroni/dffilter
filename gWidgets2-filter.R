@@ -4,7 +4,6 @@
 # idxs <- NULL                                # global set of indices that are being edited
 # cnms <- NULL                                # global column names
 
-##!!inspect the gfilter code (logical vector selection, use spinners for 'range', have 'select all' and redefine 'clear', rename radio/choice to single/multiple, head/tail/some, use combo evern for 3 radio choices, manually update filter items to reflect available choices as a 'update filters' button?, what happens to 'Date' or 'other' classes, use rgtk2editdf)
 ##!!experiment with hide left pane layout
 ##!!hack 'grepl' search into gfilter()
 ##!!bug when modifying a level it doesn't update the filters
@@ -56,17 +55,22 @@ dffilter <- function(data_set, DF = NULL, idxs = NULL, cnms = NULL){
     c_names <- gcheckboxgroup(names(data_set), checked=TRUE, cont=c_gp, 
                               use.table=TRUE, expand=TRUE)
     s_gp <- ggroup(cont=c_gp, horizontal=TRUE)
-    # gbutton("Invert", cont=ggroup(cont=s_gp), handler = function(h,...) {
-    #     svalue(c_names, index=TRUE) <- setdiff(1:length(names(data_set)), 
-    #                                            svalue(c_names, index=TRUE))
-    # })
+    
+    ## Invert selection, select all and select none are all useful in different cases
+    b_invert <- gbutton("Invert", cont=ggroup(cont=s_gp), handler = function(h,...) {
+        svalue(c_names, index=TRUE) <- setdiff(1:length(names(data_set)), 
+                                               svalue(c_names, index=TRUE))
+    })
+    tooltip(b_invert) <- 'Invert selection'
     b_selall <- gbutton("Select all", cont=ggroup(cont=s_gp), handler = function(h,...) {
         svalue(c_names, index=TRUE) <- 1:length(names(data_set))
     })
+    tooltip(b_selall) <- 'Select all'
     b_selall$set_icon("select-all")
     b_clear <- gbutton("Clear", cont=ggroup(cont=s_gp), handler = function(h,...) {
         svalue(c_names, index=TRUE) <- integer()
     })
+    tooltip(b_clear) <- 'Select none'
     
     ## centralized handler helper fun for display button
     h_disp <- function(h, ...) {
@@ -95,6 +99,7 @@ dffilter <- function(data_set, DF = NULL, idxs = NULL, cnms = NULL){
     }
     addHandlerChanged(c_names, h_disp)
     addHandlerChanged(b_selall, h_disp)
+    addHandlerChanged(b_invert, h_disp)
     addHandlerChanged(b_clear, h_disp)
     
     ## Filter rows by logical
@@ -206,3 +211,8 @@ dffilter <- function(data_set, DF = NULL, idxs = NULL, cnms = NULL){
 require(MASS)
 Xa <- Cars93 ## this will be in a function... replace with your won
 dffilter(Xa)
+
+## gfilter TODO items
+##!!inspect the gfilter code (logical vector selection, use spinners for 'range', have 'select all' and redefine 'clear', rename radio/choice to single/multiple, head/tail/some, use combo evern for 3 radio choices, manually update filter items to reflect available choices as a 'update filters' button or 'freeze selection' checkbox?, what happens to 'Date' or 'other' classes, use rgtk2editdf, when NA in variables, )
+
+
