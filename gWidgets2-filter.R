@@ -31,9 +31,19 @@ dffilter <- function(data_set, DF = NULL, idxs = NULL, cnms = NULL){
         #if(identical)
         #return(data_set)
     })
-    pg <- gpanedgroup(w, horizontal=TRUE)
+    #pg <- gpanedgroup(w, horizontal=TRUE)
+    pg <- ggroup(cont=w, horizontal=TRUE)
     
-    f_side <- gvbox(cont=pg, use.scrollwindow=TRUE)
+    f_side0 <- gvbox(cont=pg, use.scrollwindow=FALSE)
+    btn = gbutton("Hide", cont=ggroup(cont=f_side0), handler=function(h, ...) {
+        val <- svalue(h$obj)
+        if(val == "Hide") {delete(f_side0, f_side)} else {add(f_side0,f_side)}
+        blockHandlers(h$obj)
+        svalue(h$obj) = ifelse(val == "Hide", "Show", "Hide")
+        unblockHandler(h$obj)
+    })
+    f_side <- gvbox(cont=f_side0, use.scrollwindow=FALSE)
+    
     df_side <- gvbox(cont = pg, expand=TRUE)
     
     df_box <- ggroup(cont=df_side, expand=TRUE) ## holds df instance
