@@ -31,18 +31,36 @@ dffilter <- function(data_set, DF = NULL, idxs = NULL, cnms = NULL){
         #if(identical)
         #return(data_set)
     })
-    #pg <- gpanedgroup(w, horizontal=TRUE)
-    pg <- ggroup(cont=w, horizontal=TRUE)
+    pg <- gpanedgroup(cont=w, horizontal=TRUE)
+    #pg <- ggroup(cont=w, horizontal=TRUE)
     
     f_side0 <- gvbox(cont=pg, use.scrollwindow=FALSE)
-    btn = gbutton("Hide", cont=ggroup(cont=f_side0), handler=function(h, ...) {
+    b_hide <- gbutton("Hide", cont=ggroup(cont=f_side0))
+    addHandlerClicked(b_hide, handler=function(h, ...) {
         val <- svalue(h$obj)
-        if(val == "Hide") {delete(f_side0, f_side)} else {add(f_side0,f_side)}
+        if(val == "Hide") {
+            delete(f_side0, f_side1)
+            svalue(pg) <- as.integer(size(b_hide)[1])
+            ##!!bug when re-setting icon
+            b_hide$set_icon("go-back")
+            tooltip(b_hide) <- "Show panel"
+        } else {
+            add(f_side0, f_side1, expand=T)
+            svalue(pg) <- as.integer(size(b_disp)[1] + 20)
+            b_hide$set_icon("go-forward")
+            tooltip(b_hide) <- "Hide panel"
+        }
         blockHandlers(h$obj)
         svalue(h$obj) = ifelse(val == "Hide", "Show", "Hide")
         unblockHandler(h$obj)
+        #size
     })
-    f_side <- gvbox(cont=f_side0, use.scrollwindow=FALSE)
+    b_hide$set_icon("go-back")
+    tooltip(b_hide) <- "Hide panel"
+    #b_reload <- gbutton("Reload", cont=ggroup(cont=f_side0))
+    #b_reload$set_icon("refresh")
+    
+    f_side1 <- gvbox(cont=f_side0, use.scrollwindow=TRUE, expand=T)
     
     df_side <- gvbox(cont = pg, expand=TRUE)
     
@@ -61,7 +79,7 @@ dffilter <- function(data_set, DF = NULL, idxs = NULL, cnms = NULL){
     
     ## set up filters.
     ## Select columns
-    c_gp <- gframe("<b> Select columns: </b>", markup=TRUE, cont=f_side, 
+    c_gp <- gframe("<b> Select columns: </b>", markup=TRUE, cont=f_side1, 
                    horizontal=FALSE)
     c_names <- gcheckboxgroup(names(data_set), checked=TRUE, cont=c_gp, 
                               use.table=TRUE, expand=TRUE)
@@ -114,13 +132,13 @@ dffilter <- function(data_set, DF = NULL, idxs = NULL, cnms = NULL){
     addHandlerChanged(b_clear, h_disp)
     
     ## Filter rows by logical
-    r_gp <- gframe("<b>Filter rows:</b>", markup=TRUE, cont=f_side, horizontal=FALSE)
+    r_gp <- gframe("<b>Filter rows:</b>", markup=TRUE, cont=f_side1, horizontal=FALSE)
     row_filter <- gfilter(data_set, cont=r_gp, expand=TRUE)
     addHandlerChanged(row_filter, h_disp)
     
     b_disp <- gbutton(paste("Display selection (", data_set_dim_orig[1], ' x ', 
                             data_set_dim_orig[2], ')', sep=''), expand=TRUE, 
-                      cont=ggroup(cont=f_side), handler=function(h,...) {
+                      cont=ggroup(cont=f_side1), handler=function(h,...) {
         cnms <<- svalue(c_names)
         rows <- svalue(row_filter)
         
@@ -178,11 +196,11 @@ dffilter <- function(data_set, DF = NULL, idxs = NULL, cnms = NULL){
     b_disp$set_icon("execute")
     #font(b_disp) <- list(weight = "bold")
     ## allow to automatically update the viewed subset
-    cb_autoupdate <- gcheckbox('Update automatically', cont=ggroup(cont=f_side))
+    cb_autoupdate <- gcheckbox('Update automatically', cont=ggroup(cont=f_side1))
     tooltip(cb_autoupdate) <- "If checked refresh the displayed dataset \nas soon as the column or row selections change."
     
     ##!!editable checkbox (freeze_attributes=TRUE)
-#         cb_do_btn <- gcheckbox('Allow editing', checked=FALSE, cont=ggroup(cont=f_side), 
+#         cb_do_btn <- gcheckbox('Allow editing', checked=FALSE, cont=ggroup(cont=f_side1), 
 #                                handler=function(h,...){
 #                                    if((grepl('*', svalue(w), fixed=T) & 
 #                                            svalue(cb_do_btn))){
@@ -193,7 +211,8 @@ dffilter <- function(data_set, DF = NULL, idxs = NULL, cnms = NULL){
     
     size(w) <- c(600, 500)
     visible(w) <- TRUE
-    svalue(pg) <- 0.42
+    svalue(pg) <- as.integer(size(b_disp)[1] + 20)
+    #svalue(pg) <- 0.42
     #svalue(pg) <- 250L
     
     ## What to do when you do ...
@@ -201,7 +220,7 @@ dffilter <- function(data_set, DF = NULL, idxs = NULL, cnms = NULL){
         ## change me to your liking
        if(gconfirm('Merge changes into the original data frame?', 'Confirm merge...', 
                 icon='question')) {
-           ##!!graciously reintegrate when row/col deletion/insertion or NA vals present
+            ##!!graciously reintegrate when row/col deletion/insertion or NA vals present
             data_set[idxs, cnms] <<- DF[]
             assign(data_set_name, data_set, .GlobalEnv)
             enabled(do_btn) <- FALSE
