@@ -1,24 +1,25 @@
 ## edit a really large data set *after* it has been filtered
 
-# DF <- NULL                                  # global gdf instance
-# idxs <- NULL                                # global set of indices that are being edited
-# cnms <- NULL                                # global column names
 
 
-##!!experiment with hide left pane layout
+##!!experiment with hide left pane layout (how to programmatically identify widest widget, via some ww <<- max(), then svalue(pg) <- ww)
 ##!!hack 'grepl' search into gfilter()
 ##!!bug when modifying a level it doesn't update the filters
-##??reload data.frame
+##??reload data.frame (bottom-left)
 ##??on display button, log subsetting operation in the console
 ##??optimize return() beahviour, confirmation, on-the-fly, discard/save&close button, undo/redo, what 5gb dataset, display diff before confirm merge, etc.
 ##??waht happens when alter 'other' variables (& robustness of editor)
+##??gbuttontoggle()
 
-##!!fix arguments (mv inside fun def)
-dffilter <- function(data_set, DF = NULL, idxs = NULL, cnms = NULL){
+dffilter <- function(data_set){
     require(gWidgets2) ## on github not CRAN. (require(devtools); install_github("gWidgets2", "jverzani")
     options(guiToolkit="RGtk2")
     require(RGtk2)
     
+    DF <- NULL                      # global gdf instance
+    idxs <- NULL                    # global set of indices that are being edited
+    cnms <- NULL                    # global column names
+
     ## ensure we have a data frame of 1x2 dimensions
     stopifnot(is.data.frame(data_set))
     stopifnot(all(dim(data_set) >= c(1,2)))
