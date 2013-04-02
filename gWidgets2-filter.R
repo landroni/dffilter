@@ -6,12 +6,11 @@
 
 
 ##!!experiment with hide left pane layout
-##!!hack 'grepl' search into gfilter()
-##!!bug when modifying a level it doesn't update the filters
-##??reload data.frame
+##!!reload data.frame (automatically poll for changes?); bug when modifying a level it doesn't update the filters
+##!!hack 'grepl' search into gfilter(); regex?; 
 ##??on display button, log subsetting operation in the console
 ##??optimize return() beahviour, confirmation, on-the-fly, discard/save&close button, undo/redo, what 5gb dataset, display diff before confirm merge, etc.
-##??waht happens when alter 'other' variables (& robustness of editor)
+##??waht happens when alter 'other' variables (Date & robustness of editor)
 
 ##!!fix arguments (mv inside fun def)
 dffilter <- function(data_set, DF = NULL, idxs = NULL, cnms = NULL){
@@ -42,13 +41,17 @@ dffilter <- function(data_set, DF = NULL, idxs = NULL, cnms = NULL){
             delete(f_side0, f_side1)
             svalue(pg) <- as.integer(size(b_hide)[1])
             ##!!bug when re-setting icon
-            b_hide$set_icon("go-back")
+            #b_hide$set_icon("go-back")
+            b_hide$set_icon("reset")
             tooltip(b_hide) <- "Show panel"
+            print(sapply(f_side0$children, function(u) size(u)))
         } else {
             add(f_side0, f_side1, expand=T)
             svalue(pg) <- as.integer(size(b_disp)[1] + 20)
-            b_hide$set_icon("go-forward")
+            #b_hide$set_icon("go-forward")
+            b_hide$set_icon("reset")
             tooltip(b_hide) <- "Hide panel"
+            print(sapply(f_side0$children, function(u) size(u)))
         }
         blockHandlers(h$obj)
         svalue(h$obj) = ifelse(val == "Hide", "Show", "Hide")
@@ -235,11 +238,12 @@ dffilter <- function(data_set, DF = NULL, idxs = NULL, cnms = NULL){
     size(c_names)[2] <- 4*25
     #print(size(pg))
     #print(size(c_names))
-    
+    print(sapply(f_side0$children, function(u) size(u)))
 }
 
 require(MASS)
 Xa <- Cars93 ## this will be in a function... replace with your won
+#Xa[3:7,1] <- NA
 dffilter(Xa)
 
 ## gfilter TODO items
@@ -248,9 +252,11 @@ dffilter(Xa)
 ##!!bug when NA in variables (detect gracefully, )
 ##Error in which(sapply(widgets, function(i) i$getActive())) : 
 ##    argument to 'which' is not logical
-##!!adding new filter should consider merged changes
+##!!adding new filter should consider merged changes (reload data frame button?)
 ##??type-ahead search in combobox gfilter and in cehckbox table? (as in LyX?)
+##!!central RStudio-like search and dynamically filter GUI elements
 ##??sort variable components?
+##??gfilterpreset (use c("==", "%in%", "!=", ">", ">=", "<", "<=") combo, logical / manual subset, )
 
 ## tangential TODO items
 ##??data frame selector (use data frame browser; what about matrix objs?) & label(..., self=T) in tooltip and make  label editable & describe() & class() & nchar()
