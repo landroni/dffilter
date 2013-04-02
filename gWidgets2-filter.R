@@ -39,22 +39,23 @@ dffilter <- function(data_set, DF = NULL, idxs = NULL, cnms = NULL){
         val <- svalue(h$obj)
         if(val == "Hide") {
             delete(f_side0, f_side1)
-            svalue(pg) <- as.integer(size(b_hide)[1])
-            ##!!bug when re-setting icon
-            #b_hide$set_icon("go-back")
-            b_hide$set_icon("reset")
+            #svalue(pg) <- as.integer(size(b_hide)[1])
             tooltip(b_hide) <- "Show panel"
             print(sapply(f_side0$children, function(u) size(u)))
         } else {
             add(f_side0, f_side1, expand=T)
             svalue(pg) <- as.integer(size(b_disp)[1] + 20)
-            #b_hide$set_icon("go-forward")
-            b_hide$set_icon("reset")
             tooltip(b_hide) <- "Hide panel"
             print(sapply(f_side0$children, function(u) size(u)))
         }
         blockHandlers(h$obj)
         svalue(h$obj) = ifelse(val == "Hide", "Show", "Hide")
+        if(svalue(h$obj) == "Hide") {
+            b_hide$set_icon("go-back")
+        } else {
+            b_hide$set_icon("go-forward")
+            svalue(pg) <- as.integer(size(b_hide)[1])
+        }
         unblockHandler(h$obj)
         #size
     })
