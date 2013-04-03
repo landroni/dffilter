@@ -30,11 +30,15 @@ dffilter <- function(data_set, DF = NULL, idxs = NULL, cnms = NULL){
         #if(identical)
         #return(data_set)
     })
+#     addHandlerChanged(w, "size-allocate", function(h,...) {
+#         print(sapply(f_side0$children, function(u) size(u)))
+#     })
     pg <- gpanedgroup(cont=w, horizontal=TRUE)
     #pg <- ggroup(cont=w, horizontal=TRUE)
     
     f_side0 <- gvbox(cont=pg, use.scrollwindow=FALSE)
-    b_hide <- gbutton("Hide", cont=ggroup(cont=f_side0))
+    f_side0g <- ggroup(cont=f_side0)
+    b_hide <- gbutton("Hide", cont=ggroup(cont=f_side0g))
     addHandlerClicked(b_hide, handler=function(h, ...) {
         val <- svalue(h$obj)
         if(val == "Hide") {
@@ -44,7 +48,7 @@ dffilter <- function(data_set, DF = NULL, idxs = NULL, cnms = NULL){
             print(sapply(f_side0$children, function(u) size(u)))
         } else {
             add(f_side0, f_side1, expand=T)
-            svalue(pg) <- as.integer(size(b_disp)[1] + 20)
+            svalue(pg) <- as.integer(size(c_names)[1] + 0)
             tooltip(b_hide) <- "Hide panel"
             print(sapply(f_side0$children, function(u) size(u)))
         }
@@ -65,6 +69,7 @@ dffilter <- function(data_set, DF = NULL, idxs = NULL, cnms = NULL){
     #b_reload$set_icon("refresh")
     
     f_side1 <- gvbox(cont=f_side0, use.scrollwindow=TRUE, expand=T)
+    f_side1$block$setPolicy("GTK_POLICY_NEVER", "GTK_POLICY_AUTOMATIC")
     
     df_side <- gvbox(cont = pg, expand=TRUE)
     
@@ -225,6 +230,7 @@ dffilter <- function(data_set, DF = NULL, idxs = NULL, cnms = NULL){
        if(gconfirm('Merge changes into the original data frame?', 'Confirm merge...', 
                 icon='question')) {
             ##!!graciously reintegrate when row/col deletion/insertion or NA vals present
+            ##!!bug when editing factor levels (not reintegrated)
             data_set[idxs, cnms] <<- DF[]
             assign(data_set_name, data_set, .GlobalEnv)
             enabled(do_btn) <- FALSE
@@ -239,12 +245,15 @@ dffilter <- function(data_set, DF = NULL, idxs = NULL, cnms = NULL){
     size(c_names)[2] <- 4*25
     #print(size(pg))
     #print(size(c_names))
-    print(sapply(f_side0$children, function(u) size(u)))
+    #print(size(s_gp))
+    #print(sapply(f_side0g$children, function(u) size(u)))
 }
 
 require(MASS)
 Xa <- Cars93 ## this will be in a function... replace with your won
 #Xa[3:7,1] <- NA
+# Xa$Model1 <- as.character(Xa$Model)
+# Xa[2,'Model1'] <- paste(rep(letters, 26), collapse='')
 dffilter(Xa)
 
 ## gfilter TODO items
