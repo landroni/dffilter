@@ -36,6 +36,7 @@ dffilter <- function(data_set, DF = NULL, idxs = NULL, cnms = NULL){
     pg <- gpanedgroup(cont=w, horizontal=TRUE)
     #pg <- ggroup(cont=w, horizontal=TRUE)
     
+    ## have a hide/show button
     f_side0 <- gvbox(cont=pg, use.scrollwindow=FALSE)
     f_side0g <- ggroup(cont=f_side0)
     b_hide <- gbutton("Hide", cont=ggroup(cont=f_side0g))
@@ -43,25 +44,23 @@ dffilter <- function(data_set, DF = NULL, idxs = NULL, cnms = NULL){
         val <- svalue(h$obj)
         if(val == "Hide") {
             delete(f_side0, f_side1)
-            #svalue(pg) <- as.integer(size(b_hide)[1])
-            tooltip(b_hide) <- "Show panel"
-            print(sapply(f_side0$children, function(u) size(u)))
         } else {
             add(f_side0, f_side1, expand=T)
-            svalue(pg) <- as.integer(size(c_names)[1] + 0)
-            tooltip(b_hide) <- "Hide panel"
-            print(sapply(f_side0$children, function(u) size(u)))
         }
         blockHandlers(h$obj)
         svalue(h$obj) = ifelse(val == "Hide", "Show", "Hide")
         if(svalue(h$obj) == "Hide") {
             b_hide$set_icon("go-back")
+            print(sapply(f_side0$children, function(u) size(u)))
+            svalue(pg) <- as.integer(size(c_names)[1] + 0)
+            tooltip(b_hide) <- "Hide panel"
         } else {
             b_hide$set_icon("go-forward")
+            print(sapply(f_side0$children, function(u) size(u)))
             svalue(pg) <- as.integer(size(b_hide)[1])
+            tooltip(b_hide) <- "Show panel"
         }
         unblockHandler(h$obj)
-        #size
     })
     b_hide$set_icon("go-back")
     tooltip(b_hide) <- "Hide panel"
@@ -220,7 +219,7 @@ dffilter <- function(data_set, DF = NULL, idxs = NULL, cnms = NULL){
     
     size(w) <- c(600, 500)
     visible(w) <- TRUE
-    svalue(pg) <- as.integer(size(b_disp)[1] + 20)
+    svalue(pg) <- as.integer(size(b_disp)[1] + 0)
     #svalue(pg) <- 0.42
     #svalue(pg) <- 250L
     
