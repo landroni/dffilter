@@ -5,7 +5,10 @@
 # cnms <- NULL                                # global column names
 
 
-##!!experiment with hide left pane layout
+##!!central RStudio-like search and dynamically filter GUI elements
+##!!type-ahead search in combobox gfilter and in cehckbox table? (as in LyX?)
+##!!have 'select all/reset' (done) and 'clear' buttons and 'prev/next' button for combobox
+##!!adding new filter should consider merged changes (reload data frame button?)
 ##!!reload data.frame (automatically poll for changes?); bug when modifying a level it doesn't update the filters
 ##!!hack 'grepl' search into gfilter(); regex?; 
 ##??on display button, log subsetting operation in the console
@@ -31,14 +34,12 @@ dffilter <- function(data_set, DF = NULL, idxs = NULL, cnms = NULL){
         #if(identical)
         #return(data_set)
     })
-#     addHandlerChanged(w, "size-allocate", function(h,...) {
-#         print(sapply(f_side0$children, function(u) size(u)))
-#     })
     pg <- gpanedgroup(cont=w, horizontal=TRUE)
     #pg <- ggroup(cont=w, horizontal=TRUE)
     
     ## have a hide/show button
-    f_side0 <- gvbox(cont=pg, use.scrollwindow=FALSE)
+    f_side0 <- gvbox(cont=pg, use.scrollwindow=FALSE, 
+                     resize=FALSE, shrink=FALSE)
     f_side0g <- ggroup(cont=f_side0)
     b_hide <- gbutton("Hide", cont=ggroup(cont=f_side0g))
     addHandlerClicked(b_hide, handler=function(h, ...) {
@@ -52,12 +53,12 @@ dffilter <- function(data_set, DF = NULL, idxs = NULL, cnms = NULL){
         svalue(h$obj) = ifelse(val == "Hide", "Show", "Hide")
         if(svalue(h$obj) == "Hide") {
             b_hide$set_icon("go-back")
-            print(sapply(f_side0$children, function(u) size(u)))
-            svalue(pg) <- as.integer(size(c_names)[1] + 6)
+            #print(sapply(f_side0$children, function(u) size(u)))
+            svalue(pg) <- as.integer(size(c_names)[1] + 10)
             tooltip(b_hide) <- "Hide panel"
         } else {
             b_hide$set_icon("go-forward")
-            print(sapply(f_side0$children, function(u) size(u)))
+            #print(sapply(f_side0$children, function(u) size(u)))
             svalue(pg) <- as.integer(size(b_hide)[1])
             tooltip(b_hide) <- "Show panel"
         }
@@ -68,8 +69,7 @@ dffilter <- function(data_set, DF = NULL, idxs = NULL, cnms = NULL){
     #b_reload <- gbutton("Reload", cont=ggroup(cont=f_side0))
     #b_reload$set_icon("refresh")
     
-    f_side1 <- gvbox(cont=f_side0, use.scrollwindow=TRUE, expand=T)
-    #f_side1$block$setPolicy("GTK_POLICY_NEVER", "GTK_POLICY_AUTOMATIC")
+    f_side1 <- gvbox(cont=f_side0, use.scrollwindow=TRUE, expand=TRUE)
     
     df_side <- gvbox(cont = pg, expand=TRUE)
     
@@ -218,9 +218,9 @@ dffilter <- function(data_set, DF = NULL, idxs = NULL, cnms = NULL){
 #         })
 #         tooltip(obj=cb_do_btn) <- "If checked allow editing of displayed subsets \nin a spreadsheet-like environment."
     
-    size(w) <- c(600, 500)
+    size(w) <- c(700, 550)
     visible(w) <- TRUE
-    svalue(pg) <- as.integer(size(b_disp)[1] + 15)
+    svalue(pg) <- as.integer(size(b_disp)[1] + 20)
     #svalue(pg) <- 0.42
     #svalue(pg) <- 250L
     
@@ -249,22 +249,17 @@ dffilter <- function(data_set, DF = NULL, idxs = NULL, cnms = NULL){
     #print(sapply(f_side0g$children, function(u) size(u)))
 }
 
-#require(MASS)
-#Xa <- Cars93 ## this will be in a function... replace with your won
+# require(MASS)
+# Xa <- Cars93 ## this will be in a function... replace with your won
 #Xa[3:7,1] <- NA
 # Xa$Model1 <- as.character(Xa$Model)
 # Xa[2,'Model1'] <- paste(rep(letters, 26), collapse='')
+# Xa$Man.trans.avail1 <- as.logical(Xa$Man.trans.avail)
+# Xa$Man.trans.avail1 <- ifelse(Xa$Man.trans.avail=='Yes', TRUE, FALSE)
 dffilter(Xa)
 
 ## gfilter TODO items
 ##!!inspect the gfilter code (logical vector selection, use spinners for 'range', head/tail/some/!is.na/na.omit, manually update filter items to reflect available choices as a 'update filters' button or 'freeze selection' checkbox?, what happens to 'Date' or 'other' classes, use rgtk2editdf, 'enable/disable filter' toggle button next to 'remove', )
-##!!have 'select all/reset' (done) and 'clear' buttons and 'prev/next' button for combobox
-##!!bug when NA in variables (detect gracefully, )
-##Error in which(sapply(widgets, function(i) i$getActive())) : 
-##    argument to 'which' is not logical
-##!!adding new filter should consider merged changes (reload data frame button?)
-##??type-ahead search in combobox gfilter and in cehckbox table? (as in LyX?)
-##!!central RStudio-like search and dynamically filter GUI elements
 ##??sort variable components?
 ##??gfilterpreset (use c("==", "%in%", "!=", ">", ">=", "<", "<=") combo, logical / manual subset, )
 
