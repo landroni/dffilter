@@ -1,13 +1,13 @@
 ## edit a really large data set *after* it has been filtered
 
-# DF <- NULL                                  # global gdf instance
-# idxs <- NULL                                # global set of indices that are being edited
-# cnms <- NULL                                # global column names
-
-dffilter <- function(data_set, DF = NULL, idxs = NULL, cnms = NULL){
+dffilter <- function(data_set){
     require(gWidgets2) ## on github not CRAN. (require(devtools); install_github("gWidgets2", "jverzani")
     options(guiToolkit="RGtk2")
     require(RGtk2)
+
+    DF <- NULL                      # global gdf instance
+    idxs <- NULL                    # global set of indices that are being edited
+    cnms <- NULL                    # global column names
     
     ## ensure we have a data frame of 1x2 dimensions
     stopifnot(is.data.frame(data_set))
