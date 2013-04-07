@@ -1,14 +1,6 @@
 ## edit a really large data set *after* it has been filtered
 
 
-##!!experiment with hide left pane layout (how to programmatically identify widest widget, via some ww <<- max(), then svalue(pg) <- ww)
-##!!hack 'grepl' search into gfilter()/gsearch()
-##!!bug when modifying a level it doesn't update the filters
-##??reload data.frame (bottom-left)
-##??on display button, log subsetting operation in the console
-##??optimize return() beahviour, confirmation, on-the-fly, discard/save&close button, undo/redo, what about 5gb dataset, display diff before confirm merge, etc.
-##??waht happens when alter 'other' variables (& robustness of editor)
-
 dffilter <- function(data_set){
     require(gWidgets2) ## on github not CRAN. (require(devtools); install_github("gWidgets2", "jverzani")
     options(guiToolkit="RGtk2")
@@ -211,17 +203,3 @@ dffilter <- function(data_set){
 #require(MASS)
 #Xa <- Cars93 ## this will be in a function... replace with your won
 #dffilter(Xa)
-
-## gfilter TODO items
-##!!inspect the gfilter code (logical vector selection, use spinners for 'range' & type-ahead updating of filters, head/tail/some/!is.na/na.omit, manually update filter items to reflect available choices as a 'update filters' button or 'freeze selection' checkbox?, what happens to 'Date' or 'other' classes, use rgtk2editdf, 'enable/disable filter' toggle button next to 'remove', )
-##!!have 'select all/reset' (done) and 'clear' buttons
-##!!adding new filter should consider merged changes (auto-polling of data frame?)
-##??type-ahead search in combobox gfilter and in cehckbox table? (as in LyX?)
-##??use fancy search box RStudio/LyX/Xfce-style that filters out the available elements in the filter widgets
-##??sort variable components? or use data frame order?
-
-## tangential TODO items
-##??data frame selector (use data frame browser; what about matrix objs?) & label(..., self=T) in tooltip and make  label editable & describe() & class() & nchar() & auto-load on package load & allow to set gtimer(check_digest) on data frames)
-##??sort  & re-order columns (in gdf()? or separately w/o loading the full data frame?; have distinct window)
-##??diff (papertrail; setdiff2 {prob} using github green/red & darkgreen/darkred colouring approach; 'dataview'; split-window with side-by-side display as in diffPDF; what happens when the two df have different nr of rows/columns?; also diff two variables within data.frame?)
-##??replace2 (gui for replacement tables)
