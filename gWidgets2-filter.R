@@ -4,23 +4,6 @@
 # idxs <- NULL                                # global set of indices that are being edited
 # cnms <- NULL                                # global column names
 
-
-##!!central RStudio-like search and dynamically filter GUI elements
-##!!type-ahead search in combobox gfilter and in cehckbox table? (as in LyX?)
-##!!have 'select all/reset' (done) and 'clear' buttons and 'prev/next' button for combobox
-##!!adding new filter should consider merged changes (reload data frame button?)
-##!!experiment with hide left pane layout (how to programmatically identify widest widget, via some ww <<- max(), then svalue(pg) <- ww)
-##??reload data.frame (bottom-left)
-##!!reload data.frame (automatically poll for changes?); bug when modifying a level it doesn't update the filters
-##!!hack 'grepl' search into gfilter()/gsearch()
-##!!hack 'grepl' search into gfilter(); regex?; 
-##??on display button, log subsetting operation in the console
-##??what of 5gb dataset or 21297 integer levels: it shouldn't be too slow
-##??optimize return() beahviour, confirmation, on-the-fly, discard/save&close button, undo/redo, what about 5gb dataset, display diff before confirm merge, etc.
-##??optimize return() beahviour, confirmation, on-the-fly, discard/save&close button, undo/redo, display diff before confirm merge, etc.
-##??waht happens when alter 'other' variables (Date & robustness of editor); investigate sapply() thingy & factor editor robustness (strange handling of inserting NA values, especially in 'char' vars)
-
-##!!fix arguments (mv inside fun def)
 dffilter <- function(data_set, DF = NULL, idxs = NULL, cnms = NULL){
     require(gWidgets2) ## on github not CRAN. (require(devtools); install_github("gWidgets2", "jverzani")
     options(guiToolkit="RGtk2")
@@ -261,20 +244,3 @@ dffilter <- function(data_set, DF = NULL, idxs = NULL, cnms = NULL){
 # Xa$Man.trans.avail1 <- as.logical(Xa$Man.trans.avail)
 # Xa$Man.trans.avail1 <- ifelse(Xa$Man.trans.avail=='Yes', TRUE, FALSE)
 #dffilter(Xa)
-
-## gfilter TODO items
-##!!inspect the gfilter code (logical vector selection, use spinners for 'range' & type-ahead updating of filters, head/tail/some/!is.na/na.omit, manually update filter items to reflect available choices as a 'update filters' button or 'freeze selection' checkbox?, what happens to 'Date' or 'other' classes, use rgtk2editdf, 'enable/disable filter' toggle button next to 'remove', )
-##!!inspect the gfilter code (logical vector selection, use spinners for 'range', head/tail/some/!is.na/na.omit, manually update filter items to reflect available choices as a 'update filters' button or 'freeze selection' checkbox?, what happens to 'Date' or 'other' classes, use rgtk2editdf, 'enable/disable filter' toggle button next to 'remove', )
-##!!adding new filter should consider merged changes (auto-polling of data frame?)
-##??use fancy search box RStudio/LyX/Xfce-style that filters out the available elements in the filter widgets
-##??sort variable components? or use data frame order?
-##??sort variable components?
-##??gfilterpreset (use c("==", "%in%", "!=", ">", ">=", "<", "<=") combo, logical / manual subset, )
-
-## tangential TODO items
-##??data frame selector (use data frame browser; what about matrix objs?) & label(..., self=T) in tooltip and make  label editable & describe() & class() & nchar() & clone obj & save obj as .RData/csv/etc. & 
-##??data frame selector (use data frame browser; what about matrix objs?) & label(..., self=T) in tooltip and make  label editable & describe() & class() & nchar() & auto-load on package load & allow to set gtimer(check_digest) on data frames)
-##??sort  & re-order columns (in gdf()? or separately w/o loading the full data frame?; have distinct window)
-##??edit data structure: rename & sort & re-order variables/cols, change var type/factors, batch rename cols (tolower), etc. w/o displaying data frame
-##??diff (papertrail; setdiff2 {prob} or {compare} using github green/red & darkgreen/darkred colouring approach; 'dataview'; split-window with side-by-side display as in diffPDF; what happens when the two df have different nr of rows/columns?; also diff two variables within data.frame?)
-##??replace2 (gui for replacement tables)
