@@ -14,7 +14,7 @@
 ##??on display button, log subsetting operation in the console
 ##??what of 5gb dataset or 21297 integer levels: it shouldn't be too slow
 ##??optimize return() beahviour, confirmation, on-the-fly, discard/save&close button, undo/redo, display diff before confirm merge, etc.
-##??waht happens when alter 'other' variables (Date & robustness of editor); investigate sapply() thingy & factor editor robustness
+##??waht happens when alter 'other' variables (Date & robustness of editor); investigate sapply() thingy & factor editor robustness (strange handling of inserting NA values, especially in 'char' vars)
 
 ##!!fix arguments (mv inside fun def)
 dffilter <- function(data_set, DF = NULL, idxs = NULL, cnms = NULL){
@@ -31,9 +31,9 @@ dffilter <- function(data_set, DF = NULL, idxs = NULL, cnms = NULL){
     w <- gwindow(paste(data_set_name, " (", data_set_dim_orig[1], ' x ', 
                        data_set_dim_orig[2], ')', sep=''), visible=FALSE, 
                  handler=function(h,...){
-        #if(identical)
-        #return(data_set)
-    })
+                     #if(identical)
+                     #return(data_set)
+                 })
     pg <- gpanedgroup(cont=w, horizontal=TRUE)
     #pg <- ggroup(cont=w, horizontal=TRUE)
     
@@ -148,59 +148,59 @@ dffilter <- function(data_set, DF = NULL, idxs = NULL, cnms = NULL){
     b_disp <- gbutton(paste("Display selection (", data_set_dim_orig[1], ' x ', 
                             data_set_dim_orig[2], ')', sep=''), expand=TRUE, 
                       cont=ggroup(cont=f_side1), handler=function(h,...) {
-        cnms <<- svalue(c_names)
-        rows <- svalue(row_filter)
-        
-        idxs <<- which(rows)                  # move to global variable
-        
-        ## now add a data frame
-        delete(df_box, df_box[1])             # remove child
-        
-        ##!!editable checkbox "disable editing"
-        #sapply(1:data_set_dim[2], function(j) editable(DF, j) <- FALSE)
-        
-        ## disallow row/col c-menu when not all columns/rows are displayed (freeze_attributes=TRUE)
-        if( all(c(length(idxs), length(cnms)) == data_set_dim_orig) ){
-            ## display full data set
-            DF <<- gdf(data_set[rows, cnms], cont=df_box, expand=TRUE)
-        } else if( all(c(length(idxs), length(cnms)) != data_set_dim_orig) ){
-            ## display subset (fewer rows/columns)
-            DF <<- gdf(data_set[rows, cnms], cont=df_box, expand=TRUE, 
-                       freeze_attributes=TRUE)
-        } else if( all(c(length(idxs) != data_set_dim_orig[1], 
-                         length(cnms) == data_set_dim_orig[2])) ){
-            ## display subset (fewer rows / all columns)
-            DF <<- gdf(data_set[rows, cnms], cont=df_box, expand=TRUE, 
-                       freeze_attributes="column")
-        } else if( all(c(length(idxs) == data_set_dim_orig[1], 
-                         length(cnms) != data_set_dim_orig[2])) ){
-            ## display subset (all rows / fewer columns)
-            DF <<- gdf(data_set[rows, cnms], cont=df_box, expand=TRUE, 
-                       freeze_attributes="row")
-        }
-        DF$set_selectmode("multiple")
-        
-        ## use "edited" dirty flag
-        addHandlerChanged(DF, handler=function(h,...){
-            if(!grepl('*', svalue(w), fixed=T)){
-                enabled(do_btn) <- TRUE
-                svalue(w) <- paste( svalue(w), '*', sep='')
-            }
-        })
-        if(grepl('*', svalue(w), fixed=T)){
-            enabled(do_btn) <- FALSE
-            svalue(w) <- paste( substr(svalue(w), 1, (nchar(svalue(w))-1)), sep='')
-        }
-        data_set_dim <- dim(data_set[idxs, cnms])
-        
-        ## custom message when displaying full database.
-        if(all(data_set_dim == data_set_dim_orig)){
-            svalue(gs_df) <- paste("Currently displaying the full data set.", sep='')
-        } else {
-            svalue(gs_df) <- paste('Currently displaying a ', data_set_dim[1], ' x ', 
-                               data_set_dim[2], " subset.", sep='')
-        }
-    })
+                          cnms <<- svalue(c_names)
+                          rows <- svalue(row_filter)
+                          
+                          idxs <<- which(rows)                  # move to global variable
+                          
+                          ## now add a data frame
+                          delete(df_box, df_box[1])             # remove child
+                          
+                          ##!!editable checkbox "disable editing"
+                          #sapply(1:data_set_dim[2], function(j) editable(DF, j) <- FALSE)
+                          
+                          ## disallow row/col c-menu when not all columns/rows are displayed (freeze_attributes=TRUE)
+                          if( all(c(length(idxs), length(cnms)) == data_set_dim_orig) ){
+                              ## display full data set
+                              DF <<- gdf(data_set[rows, cnms], cont=df_box, expand=TRUE)
+                          } else if( all(c(length(idxs), length(cnms)) != data_set_dim_orig) ){
+                              ## display subset (fewer rows/columns)
+                              DF <<- gdf(data_set[rows, cnms], cont=df_box, expand=TRUE, 
+                                         freeze_attributes=TRUE)
+                          } else if( all(c(length(idxs) != data_set_dim_orig[1], 
+                                           length(cnms) == data_set_dim_orig[2])) ){
+                              ## display subset (fewer rows / all columns)
+                              DF <<- gdf(data_set[rows, cnms], cont=df_box, expand=TRUE, 
+                                         freeze_attributes="column")
+                          } else if( all(c(length(idxs) == data_set_dim_orig[1], 
+                                           length(cnms) != data_set_dim_orig[2])) ){
+                              ## display subset (all rows / fewer columns)
+                              DF <<- gdf(data_set[rows, cnms], cont=df_box, expand=TRUE, 
+                                         freeze_attributes="row")
+                          }
+                          DF$set_selectmode("multiple")
+                          
+                          ## use "edited" dirty flag
+                          addHandlerChanged(DF, handler=function(h,...){
+                              if(!grepl('*', svalue(w), fixed=T)){
+                                  enabled(do_btn) <- TRUE
+                                  svalue(w) <- paste( svalue(w), '*', sep='')
+                              }
+                          })
+                          if(grepl('*', svalue(w), fixed=T)){
+                              enabled(do_btn) <- FALSE
+                              svalue(w) <- paste( substr(svalue(w), 1, (nchar(svalue(w))-1)), sep='')
+                          }
+                          data_set_dim <- dim(data_set[idxs, cnms])
+                          
+                          ## custom message when displaying full database.
+                          if(all(data_set_dim == data_set_dim_orig)){
+                              svalue(gs_df) <- paste("Currently displaying the full data set.", sep='')
+                          } else {
+                              svalue(gs_df) <- paste('Currently displaying a ', data_set_dim[1], ' x ', 
+                                                     data_set_dim[2], " subset.", sep='')
+                          }
+                      })
     enabled(b_disp) <- TRUE
     b_disp$set_icon("execute")
     #font(b_disp) <- list(weight = "bold")
@@ -209,14 +209,14 @@ dffilter <- function(data_set, DF = NULL, idxs = NULL, cnms = NULL){
     tooltip(cb_autoupdate) <- "If checked refresh the displayed dataset \nas soon as the column or row selections change."
     
     ##!!editable checkbox (freeze_attributes=TRUE)
-#         cb_do_btn <- gcheckbox('Allow editing', checked=FALSE, cont=ggroup(cont=f_side1), 
-#                                handler=function(h,...){
-#                                    if((grepl('*', svalue(w), fixed=T) & 
-#                                            svalue(cb_do_btn))){
-#                                        enabled(do_btn) <- TRUE
-#                                    }
-#         })
-#         tooltip(obj=cb_do_btn) <- "If checked allow editing of displayed subsets \nin a spreadsheet-like environment."
+    #         cb_do_btn <- gcheckbox('Allow editing', checked=FALSE, cont=ggroup(cont=f_side1), 
+    #                                handler=function(h,...){
+    #                                    if((grepl('*', svalue(w), fixed=T) & 
+    #                                            svalue(cb_do_btn))){
+    #                                        enabled(do_btn) <- TRUE
+    #                                    }
+    #         })
+    #         tooltip(obj=cb_do_btn) <- "If checked allow editing of displayed subsets \nin a spreadsheet-like environment."
     
     size(w) <- c(700, 550)
     visible(w) <- TRUE
@@ -227,8 +227,8 @@ dffilter <- function(data_set, DF = NULL, idxs = NULL, cnms = NULL){
     ## What to do when you do ...
     addHandlerClicked(do_btn, function(h,...) {
         ## change me to your liking
-       if(gconfirm('Merge changes into the original data frame?', 'Confirm merge...', 
-                icon='question')) {
+        if(gconfirm('Merge changes into the original data frame?', 'Confirm merge...', 
+                    icon='question')) {
             ##!!graciously reintegrate when row/col deletion/insertion or NA vals present
             ##!!bug when editing factor levels (not reintegrated)
             data_set[idxs, cnms] <<- DF[]
@@ -236,11 +236,11 @@ dffilter <- function(data_set, DF = NULL, idxs = NULL, cnms = NULL){
             enabled(do_btn) <- FALSE
             svalue(w) <- paste( substr(svalue(w), 1, (nchar(svalue(w))-1)), sep='')
             galert("The original data frame has been modified.", parent=w)
-       } else {
-           #galert("Modifications cancelled.", parent=w)
-       }
+        } else {
+            #galert("Modifications cancelled.", parent=w)
+        }
     }) 
-
+    
     ## use 4 lines as hight of selection box
     size(c_names)[2] <- 4*25
     #print(size(pg))
@@ -251,7 +251,7 @@ dffilter <- function(data_set, DF = NULL, idxs = NULL, cnms = NULL){
 
 # require(MASS)
 # Xa <- Cars93 ## this will be in a function... replace with your won
-#Xa[3:7,1] <- NA
+# Xa[3:7,1] <- NA
 # Xa$Model1 <- as.character(Xa$Model)
 # Xa[2,'Model1'] <- paste(rep(letters, 26), collapse='')
 # Xa$Man.trans.avail1 <- as.logical(Xa$Man.trans.avail)
@@ -267,5 +267,5 @@ dffilter(Xa)
 ##??data frame selector (use data frame browser; what about matrix objs?) & label(..., self=T) in tooltip and make  label editable & describe() & class() & nchar() & clone obj & save obj as .RData/csv/etc. & 
 ##??sort  & re-order columns (in gdf()? or separately w/o loading the full data frame?; have distinct window)
 ##??edit data structure: rename & sort & re-order variables/cols, change var type/factors, batch rename cols (tolower), etc. w/o displaying data frame
-##??diff (papertrail; setdiff2 {prob} using github green/red & darkgreen/darkred colouring approach; 'dataview'; split-window with side-by-side display as in diffPDF; what happens when the two df have different nr of rows/columns?; also diff two variables within data.frame?)
+##??diff (papertrail; setdiff2 {prob} or {compare} using github green/red & darkgreen/darkred colouring approach; 'dataview'; split-window with side-by-side display as in diffPDF; what happens when the two df have different nr of rows/columns?; also diff two variables within data.frame?)
 ##??replace2 (gui for replacement tables)
