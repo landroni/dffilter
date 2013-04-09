@@ -243,4 +243,4 @@ dffilter <- function(data_set){
 # Xa[2,'Model1'] <- paste(rep(letters, 26), collapse='')
 # Xa$Man.trans.avail1 <- as.logical(Xa$Man.trans.avail)
 # Xa$Man.trans.avail1 <- ifelse(Xa$Man.trans.avail=='Yes', TRUE, FALSE)
-#dffilter(Xa)
+dffilter(Xa)

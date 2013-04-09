@@ -1,5 +1,7 @@
 ##!!central RStudio-like search and dynamically filter GUI elements
+##!!when Add item, toggle to enable "search" gedit() box
 ##!!type-ahead search in combobox gfilter and in cehckbox table? (as in LyX?)
+##!!add editable=F, hide=F
 ##!!have 'select all/reset' (done) and 'clear' buttons and 'prev/next' button for combobox
 ##!!adding new filter should consider merged changes (reload data frame button?)
 ##!!experiment with hide left pane layout (how to programmatically identify widest widget, via some ww <<- max(), then svalue(pg) <- ww)
@@ -34,4 +36,4 @@
 ##??edit data structure: rename & sort & re-order variables/cols, change var type/factors, batch rename cols (tolower), etc. w/o displaying data frame
 ##??diff (papertrail; setdiff2 {prob} or {compare} using github green/red & darkgreen/darkred colouring approach; 'dataview'; split-window with side-by-side display as in diffPDF; what happens when the two df have different nr of rows/columns?; also diff two variables within data.frame?)
 ##??replace2 (gui for replacement tables)
-##??diff (papertrail; setdiff2 {prob} using github green/red & darkgreen/darkred colouring approach; 'dataview'; split-window with side-by-side display as in diffPDF; what happens when the two df have different nr of rows/columns?; also diff two variables within data.frame?)
+##??diff (papertrail; setdiff2 {prob} using github green/red & darkgreen/darkred colouring approach; 'dataview'; split-window with side-by-side display as in diffPDF; what happens when the two df have different nr of rows/columns?; also diff two variables within data.frame?; display all.equal() results and doublecheck with identical() on subset; )
