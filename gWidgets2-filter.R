@@ -1,6 +1,6 @@
 ## edit a really large data set *after* it has been filtered
 
-dffilter <- function(data_set){
+dffilter <- function(data_set, editable=FALSE){
     require(gWidgets2) ## on github not CRAN. (require(devtools); install_github("gWidgets2", "jverzani")
     options(guiToolkit="RGtk2")
     require(RGtk2)
@@ -64,9 +64,11 @@ dffilter <- function(data_set){
     glabel("Select columns to be displayed \nand define appropriate row filters,\nthen click the 'Display selection' button. \nIf you make changes to your data, you \ncan merge them into the original dataset.", cont=df_box)
     
     btn_gp <- ggroup(cont = df_side)
-    do_btn <- gbutton("Merge changes...", cont=btn_gp)
-    do_btn$set_icon("ok")
-    enabled(do_btn) <- FALSE
+    if(editable) {
+        do_btn <- gbutton("Merge changes...", cont=btn_gp)
+        do_btn$set_icon("ok")
+        enabled(do_btn) <- FALSE
+    }
     addSpring(btn_gp)
     close_btn <- gbutton("Close", cont=btn_gp, handler=function(h,...){
         dispose(w)
@@ -143,24 +145,28 @@ dffilter <- function(data_set){
                           ## now add a data frame
                           delete(df_box, df_box[1])             # remove child
                           
-                          ##!!editable checkbox "disable editing"
-                          #sapply(1:data_set_dim[2], function(j) editable(DF, j) <- FALSE)
+                          ## disable editing if so requested
+                          data_set_dim <- dim(data_set[idxs, cnms])
+                          if(!editable) {
+                              DF <<- gdf(data_set[rows, cnms], cont=df_box, expand=TRUE, 
+                                         freeze_attributes=TRUE)
+                              sapply(1:data_set_dim[2], function(j) editable(DF, j) <- FALSE)
                           
-                          ## disallow row/col c-menu when not all columns/rows are displayed (freeze_attributes=TRUE)
-                          if( all(c(length(idxs), length(cnms)) == data_set_dim_orig) ){
+                          ## if(editable), disallow row/col c-menu when not all columns/rows are displayed (freeze_attributes=TRUE)
+                          } else if( all(data_set_dim == data_set_dim_orig) ){
                               ## display full data set
                               DF <<- gdf(data_set[rows, cnms], cont=df_box, expand=TRUE)
-                          } else if( all(c(length(idxs), length(cnms)) != data_set_dim_orig) ){
+                          } else if( all(data_set_dim != data_set_dim_orig) ){
                               ## display subset (fewer rows/columns)
                               DF <<- gdf(data_set[rows, cnms], cont=df_box, expand=TRUE, 
                                          freeze_attributes=TRUE)
-                          } else if( all(c(length(idxs) != data_set_dim_orig[1], 
-                                           length(cnms) == data_set_dim_orig[2])) ){
+                          } else if( all(data_set_dim[1] != data_set_dim_orig[1], 
+                                         data_set_dim[2] == data_set_dim_orig[2])) {
                               ## display subset (fewer rows / all columns)
                               DF <<- gdf(data_set[rows, cnms], cont=df_box, expand=TRUE, 
                                          freeze_attributes="column")
-                          } else if( all(c(length(idxs) == data_set_dim_orig[1], 
-                                           length(cnms) != data_set_dim_orig[2])) ){
+                          } else if( all(data_set_dim[1] == data_set_dim_orig[1], 
+                                         data_set_dim[2] != data_set_dim_orig[2])) {
                               ## display subset (all rows / fewer columns)
                               DF <<- gdf(data_set[rows, cnms], cont=df_box, expand=TRUE, 
                                          freeze_attributes="row")
@@ -178,7 +184,6 @@ dffilter <- function(data_set){
                               enabled(do_btn) <- FALSE
                               svalue(w) <- paste( substr(svalue(w), 1, (nchar(svalue(w))-1)), sep='')
                           }
-                          data_set_dim <- dim(data_set[idxs, cnms])
                           
                           ## custom message when displaying full database.
                           if(all(data_set_dim == data_set_dim_orig)){
@@ -195,7 +200,7 @@ dffilter <- function(data_set){
     cb_autoupdate <- gcheckbox('Update automatically', cont=ggroup(cont=f_side1))
     tooltip(cb_autoupdate) <- "If checked refresh the displayed dataset \nas soon as the column or row selections change."
     
-    ##!!editable checkbox (freeze_attributes=TRUE)
+    ##??editable checkbox (freeze_attributes=TRUE)
     #         cb_do_btn <- gcheckbox('Allow editing', checked=FALSE, cont=ggroup(cont=f_side1), 
     #                                handler=function(h,...){
     #                                    if((grepl('*', svalue(w), fixed=T) & 
@@ -212,22 +217,22 @@ dffilter <- function(data_set){
     #svalue(pg) <- 250L
     
     ## What to do when you do ...
-    addHandlerClicked(do_btn, function(h,...) {
-        ## change me to your liking
-        if(gconfirm('Merge changes into the original data frame?', 'Confirm merge...', 
-                    icon='question')) {
-            ##!!graciously reintegrate when row/col deletion/insertion or NA vals present
-            ##!!bug when editing factor levels (not reintegrated)
-            data_set[idxs, cnms] <<- DF[]
-            assign(data_set_name, data_set, .GlobalEnv)
-            enabled(do_btn) <- FALSE
-            svalue(w) <- paste( substr(svalue(w), 1, (nchar(svalue(w))-1)), sep='')
-            galert("The original data frame has been modified.", parent=w)
-        } else {
-            #galert("Modifications cancelled.", parent=w)
-        }
-    }) 
-    
+    if(editable){
+        addHandlerClicked(do_btn, function(h,...) {
+            ## change me to your liking
+            if(gconfirm('Merge changes into the original data frame?', 'Confirm merge...', 
+                        icon='question')) {
+                ##!!graciously reintegrate when row/col deletion/insertion or NA vals present
+                data_set[idxs, cnms] <<- DF[]
+                assign(data_set_name, data_set, .GlobalEnv)
+                enabled(do_btn) <- FALSE
+                svalue(w) <- paste( substr(svalue(w), 1, (nchar(svalue(w))-1)), sep='')
+                galert("The original data frame has been modified.", parent=w)
+            } else {
+                #galert("Modifications cancelled.", parent=w)
+            }
+        }) 
+    }
     ## use 4 lines as hight of selection box
     size(c_names)[2] <- 4*25
     #print(size(pg))
@@ -236,8 +241,8 @@ dffilter <- function(data_set){
     #print(sapply(f_side0g$children, function(u) size(u)))
 }
 
-#require(MASS)
-#Xa <- Cars93 ## this will be in a function... replace with your won
+# require(MASS)
+# Xa <- Cars93 ## this will be in a function... replace with your won
 # Xa[3:7,1] <- NA
 # Xa$Model1 <- as.character(Xa$Model)
 # Xa[2,'Model1'] <- paste(rep(letters, 26), collapse='')
