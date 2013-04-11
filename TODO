@@ -1,10 +1,14 @@
+##!!check how you can check.names() or whatever to avoid assignment issues
+##!!re-run search after changing Opts
+##!!introduce hacky diff() functionality on Merge; check if subset objs are identical
 ##!!display nr of levels for each var
 ##!!toggle button to display only unique matches
 ##!!when Add item, toggle to enable "search" gedit() box
 ##!!add hide=F
 ##!!have 'prev/next' button for combobox
+##!!default include NA: yes for multiple, no for single choice
 ##!!adding new filter should consider merged changes (reload data frame button?)
-##!!reload data.frame (automatically poll for changes?); bug when modifying a level it doesn't update the filters
+##!!reload data.frame (automatically poll for changes?); bug when modifying a level it doesn't update the filters; bottom-left?
 ##!!hide left pane layout: how to increase width when Add item is trigerred? 
 ##??on display button, log subsetting operation in the console
 ##??what of 5gb dataset or 21297 integer levels: it shouldn't be too slow
@@ -12,7 +16,6 @@
 ##??optimize return() beahviour, confirmation, on-the-fly, discard/save&close button, undo/redo, display diff before confirm merge, etc.
 ##??waht happens when alter 'other' variables (Date & robustness of editor); investigate sapply() thingy & factor editor robustness (strange handling of inserting NA values, especially in 'char' vars)
 ##!!bug when modifying a level it doesn't update the filters
-##??reload data.frame (bottom-left)
 ##??waht happens when alter 'other' variables (& robustness of editor)
 
 ## gfilter TODO items
