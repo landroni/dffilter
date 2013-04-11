@@ -1,5 +1,29 @@
 ## edit a really large data set *after* it has been filtered
 
+## diff related funs
+setdiff2 <- function(x, y, ...){
+    .res <- list(x_y=NA, y_x=NA)
+    .res[[1]] <- setdiff(x, y, ...)
+    .res[[2]] <- setdiff(y, x, ...)
+    return(.res)
+}
+
+View <- rstudio::viewData
+
+View_diff <- function(x, y, ...){
+    #browser()
+    if(identical(x, y, ...)){ 
+        print("Objects are identical")
+        return(invisible(NULL))
+    }
+    print(all.equal(x, y, ...))
+    require(prob)
+    xe <- setdiff2(x, y, ...)
+    View(rbind(xe[[1]], xe[[2]], ...))
+    return(invisible(NULL))
+}
+
+
 dffilter <- function(data_set, editable=FALSE){
     require(gWidgets2) ## on github not CRAN. (require(devtools); install_github("gWidgets2", "jverzani")
     options(guiToolkit="RGtk2")
@@ -218,7 +242,16 @@ dffilter <- function(data_set, editable=FALSE){
     
     ## What to do when you do ...
     if(editable){
+        ##??check if possible to avoid a stray copy
+        ##??async trouble?
+        data_set_diff <- data_set
         addHandlerClicked(do_btn, function(h,...) {
+
+            ## view changes before merging
+            data_set_diff[idxs, cnms] <<- DF[]
+            View_diff(get(data_set_name, .GlobalEnv), data_set_diff)
+            data_set_diff <- NULL
+            
             ## change me to your liking
             if(gconfirm('Merge changes into the original data frame?', 'Confirm merge...', 
                         icon='question')) {
@@ -248,4 +281,4 @@ dffilter <- function(data_set, editable=FALSE){
 # Xa[2,'Model1'] <- paste(rep(letters, 26), collapse='')
 # Xa$Man.trans.avail1 <- as.logical(Xa$Man.trans.avail)
 # Xa$Man.trans.avail1 <- ifelse(Xa$Man.trans.avail=='Yes', TRUE, FALSE)
-dffilter(Xa)
+dffilter(Xa,T)
