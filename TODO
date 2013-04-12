@@ -4,7 +4,7 @@
 ##!!display nr of levels for each var
 ##!!toggle button to display only unique matches
 ##!!when Add item, toggle to enable "search" gedit() box
-##!!add hide=F
+##!!add hide=F, search.opts=list()
 ##!!have 'prev/next' button for combobox
 ##!!default include NA: yes for multiple, no for single choice
 ##!!adding new filter should consider merged changes (reload data frame button?)
