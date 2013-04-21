@@ -1,3 +1,4 @@
+##!!introduce hacky diff() functionality on Merge; check if subset objs are identical; use all.equal() and identical() on subset
 ##!!reload data.frame button (automatically poll for changes? RStudio-style, maybe when record change in workspace?); bug when modifying a level it doesn't update the filters; bottom-left?; adding new filter should consider merged changes
 ##!!search for col names
 ##!!f4 for hide pane + Opera-style handle + increase width when Add item is trigerred 
@@ -5,7 +6,6 @@
 ##
 ##!!check how you can check.names() or whatever to avoid assignment issues
 ##!!re-run search after changing Opts
-##!!introduce hacky diff() functionality on Merge; check if subset objs are identical
 ##!!display nr of levels for each var
 ##!!toggle button to display only unique matches
 ##!!add hide=F, search.opts=list()
@@ -24,7 +24,7 @@
 ##??print
 
 ## gfilter TODO items
-##!!inspect the gfilter code (logical vector selection, use spinners for 'range' & type-ahead updating of filters, head/tail/some/!is.na/na.omit, manually update filter items to reflect available choices as a 'update filters' button or 'freeze selection' checkbox?, what happens to 'Date' or 'other' classes, use rgtk2editdf, 'enable/disable filter' toggle button next to 'remove', )
+##!!inspect the gfilter code (logical vector selection, use spinners for 'range' & type-ahead updating of filters, head/tail/some/!is.na/na.omit, manually update filter items to reflect available choices as a 'update filters' button or 'freeze selection' checkbox?, what happens to 'Date' or 'other' classes, use rgtk2editdf, 'enable/disable filter' toggle button next to 'remove', tweak icons in gedit() search boxes, )
 ##!!inspect the gfilter code (logical vector selection, use spinners for 'range', head/tail/some/!is.na/na.omit, manually update filter items to reflect available choices as a 'update filters' button or 'freeze selection' checkbox?, what happens to 'Date' or 'other' classes, use rgtk2editdf, 'enable/disable filter' toggle button next to 'remove', )
 ##!!adding new filter should consider merged changes (auto-polling of data frame?)
 ##??use fancy search box RStudio/LyX/Xfce-style that filters out the available elements in the filter widgets
