@@ -48,4 +48,4 @@
 ##??poor man's loop constructor/debugger/sandbox with automatic interpretation of variables and display of obtained values and working on a head() subset of original input; loop workflow; apply() funs; 
 ##??poor man's formula constructor, given a df; look into Rcmdr for an implementation; allow for * : etc. constructs, maybe by using groupings; log the reproducible, generated command; see pmg; 
 ##??investigate dffilter() compatibility with data.table package
-##??melt/dcast gui for pivot tables (this is still exploratory so fits the scope of the package); use margins et al.; 
+##??melt/dcast gui for pivot tables (this is still exploratory so fits the scope of the package); use margins et al.; OR use 'tables' tabular() and provide latex/html export & reproducible code
