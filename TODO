@@ -1,13 +1,16 @@
+##!!gfilter: head/tail/some, 
+##??gcheckboxgroup: fix selection on filter..
+##??when viewing gdf(), possible to c-menu "copy" cell?
 ##!!introduce hacky diff() functionality on Merge; check if subset objs are identical; use all.equal() and identical() on subset
 ##!!reload data.frame button (automatically poll for changes? RStudio-style, maybe when record change in workspace?); bug when modifying a level it doesn't update the filters; bottom-left?; adding new filter should consider merged changes
 ##!!search for col names
 ##!!f4 for hide pane + Opera-style handle + increase width when Add item is trigerred 
 ##!!bug with search auto-select checkboxes not triggering update on label (do we want that?)
+##!!toggle button to display only unique matches (can gdf() support this?)
 ##
 ##!!check how you can check.names() or whatever to avoid assignment issues
 ##!!re-run search after changing Opts
 ##!!display nr of levels for each var
-##!!toggle button to display only unique matches
 ##!!add hide=F, search.opts=list()
 ##!!have 'prev/next' button for combobox
 ##!!default include NA: yes for multiple, no for single choice
@@ -24,7 +27,7 @@
 ##??print
 
 ## gfilter TODO items
-##!!inspect the gfilter code (logical vector selection, use spinners for 'range' & type-ahead updating of filters, head/tail/some/!is.na/na.omit, manually update filter items to reflect available choices as a 'update filters' button or 'freeze selection' checkbox?, what happens to 'Date' or 'other' classes, use rgtk2editdf, 'enable/disable filter' toggle button next to 'remove', tweak icons in gedit() search boxes, )
+##!!inspect the gfilter code (logical vector selection, use spinners for 'range' & type-ahead updating of filters, manually update filter items to reflect available choices as a 'update filters' button or 'freeze selection' checkbox?, what happens to 'Date' or 'other' classes, use rgtk2editdf, 'enable/disable filter' toggle button next to 'remove', tweak icons in gedit() search boxes, )
 ##!!inspect the gfilter code (logical vector selection, use spinners for 'range', head/tail/some/!is.na/na.omit, manually update filter items to reflect available choices as a 'update filters' button or 'freeze selection' checkbox?, what happens to 'Date' or 'other' classes, use rgtk2editdf, 'enable/disable filter' toggle button next to 'remove', )
 ##!!adding new filter should consider merged changes (auto-polling of data frame?)
 ##??use fancy search box RStudio/LyX/Xfce-style that filters out the available elements in the filter widgets
@@ -37,7 +40,7 @@
 
 ## tangential TODO items
 ##??data frame selector (use data frame browser; what about matrix objs?) & label(..., self=T) in tooltip and make  label editable & describe() & class() & nchar() & clone obj & save obj as .RData/csv/etc. & 
-##??data frame selector (use data frame browser; what about matrix objs?) & label(..., self=T) in tooltip and make  label editable & describe() & class() & nchar() & auto-load on package load & allow to set gtimer(check_digest) on data frames; debug var with nchar, etc.; )
+##??data frame selector (use data frame browser; what about matrix objs?) & label(..., self=T) in tooltip and make  label editable & describe() & class() & nchar() & auto-load on package load & allow to set gtimer(check_digest) on data frames or maybe allow to set polling using digests on specific objects/subsets; debug var with nchar, etc.; allow to compare to variables, even when vars from two different data frames (all.equal()); allow to compare two objects (all.equal()); 
 ##??sort  & re-order columns (in gdf()? or separately w/o loading the full data frame?; have distinct window)
 ##??edit data structure: rename & sort & re-order variables/cols, change var type/factors, batch rename cols (tolower), etc. w/o displaying data frame; Deducer-style? ; dfstruct(); 
 ##??diff (papertrail; setdiff2 {prob} or {compare} using github green/red & darkgreen/darkred colouring approach; 'dataview'; split-window with side-by-side display as in diffPDF; what happens when the two df have different nr of rows/columns?; also diff two variables within data.frame?; preview pane with head(X, 20) including class/mode, etc.; )
