@@ -25,6 +25,7 @@
 ##??multiple selection mode (isntead of shift+select on cehckboxes); or via c-menu item "select to here"
 ##!!start with gfilterpreset of head(.., 1000 )
 ##??print
+##!!export subset ("save as" different obj)
 
 ## gfilter TODO items
 ##!!inspect the gfilter code (logical vector selection, use spinners for 'range' & type-ahead updating of filters, manually update filter items to reflect available choices as a 'update filters' button or 'freeze selection' checkbox?, what happens to 'Date' or 'other' classes, use rgtk2editdf, 'enable/disable filter' toggle button next to 'remove', tweak icons in gedit() search boxes, )
