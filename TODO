@@ -6,7 +6,7 @@
 ##!!search for col names
 ##!!f4 for hide pane + Opera-style handle + increase width when Add item is trigerred 
 ##!!bug with search auto-select checkboxes not triggering update on label (do we want that?)
-##!!toggle button to display only unique matches (can gdf() support this?)
+##!!toggle button to display only unique()/duplicated2() matches (can gdf() support this?)
 ##
 ##!!check how you can check.names() or whatever to avoid assignment issues
 ##!!re-run search after changing Opts
