@@ -1,18 +1,20 @@
-##!!gfilter: head/tail/some, 
+##!!gfilter: head/tail/some ; start with gfilterpreset of head(.., 1000 ) 
 ##??gcheckboxgroup: fix selection on filter..
-##??when viewing gdf(), possible to c-menu "copy" cell?
-##!!introduce hacky diff() functionality on Merge; check if subset objs are identical; use all.equal() and identical() on subset
-##!!reload data.frame button (automatically poll for changes? RStudio-style, maybe when record change in workspace?); bug when modifying a level it doesn't update the filters; bottom-left?; adding new filter should consider merged changes
-##!!search for col names
-##!!f4 for hide pane + Opera-style handle + increase width when Add item is trigerred 
+##!!reload data.frame button (when making object copy, save digest, then before saving changes in workspace, check if digest of object is still the same and if not inform the user that the object had already been modified and ask for additional confirmation); bottom-left? 
+##!!adding new filter should consider merged changes; bug when modifying a level and merging changes, it should automatically update the filters; 
+##!!search for/filter col names
+##!!increase width when Add item is trigerred 
 ##!!bug with search auto-select checkboxes not triggering update on label (do we want that?)
-##!!toggle button to display only unique()/duplicated2() matches (can gdf() support this?)
-##
-##!!check how you can check.names() or whatever to avoid assignment issues
-##!!re-run search after changing Opts
-##!!display nr of levels for each var
-##!!add hide=F, search.opts=list()
 ##!!have 'prev/next' button for combobox
+##!!introduce hacky diff() functionality on Merge; check if subset objs are identical; use all.equal() and identical() on subset
+##
+##!!f4 for hide pane + Opera-style handle
+##??when viewing gdf(), possible to c-menu "copy" cell?
+##!!toggle button to display only unique()/duplicated2() matches (can gdf() support this?)
+##!!check how you can check.names() or whatever to avoid assignment issues
+##!!display nr of levels for each var
+##!!debug var in c-menu: unique(nchar()), levels(), class(), is.na(), is_sane(), etc.
+##!!add hide=F, search.opts=list()
 ##!!default include NA: yes for multiple, no for single choice
 ##??on display button, log subsetting operation in the console
 ##??what of 5gb dataset or 21297 integer levels: it shouldn't be too slow; if possible use max 1 copy of df; 
@@ -23,9 +25,9 @@
 ##!!investigate cache bug: dffilter(Xa), Xa$var[1:10,] <- NA, dffilter(Xa) without closing first instance. Or dffilter(cbind(Xa, Xb)). 
 ##??some sort of weird --detach-- pop-up to have more scrolling space to choose column names, and maybe to re-arrange them for displaying purposes. 
 ##??multiple selection mode (isntead of shift+select on cehckboxes); or via c-menu item "select to here"
-##!!start with gfilterpreset of head(.., 1000 )
 ##??print
 ##!!export subset ("save as" different obj)
+##??log commands, if possible
 
 ## gfilter TODO items
 ##!!inspect the gfilter code (logical vector selection, use spinners for 'range' & type-ahead updating of filters, manually update filter items to reflect available choices as a 'update filters' button or 'freeze selection' checkbox?, what happens to 'Date' or 'other' classes, use rgtk2editdf, 'enable/disable filter' toggle button next to 'remove', tweak icons in gedit() search boxes, )
