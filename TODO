@@ -28,6 +28,9 @@
 ##??print
 ##!!export subset ("save as" different obj)
 ##??log commands, if possible
+##??use dnd to re-order columns in list, for display purposes & tooltip
+##??c-menu on label to 'disable filter' (NOT remove filter)
+##!!main c-menu on gdf() to: debug vars, describe subset, etc.; describ/debug buttons on home screen at start-up, for full data frame; 
 
 ## gfilter TODO items
 ##!!inspect the gfilter code (logical vector selection, use spinners for 'range' & type-ahead updating of filters, manually update filter items to reflect available choices as a 'update filters' button or 'freeze selection' checkbox?, what happens to 'Date' or 'other' classes, use rgtk2editdf, 'enable/disable filter' toggle button next to 'remove', tweak icons in gedit() search boxes, )
