@@ -1,60 +1,73 @@
-##!!gfilter: head/tail/some ; start with gfilterpreset of head(.., 1000 ) 
-##??gcheckboxgroup: fix selection on filter..
-##!!reload data.frame button (when making object copy, save digest, then before saving changes in workspace, check if digest of object is still the same and if not inform the user that the object had already been modified and ask for additional confirmation); bottom-left? 
-##!!adding new filter should consider merged changes; bug when modifying a level and merging changes, it should automatically update the filters; 
-##!!search for/filter col names
-##!!increase width when Add item is trigerred 
-##!!bug with search auto-select checkboxes not triggering update on label (do we want that?)
-##!!have 'prev/next' button for combobox
-##!!introduce hacky diff() functionality on Merge; check if subset objs are identical; use all.equal() and identical() on subset
+High priority / ASAP:
+ - ??gcheckboxgroup: fix selection on filter..
+ - !!fix annoying resize vertical handle on filter 'add'
+ - !!gfilter: head/tail/some (start with gfilterpreset of head(.., 1000 ) )
+ - ??c-menu on label|checkbox to 'disable filter' temporarily (NOT remove filter)
+ - !!search for/filter col names (var names), like in RStudio
+ - !!fancy re-layout on Hide
+ - !!toggle button to display only unique()/duplicated2() matches (can gdf() support this?)
+ - !!tmp re-sort of displayed subset (perhaps via a drop-menu)
+ - !!reload data.frame button (when making object copy, save digest, then before saving changes in workspace, check if digest of object is still the same and if not inform the user that the object had already been modified and ask for additional confirmation); bottom-left? 
+ - !!bar handle to resize height of var box
+
+Medium priority / soon:
+ - !!adding new filter should consider merged changes; bug when modifying a level and merging changes, it should automatically update the filters; 
+ - !!increase width when Add item is trigerred 
+ - !!bug with search auto-select checkboxes not triggering update on label (do we want that?)
+ - !!have 'prev/next' button for combobox
+ - !!introduce hacky diff() functionality on Merge; check if subset objs are identical; use all.equal() and identical() on subset
 ##
-##!!f4 for hide pane + Opera-style handle
-##??when viewing gdf(), possible to c-menu "copy" cell?
-##!!toggle button to display only unique()/duplicated2() matches (can gdf() support this?)
-##!!check how you can check.names() or whatever to avoid assignment issues
-##!!display nr of levels for each var
-##!!debug var in c-menu: unique(nchar()), levels(), class(), is.na(), is_sane(), etc.
-##!!add hide=F, search.opts=list()
-##!!default include NA: yes for multiple, no for single choice
-##??on display button, log subsetting operation in the console
-##??what of 5gb dataset or 21297 integer levels: it shouldn't be too slow; if possible use max 1 copy of df; 
-##??optimize return() beahviour, confirmation, on-the-fly, discard/save&close button, undo/redo, what about 5gb dataset, display diff before confirm merge, etc.
-##??optimize return() beahviour, confirmation, on-the-fly, discard/save&close button, undo/redo, display diff before confirm merge, etc.
-##??waht happens when alter 'other' variables (Date & robustness of editor); investigate sapply() thingy & factor editor robustness (strange handling of inserting NA values, especially in 'char' vars)
-##??waht happens when alter 'other' variables (& robustness of editor)
-##!!investigate cache bug: dffilter(Xa), Xa$var[1:10,] <- NA, dffilter(Xa) without closing first instance. Or dffilter(cbind(Xa, Xb)). 
-##??some sort of weird --detach-- pop-up to have more scrolling space to choose column names, and maybe to re-arrange them for displaying purposes. 
-##??multiple selection mode (isntead of shift+select on cehckboxes); or via c-menu item "select to here"
-##??print
-##!!export subset ("save as" different obj)
-##??log commands, if possible
-##??use dnd to re-order columns in list, for display purposes & tooltip
-##??c-menu on label to 'disable filter' (NOT remove filter)
-##!!main c-menu on gdf() to: debug vars, describe subset, etc.; describ/debug buttons on home screen at start-up, for full data frame; 
+ - ??when viewing gdf(), possible to c-menu "copy" cell?
+ - !!check how you can check.names() or whatever to avoid assignment issues
+ - !!display nr of levels for each var
+ - !!debug var in c-menu: unique(nchar()), levels(), class(), is.na(), is_sane(), etc.
+ - !!add hide=F, search.opts=list()
+ - !!default include NA: yes for multiple, no for single choice
+ - ??on display button, log subsetting operation in the console
+ - ??what of 5gb dataset or 21297 integer levels: it shouldn't be too slow; if possible use max 1 copy of df; 
+ - ??optimize return() beahviour, confirmation, on-the-fly, discard/save&close button, undo/redo, what about 5gb dataset, display diff before confirm merge, etc.
+ - ??optimize return() beahviour, confirmation, on-the-fly, discard/save&close button, undo/redo, display diff before confirm merge, etc.
+ - ??waht happens when alter 'other' variables (Date & robustness of editor); investigate sapply() thingy & factor editor robustness (strange handling of inserting NA values, especially in 'char' vars)
+ - ??waht happens when alter 'other' variables (& robustness of editor)
+ - !!investigate cache bug: dffilter(Xa), Xa$var[1:10,] <- NA, dffilter(Xa) without closing first instance. Or dffilter(cbind(Xa, Xb)). 
+ - ??some sort of weird --detach-- pop-up to have more scrolling space to choose column names, and maybe to re-arrange them for displaying purposes. 
+ - ??multiple selection mode (isntead of shift+select on cehckboxes); or via c-menu item "select to here"
+ - ??print
+ - !!export subset ("save as" different obj)
+ - ??log commands, if possible
+ - ??use dnd to re-order columns in list, for display purposes & tooltip
+ - !!main c-menu on gdf() to: debug vars, describe subset, etc.; describ/debug buttons on home screen at start-up, for full data frame; 
 
 ## gfilter TODO items
-##!!inspect the gfilter code (logical vector selection, use spinners for 'range' & type-ahead updating of filters, manually update filter items to reflect available choices as a 'update filters' button or 'freeze selection' checkbox?, what happens to 'Date' or 'other' classes, use rgtk2editdf, 'enable/disable filter' toggle button next to 'remove', tweak icons in gedit() search boxes, )
-##!!inspect the gfilter code (logical vector selection, use spinners for 'range', head/tail/some/!is.na/na.omit, manually update filter items to reflect available choices as a 'update filters' button or 'freeze selection' checkbox?, what happens to 'Date' or 'other' classes, use rgtk2editdf, 'enable/disable filter' toggle button next to 'remove', )
-##!!adding new filter should consider merged changes (auto-polling of data frame?)
-##??use fancy search box RStudio/LyX/Xfce-style that filters out the available elements in the filter widgets
-##??sort variable components? or use data frame order?
-##??sort variable components?
-##??gfilterpreset (use c("==", "%in%", "!=", ">", ">=", "<", "<=") combo, logical / manual subset, )
-##!!have 'select all/reset' (done) and 'clear' buttons
-##??type-ahead search in combobox gfilter and in cehckbox table? (as in LyX?)
-##??stringr (for options 'whole word' in search; replacement for grepl(); )
+ - !!inspect the gfilter code (logical vector selection, use spinners for 'range' & type-ahead updating of filters, manually update filter items to reflect available choices as a 'update filters' button or 'freeze selection' checkbox?, what happens to 'Date' or 'other' classes, use rgtk2editdf, 'enable/disable filter' toggle button next to 'remove', tweak icons in gedit() search boxes, )
+ - !!inspect the gfilter code (logical vector selection, use spinners for 'range', head/tail/some/!is.na/na.omit, manually update filter items to reflect available choices as a 'update filters' button or 'freeze selection' checkbox?, what happens to 'Date' or 'other' classes, use rgtk2editdf, 'enable/disable filter' toggle button next to 'remove', )
+ - !!adding new filter should consider merged changes (auto-polling of data frame?)
+ - ??use fancy search box RStudio/LyX/Xfce-style that filters out the available elements in the filter widgets
+ - ??sort variable components? or use data frame order?
+ - ??sort variable components?
+ - ??gfilterpreset (use c("==", "%in%", "!=", ">", ">=", "<", "<=") combo, logical / manual subset, )
+ - !!have 'select all/reset' (done) and 'clear' buttons
+ - ??type-ahead search in combobox gfilter and in cehckbox table? (as in LyX?)
+ - ??stringr (for options 'whole word' in search; replacement for grepl(); )
 
-## tangential TODO items
-##??data frame selector (use data frame browser; what about matrix objs?) & label(..., self=T) in tooltip and make  label editable & describe() & class() & nchar() & clone obj & save obj as .RData/csv/etc. & 
-##??data frame selector (use data frame browser; what about matrix objs?) & label(..., self=T) in tooltip and make  label editable & describe() & class() & nchar() & auto-load on package load & allow to set gtimer(check_digest) on data frames or maybe allow to set polling using digests on specific objects/subsets; debug var with nchar, etc.; allow to compare to variables, even when vars from two different data frames (all.equal()); allow to compare two objects (all.equal()); 
-##??sort  & re-order columns (in gdf()? or separately w/o loading the full data frame?; have distinct window)
-##??edit data structure: rename & sort & re-order variables/cols, change var type/factors, edit factors, batch rename cols (tolower), etc. w/o displaying data frame; Deducer-style? ; dfstruct(); mutate(), copy vars, create new vars by transforming existing var; 
-##??diff (papertrail; setdiff2 {prob} or {compare} using github green/red & darkgreen/darkred colouring approach; 'dataview'; split-window with side-by-side display as in diffPDF; what happens when the two df have different nr of rows/columns?; also diff two variables within data.frame?; preview pane with head(X, 20) including class/mode, etc.; )
-##??replace2 (gui for replacement tables); merge; 
-##??diff (papertrail; setdiff2 {prob} using github green/red & darkgreen/darkred colouring approach; 'dataview'; split-window with side-by-side display as in diffPDF; what happens when the two df have different nr of rows/columns?; also diff two variables within data.frame?; display all.equal() results and doublecheck with identical() on subset; dfdiff(); )
-##??ulabel -- graphically update label (in style of clabel); how deal with cbind() that discards label? maybe store in special object that documents all up-to-date labelled objs in workspace; append 'last modified on date time'; 
-##!!come up with Test data frame with NAs, NA vars, different data structures, labels, etc.
-##??poor man's loop constructor/debugger/sandbox with automatic interpretation of variables and display of obtained values and working on a head() subset of original input; loop workflow; apply() funs; 
-##??poor man's formula constructor, given a df; look into Rcmdr for an implementation; allow for * : etc. constructs, maybe by using groupings; log the reproducible, generated command; see pmg; 
-##??investigate dffilter() compatibility with data.table package
-##??melt/dcast gui for pivot tables (this is still exploratory so fits the scope of the package); use margins et al.; OR use 'tables' tabular() and provide latex/html export & reproducible code
+Low priority / later:
+ - !!f4 for hide pane + Opera-style handle
+
+
+
+Low priority / maybe:
+ - ??data frame selector (use data frame browser; what about matrix objs?) & label(..., self=T) in tooltip and make  label editable & describe() & class() & nchar() & clone obj & save obj as .RData/csv/etc. & 
+ - ??data frame selector (use data frame browser; what about matrix objs?) & label(..., self=T) in tooltip and make  label editable & describe() & class() & nchar() & auto-load on package load & allow to set gtimer(check_digest) on data frames or maybe allow to set polling using digests on specific objects/subsets; debug var with nchar, etc.; allow to compare to variables, even when vars from two different data frames (all.equal()); allow to compare two objects (all.equal()); 
+ - ??sort  & re-order columns (in gdf()? or separately w/o loading the full data frame?; have distinct window)
+ - ??edit data structure: rename & sort & re-order variables/cols, change var type/factors, edit factors, batch rename cols (tolower), etc. w/o displaying data frame; Deducer-style? ; dfstruct(); mutate(), copy vars, create new vars by transforming existing var; 
+ - ??diff (papertrail; setdiff2 {prob} or {compare} using github green/red & darkgreen/darkred colouring approach; 'dataview'; split-window with side-by-side display as in diffPDF; what happens when the two df have different nr of rows/columns?; also diff two variables within data.frame?; preview pane with head(X, 20) including class/mode, etc.; )
+ - ??replace2 (gui for replacement tables); merge; 
+ - ??diff (papertrail; setdiff2 {prob} using github green/red & darkgreen/darkred colouring approach; 'dataview'; split-window with side-by-side display as in diffPDF; what happens when the two df have different nr of rows/columns?; also diff two variables within data.frame?; display all.equal() results and doublecheck with identical() on subset; dfdiff(); )
+ - ??ulabel -- graphically update label (in style of clabel); how deal with cbind() that discards label? maybe store in special object that documents all up-to-date labelled objs in workspace; append 'last modified on date time'; 
+ - !!come up with Test data frame with NAs, NA vars, different data structures, labels, etc.
+ - ??poor man's loop constructor/debugger/sandbox with automatic interpretation of variables and display of obtained values and working on a head() subset of original input; loop workflow; apply() funs; 
+ - ??poor man's formula constructor, given a df; look into Rcmdr for an implementation; allow for * : etc. constructs, maybe by using groupings; log the reproducible, generated command; see pmg; 
+ - ??investigate dffilter() compatibility with data.table package
+ - ??melt/dcast gui for pivot tables (this is still exploratory so fits the scope of the package); use margins et al.; OR use 'tables' tabular() and provide latex/html export & reproducible code
+ - name ideas: "interactive data manipulation"
+ - rstudio usage ideas: View <- dffilter
