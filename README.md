@@ -1,19 +1,17 @@
 gWidgets2-filter
 ================
 
-gWidgets2 GUI to search, filter selection and edit a data frame in R
+gWidgets2 GUI to view, search, subset and edit a data frame in R
 
-The GUI allows the user to search and filter rows in a data frame, select only the desired columns and display the resulting subset. Optionally the user can edit the subset and reliably merge the changes into the original data frame. 
+The GUI allows the user to search and filter rows in a data frame, select only the desired columns and display the resulting subset. Optionally the user can edit the subset and merge the changes into the original data frame (experimental). 
 
-At the moment the software is pre-alpha, ***experimental***. Testers needed. 
+At the moment the software is alpha, and the editing feature is ***experimental***. Testers welcome. 
 
 Installation intructions
 ================
 
-You will need development versions of [gWidgets2](https://github.com/jverzani/gWidgets2) and [gWidgets2RGtk2](https://github.com/jverzani/gWidgets2RGtk2). It may work with [gWidgets2tcltk](https://github.com/jverzani/gWidgets2tcltk) but this wasn't yet tested.
+You will need to install [gWidgets2](http://cran.r-project.org/web/packages/gWidgets2) and [gWidgets2RGtk2](http://cran.r-project.org/web/packages/gWidgets2RGtk2). The data frame viewer may work with [gWidgets2tcltk](http://cran.r-project.org/web/packages/gWidgets2tcltk), but this wasn't thoroughly tested.
 
-    require(devtools) 
-    install_github("gWidgets2", "jverzani")
-    install_github("gWidgets2RGtk2", "jverzani")
+    install.packages(c("gWidgets2", "gWidgets2RGtk2"))
 
-Then download and source `gWidgets2-filter.R`. 
+Then download and source `gWidgets2-filter.R`. (Proper R packaging is on the way.)
