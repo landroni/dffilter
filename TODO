@@ -1,14 +1,20 @@
 High priority / ASAP:
- - ??gcheckboxgroup: fix selection on filter..
- - !!fix annoying resize vertical handle on filter 'add'
  - !!gfilter: head/tail/some (start with gfilterpreset of head(.., 1000 ) )
+ - !!rm 'include NA' from preset filter (redefine make_buttons)
+ - ??'include NA' should be checked by default in 'multiple' but unchecked in 'single'
+ - !!'reset' button should also handle 'include NA'
+
+- ??gcheckboxgroup: fix selection on filter..
+ - !!fix annoying resize vertical handle on filter 'add'
  - ??c-menu on label|checkbox to 'disable filter' temporarily (NOT remove filter)
  - !!search for/filter col names (var names), like in RStudio
- - !!fancy re-layout on Hide
  - !!toggle button to display only unique()/duplicated2() matches (can gdf() support this?)
  - !!tmp re-sort of displayed subset (perhaps via a drop-menu)
  - !!reload data.frame button (when making object copy, save digest, then before saving changes in workspace, check if digest of object is still the same and if not inform the user that the object had already been modified and ask for additional confirmation); bottom-left? 
  - !!bar handle to resize height of var box
+ - !!display label(..., self=T) if available
+ - ??close window using ESC (optional)
+ - !!fancy re-layout on Hide
 
 Medium priority / soon:
  - !!adding new filter should consider merged changes; bug when modifying a level and merging changes, it should automatically update the filters; 
