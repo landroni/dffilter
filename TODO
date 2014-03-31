@@ -1,13 +1,17 @@
 High priority / ASAP:
- - !!gfilter: head/tail/some (start with gfilterpreset of head(.., 1000 ) )
- - !!rm 'include NA' from preset filter (redefine make_buttons)
- - ??'include NA' should be checked by default in 'multiple' but unchecked in 'single'
- - !!'reset' button should also handle 'include NA'
-
-- ??gcheckboxgroup: fix selection on filter..
- - !!fix annoying resize vertical handle on filter 'add'
- - ??c-menu on label|checkbox to 'disable filter' temporarily (NOT remove filter)
+ - !!adjust filter buttons
+    - rm 'include NA' from preset filter (redefine make_buttons)
+    - c-menu on label|checkbox to 'disable filter' temporarily (NOT remove filter)
  - !!search for/filter col names (var names), like in RStudio
+ - !!fix negative input in head(..., )
+ - ??gcheckboxgroup: fix selection on filter..; SEEMS fixed
+
+ - !!increase width when Add item is trigerred 
+    - fix annoying resize vertical handle on filter 'add'
+ - !!somehow preserve set.seed() with 'some' preset filter & another filter
+ - !!make '1000' for head() user-configurable
+ - !!make button bold on change, normal after display
+ - ??'reset' button should also handle 'include NA'
  - !!toggle button to display only unique()/duplicated2() matches (can gdf() support this?)
  - !!tmp re-sort of displayed subset (perhaps via a drop-menu)
  - !!reload data.frame button (when making object copy, save digest, then before saving changes in workspace, check if digest of object is still the same and if not inform the user that the object had already been modified and ask for additional confirmation); bottom-left? 
@@ -15,12 +19,12 @@ High priority / ASAP:
  - !!display label(..., self=T) if available
  - ??close window using ESC (optional)
  - !!fancy re-layout on Hide
+ - !!have 'prev/next' button for combobox
+ - !!use appropriate icon for 'invert' button
 
 Medium priority / soon:
  - !!adding new filter should consider merged changes; bug when modifying a level and merging changes, it should automatically update the filters; 
- - !!increase width when Add item is trigerred 
  - !!bug with search auto-select checkboxes not triggering update on label (do we want that?)
- - !!have 'prev/next' button for combobox
  - !!introduce hacky diff() functionality on Merge; check if subset objs are identical; use all.equal() and identical() on subset
 ##
  - ??when viewing gdf(), possible to c-menu "copy" cell?
@@ -28,7 +32,6 @@ Medium priority / soon:
  - !!display nr of levels for each var
  - !!debug var in c-menu: unique(nchar()), levels(), class(), is.na(), is_sane(), etc.
  - !!add hide=F, search.opts=list()
- - !!default include NA: yes for multiple, no for single choice
  - ??on display button, log subsetting operation in the console
  - ??what of 5gb dataset or 21297 integer levels: it shouldn't be too slow; if possible use max 1 copy of df; 
  - ??optimize return() beahviour, confirmation, on-the-fly, discard/save&close button, undo/redo, what about 5gb dataset, display diff before confirm merge, etc.
