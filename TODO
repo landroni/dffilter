@@ -1,15 +1,14 @@
 High priority / ASAP:
- - !!adjust filter buttons
-    - rm 'include NA' from preset filter (redefine make_buttons)
-    - c-menu on label|checkbox to 'disable filter' temporarily (NOT remove filter)
  - !!search for/filter col names (var names), like in RStudio
- - !!fix negative input in head(..., )
- - ??gcheckboxgroup: fix selection on filter..; SEEMS fixed
-
  - !!increase width when Add item is trigerred 
     - fix annoying resize vertical handle on filter 'add'
- - !!somehow preserve set.seed() with 'some' preset filter & another filter
- - !!make '1000' for head() user-configurable
+
+ - !!tweak preset
+    - somehow preserve set.seed() with 'some' preset filter & another filter
+    - fix negative input in head(..., )
+    - improve speed of preset filter (tweak fun to limit 10^x)
+    - tweak seq_sane to jump as in c(10:50,100)
+    - make '1000' for head() user-configurable
  - !!make button bold on change, normal after display
  - ??'reset' button should also handle 'include NA'
  - !!toggle button to display only unique()/duplicated2() matches (can gdf() support this?)
@@ -18,9 +17,7 @@ High priority / ASAP:
  - !!bar handle to resize height of var box
  - !!display label(..., self=T) if available
  - ??close window using ESC (optional)
- - !!fancy re-layout on Hide
- - !!have 'prev/next' button for combobox
- - !!use appropriate icon for 'invert' button
+ - !!implement 'prev/next' button for combobox
 
 Medium priority / soon:
  - !!adding new filter should consider merged changes; bug when modifying a level and merging changes, it should automatically update the filters; 

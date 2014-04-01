@@ -92,6 +92,7 @@ dffilter <- function(data_set, display=TRUE, maximize=FALSE, editable=FALSE){
                                                svalue(c_names, index=TRUE))
     })
     tooltip(b_invert) <- 'Invert selection'
+    b_invert$set_icon("jump-to")
     b_selall <- gbutton("Select all", cont=ggroup(cont=s_gp), handler = function(h,...) {
         svalue(c_names, index=TRUE) <- 1:length(names(data_set))
     })
@@ -222,7 +223,8 @@ dffilter <- function(data_set, display=TRUE, maximize=FALSE, editable=FALSE){
     size(w) <- c(950, 650)
     visible(w) <- TRUE
     svalue(pg) <- as.integer(size(b_disp)[1] + 20)
-    if(display) hb_disp()
+    #if(display) hb_disp()
+    if(display) b_disp$invoke_change_handler()
     #svalue(pg) <- 0.42
     #svalue(pg) <- 250L
     
@@ -243,8 +245,8 @@ dffilter <- function(data_set, display=TRUE, maximize=FALSE, editable=FALSE){
             }
         }) 
     }
-    ## use 4 lines as hight of selection box
-    size(c_names)[2] <- 4*25
+    ## use 5 lines as hight of selection box (less claustrophobic)
+    size(c_names)[2] <- 5*25
     #print(size(pg))
     #print(size(c_names))
     #print(size(s_gp))
