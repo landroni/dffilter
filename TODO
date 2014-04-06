@@ -1,5 +1,4 @@
 High priority / ASAP:
- - !!search for/filter col names (var names), like in RStudio
  - !!increase width when Add item is trigerred 
     - fix annoying resize vertical handle on filter 'add'
 
@@ -10,16 +9,16 @@ High priority / ASAP:
     - tweak seq_sane to jump as in c(10:50,100)
     - make '1000' for head() user-configurable
  - !!make button bold on change, normal after display
- - ??'reset' button should also handle 'include NA'
+ - !!add 'sort items' toggle button in filter
  - !!toggle button to display only unique()/duplicated2() matches (can gdf() support this?)
- - !!tmp re-sort of displayed subset (perhaps via a drop-menu)
+ - !!tmp re-sort of displayed subset (perhaps via a drop-menu or in gdf())
  - !!reload data.frame button (when making object copy, save digest, then before saving changes in workspace, check if digest of object is still the same and if not inform the user that the object had already been modified and ask for additional confirmation); bottom-left? 
  - !!bar handle to resize height of var box
+ - !!close window using ESC (optional)
  - !!display label(..., self=T) if available
- - ??close window using ESC (optional)
- - !!implement 'prev/next' button for combobox
 
 Medium priority / soon:
+ - !!highlight gdf() columns (see github ticket)
  - !!adding new filter should consider merged changes; bug when modifying a level and merging changes, it should automatically update the filters; 
  - !!bug with search auto-select checkboxes not triggering update on label (do we want that?)
  - !!introduce hacky diff() functionality on Merge; check if subset objs are identical; use all.equal() and identical() on subset
@@ -43,6 +42,7 @@ Medium priority / soon:
  - ??log commands, if possible
  - ??use dnd to re-order columns in list, for display purposes & tooltip
  - !!main c-menu on gdf() to: debug vars, describe subset, etc.; describ/debug buttons on home screen at start-up, for full data frame; 
+ - ??theme dependent colors
 
 ## gfilter TODO items
  - !!inspect the gfilter code (logical vector selection, use spinners for 'range' & type-ahead updating of filters, manually update filter items to reflect available choices as a 'update filters' button or 'freeze selection' checkbox?, what happens to 'Date' or 'other' classes, use rgtk2editdf, 'enable/disable filter' toggle button next to 'remove', tweak icons in gedit() search boxes, )
@@ -50,12 +50,10 @@ Medium priority / soon:
  - !!adding new filter should consider merged changes (auto-polling of data frame?)
  - ??use fancy search box RStudio/LyX/Xfce-style that filters out the available elements in the filter widgets
  - ??sort variable components? or use data frame order?
- - ??sort variable components?
  - ??gfilterpreset (use c("==", "%in%", "!=", ">", ">=", "<", "<=") combo, logical / manual subset, )
- - !!have 'select all/reset' (done) and 'clear' buttons
  - ??type-ahead search in combobox gfilter and in cehckbox table? (as in LyX?)
  - ??stringr (for options 'whole word' in search; replacement for grepl(); )
-
+ 
 Low priority / later:
  - !!f4 for hide pane + Opera-style handle
 

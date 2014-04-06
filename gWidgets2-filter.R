@@ -13,14 +13,16 @@ dffilter <- function(data_set, display=TRUE, maximize=FALSE, editable=FALSE){
     stopifnot(is.data.frame(data_set))
     stopifnot(all(dim(data_set) >= c(1,2)))
     data_set_name <- deparse(substitute(data_set))
-    
+    data_set_nms <- names(data_set)
     data_set_dim_orig <- dim(data_set)
+    
     w <- gwindow(paste(data_set_name, " (", data_set_dim_orig[1], ' x ', 
                        data_set_dim_orig[2], ')', sep=''), visible=FALSE, 
                  handler=function(h,...){
                      #if(identical)
                      #return(data_set)
                  })
+                 
     ##maximize window on load
     if(maximize) getToolkitWidget(w)$maximize()
     
@@ -56,6 +58,8 @@ dffilter <- function(data_set, display=TRUE, maximize=FALSE, editable=FALSE){
     })
     b_hide$set_icon("go-back")
     tooltip(b_hide) <- "Hide panel"
+
+    ## have a reload button
     #b_reload <- gbutton("Reload", cont=ggroup(cont=f_side0))
     #b_reload$set_icon("refresh")
     
@@ -82,31 +86,111 @@ dffilter <- function(data_set, display=TRUE, maximize=FALSE, editable=FALSE){
     ## Select columns
     c_gp <- gframe("<b> Select columns: </b>", markup=TRUE, cont=f_side1, 
                    horizontal=FALSE)
-    c_names <- gcheckboxgroup(names(data_set), checked=TRUE, cont=c_gp, 
-                              use.table=TRUE, expand=TRUE)
+
+    ##fancy search for selecting columns
+    ##prepare the search input box & handler
+     vb <- gvbox(container=c_gp)
+     search_type <-  list(ignore.case=TRUE, perl=FALSE, fixed=FALSE)
+       gp <- ggroup(cont=vb)
+       ed <- gedit("", initial.msg="Filter values by...", expand=TRUE, container=gp)
+       ed$set_icon("ed-search", "start")
+       ed$set_icon("ed-remove", "end")
+       ed$set_icon_handler(function(h,...) {
+         svalue(ed) <- ""
+       }, where="end")
+       
+       search_handler <- function(h,..., do_old=TRUE) {
+         ## we keep track of old selection here
+         ## that updates only when user changes selection, not when filter does
+         cur_sel <- old_selection
+         blockHandlers(c_names)
+         on.exit(unblockHandlers(c_names))
+         val <- svalue(ed)
+
+         if(val == "") {
+           c_names[] <<- data_set_nms
+         } else {
+           l <- c(list(pattern=val, x=data_set_nms), search_type)
+           new_vals = data_set_nms[do.call(grepl, l)]
+           if (length(new_vals)) {
+             c_names[] <<- new_vals
+           } else {
+             c_names[] <<- character(0) 
+             return()
+           }
+         }
+         svalue(c_names) <<- cur_sel
+       }
+
+       b <- gbutton("opts", cont=gp)
+       cbs <- list(gcheckbox("Ignore case", checked=TRUE, handler=function(h,...) {
+                             search_type[["ignore.case"]] <<- svalue(h$obj)
+                             search_handler(do_old=FALSE)
+                             }),
+                   gcheckbox("Regex", checked=TRUE, handler=function(h,...) {
+                     search_type[["fixed"]] <<- !svalue(h$obj)
+                     search_handler(do_old=FALSE)                                                     
+                   }),
+                   gcheckbox("Perl compatible", checked=FALSE, handler=function(h,...) {
+                     search_type[["perl"]] <<- svalue(h$obj)
+                     search_handler(do_old=FALSE)                                                     
+                   })
+                   )
+       
+       addPopupMenu(b, gmenu(cbs, popup=TRUE))
+
+       addHandlerKeystroke(ed, search_handler)
+       addHandlerChanged(ed, search_handler)
+
+
+    c_names <<- gcheckboxgroup(data_set_nms, checked=TRUE, cont=c_gp, 
+                              use.table=TRUE, expand=TRUE, fill=TRUE)
+    
+    ##continue fancy search functionality
+    ##initialize old_selection which will be the output value of c_names
+     old_selection <<- svalue(c_names)
+     #svalue(c_names, index=TRUE) <<- TRUE
+
+                              
     s_gp <- ggroup(cont=c_gp, horizontal=TRUE)
     
     ## Invert selection, select all and select none are all useful in different cases
+    ##FIXME are the h_disp() calls redundant?
     b_invert <- gbutton("Invert", cont=ggroup(cont=s_gp), handler = function(h,...) {
-        svalue(c_names, index=TRUE) <- setdiff(1:length(names(data_set)), 
+        svalue(c_names, index=TRUE) <<- setdiff(1:length(data_set_nms), 
                                                svalue(c_names, index=TRUE))
+        h_disp()
     })
     tooltip(b_invert) <- 'Invert selection'
     b_invert$set_icon("jump-to")
+ 
     b_selall <- gbutton("Select all", cont=ggroup(cont=s_gp), handler = function(h,...) {
-        svalue(c_names, index=TRUE) <- 1:length(names(data_set))
+        #svalue(c_names, index=TRUE) <- 1:length(data_set_nms)
+        svalue(c_names, index=TRUE) <<- TRUE
+        #c_names$invoke_change_handler()
+        h_disp()
     })
     tooltip(b_selall) <- 'Select all'
     b_selall$set_icon("select-all")
+
     b_clear <- gbutton("Clear", cont=ggroup(cont=s_gp), handler = function(h,...) {
-        svalue(c_names, index=TRUE) <- integer()
+        #svalue(c_names, index=TRUE) <- integer()
+        svalue(c_names, index=TRUE) <<- FALSE
+        h_disp()
     })
     tooltip(b_clear) <- 'Select none'
     
+    ## Filter rows by logical
+    r_gp <- gframe("<b>Filter rows:</b>", markup=TRUE, cont=f_side1, horizontal=FALSE)
+    row_filter <- gfilter(data_set, initial.vars=data.frame(data_set_nms[1], "preset", 
+                                                            "preset", stringsAsFactors=FALSE), 
+                          cont=r_gp, expand=TRUE)
+
     ## centralized handler helper fun to update size in 'display' button
     h_disp <- function(h, ...) {
         rows <- svalue(row_filter)
-        cnms <<- svalue(c_names)
+        #cnms <<- svalue(c_names)
+        cnms <<- old_selection
         idxs <<- which(rows)                  # move to global variable
         
         ## detect size of data frame to be displayed
@@ -128,23 +212,41 @@ dffilter <- function(data_set, display=TRUE, maximize=FALSE, editable=FALSE){
         ## autoupdate when option checked and button enabled
         if( svalue(cb_autoupdate) & enabled(b_disp) ) b_disp$invoke_change_handler()
     }
-    addHandlerChanged(c_names, h_disp)
+    #addHandlerChanged(c_names, h_disp)
     addHandlerChanged(b_selall, h_disp)
     addHandlerChanged(b_invert, h_disp)
     addHandlerChanged(b_clear, h_disp)
-    
-    ## Filter rows by logical
-    r_gp <- gframe("<b>Filter rows:</b>", markup=TRUE, cont=f_side1, horizontal=FALSE)
-    row_filter <- gfilter(data_set, initial.vars=data.frame(names(data_set)[1], "preset", 
-                                                            "preset", stringsAsFactors=FALSE), 
-                          cont=r_gp, expand=TRUE)
     addHandlerChanged(row_filter, h_disp)
+    
+    ##handler for fancy search functionality
+    ##needs to be after h_disp() is defined
+     addHandlerChanged(c_names, function(h,...) {
+       ### XXX selection
+       ## have to be careful, as items may be narrowed
+       visible_items = c_names[]
+       new <- svalue(h$obj)
+       old <- intersect(visible_items, old_selection)
+
+       
+       added <- setdiff(new, old)
+       removed <- setdiff(old, new)
+
+       ## This is sort of tricky, not sure it is correct
+       if(length(added) > 0) {
+         old_selection <<- unique(c(old_selection, added))
+       }
+       if(length(removed) > 0) {
+         old_selection <<- setdiff(old_selection, removed)
+       }
+       old_selection <<- data_set_nms[data_set_nms %in% old_selection]
+       h_disp()
+     })                              
     
     ##handler to execute on click of 'display' button
     hb_disp <- function(h,...) {
-        cnms <<- svalue(c_names)
         rows <- svalue(row_filter)
-        
+        #cnms <<- svalue(c_names)
+        cnms <<- old_selection
         idxs <<- which(rows)                  # move to global variable
         
         ## now add a data frame
@@ -246,7 +348,7 @@ dffilter <- function(data_set, display=TRUE, maximize=FALSE, editable=FALSE){
         }) 
     }
     ## use 5 lines as hight of selection box (less claustrophobic)
-    size(c_names)[2] <- 5*25
+    size(c_names)[2] <<- 5*25
     #print(size(pg))
     #print(size(c_names))
     #print(size(s_gp))
