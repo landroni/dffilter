@@ -1,7 +1,6 @@
 High priority / ASAP:
- - !!increase width when Add item is trigerred 
-    - fix annoying resize vertical handle on filter 'add'
-
+ - !!use new_item_handler to handle the auto-resize of pane issue (on 'add item')
+ - !!throttle requests from preset (see #40)
  - !!tweak preset
     - somehow preserve set.seed() with 'some' preset filter & another filter
     - fix negative input in head(..., )
@@ -18,7 +17,7 @@ High priority / ASAP:
  - !!display label(..., self=T) if available
 
 Medium priority / soon:
- - !!highlight gdf() columns (see github ticket)
+ - !!highlight gdf() columns (see #12)
  - !!adding new filter should consider merged changes; bug when modifying a level and merging changes, it should automatically update the filters; 
  - !!bug with search auto-select checkboxes not triggering update on label (do we want that?)
  - !!introduce hacky diff() functionality on Merge; check if subset objs are identical; use all.equal() and identical() on subset
