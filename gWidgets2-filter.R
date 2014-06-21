@@ -8,6 +8,8 @@ dffilter <- function(data_set, display=TRUE, maximize=FALSE, editable=FALSE){
     DF <- NULL                      # global gdf instance
     idxs <- NULL                    # global set of indices that are being edited
     cnms <- NULL                    # global column names
+    c_names <- NULL                 # global column names widget
+    old_selection <- NULL           # global old selection storage
     
     ## ensure we have a data frame of 1x2 dimensions
     stopifnot(is.data.frame(data_set))
@@ -90,7 +92,7 @@ dffilter <- function(data_set, display=TRUE, maximize=FALSE, editable=FALSE){
     ##fancy search for selecting columns
     ##prepare the search input box & handler
      vb <- gvbox(container=c_gp)
-     search_type <-  list(ignore.case=TRUE, perl=FALSE, fixed=FALSE)
+     search_type <-  list(ignore.case=TRUE, perl=FALSE, fixed=FALSE)  ##init global instance
        gp <- ggroup(cont=vb)
        ed <- gedit("", initial.msg="Filter values by...", expand=TRUE, container=gp)
        ed$set_icon("ed-search", "start")
@@ -143,12 +145,12 @@ dffilter <- function(data_set, display=TRUE, maximize=FALSE, editable=FALSE){
        addHandlerChanged(ed, search_handler)
 
 
-    c_names <<- gcheckboxgroup(data_set_nms, checked=TRUE, cont=c_gp, 
+    c_names <- gcheckboxgroup(data_set_nms, checked=TRUE, cont=c_gp, 
                               use.table=TRUE, expand=TRUE, fill=TRUE)
     
     ##continue fancy search functionality
     ##initialize old_selection which will be the output value of c_names
-     old_selection <<- svalue(c_names)
+     old_selection <- svalue(c_names)
      #svalue(c_names, index=TRUE) <<- TRUE
 
                               
@@ -348,7 +350,7 @@ dffilter <- function(data_set, display=TRUE, maximize=FALSE, editable=FALSE){
         }) 
     }
     ## use 5 lines as hight of selection box (less claustrophobic)
-    size(c_names)[2] <<- 5*25
+    size(c_names)[2] <- 5*25
     #print(size(pg))
     #print(size(c_names))
     #print(size(s_gp))
@@ -364,4 +366,4 @@ dffilter <- function(data_set, display=TRUE, maximize=FALSE, editable=FALSE){
 # Xa$Man.trans.avail1 <- as.logical(Xa$Man.trans.avail)
 # Xa$Man.trans.avail1 <- ifelse(Xa$Man.trans.avail=='Yes', TRUE, FALSE)
 View <- dffilter
-View(Xa)
+#View(Xa)
