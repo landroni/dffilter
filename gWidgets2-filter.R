@@ -1,6 +1,6 @@
 ## edit a really large data set *after* it has been filtered
 
-dffilter <- function(data_set, display=TRUE, maximize=FALSE, editable=FALSE){
+dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE){
     require(gWidgets2) ## on github not CRAN. (require(devtools); install_github("gWidgets2", "jverzani")
     options(guiToolkit="RGtk2")
     require(RGtk2)
@@ -324,7 +324,7 @@ dffilter <- function(data_set, display=TRUE, maximize=FALSE, editable=FALSE){
     #         tooltip(obj=cb_do_btn) <- "If checked allow editing of displayed subsets \nin a spreadsheet-like environment."
     
     h_disp()  ##update display button size given 'preset' filter
-    size(w) <- c(950, 650)
+    size(w) <- c(750, 600)
     visible(w) <- TRUE
     svalue(pg) <- as.integer(size(b_disp)[1] + 20)
     #if(display) hb_disp()
