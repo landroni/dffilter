@@ -159,7 +159,7 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE){
     
     ## Invert selection, select all and select none are all useful in different cases
     ##FIXME are the h_disp() calls redundant?
-    b_invert <- gbutton("Invert", cont=ggroup(cont=s_gp), handler = function(h,...) {
+    b_invert <- gbutton("", cont=ggroup(cont=s_gp), handler = function(h,...) {
         svalue(c_names, index=TRUE) <<- setdiff(1:length(data_set_nms), 
                                                svalue(c_names, index=TRUE))
         h_disp()
