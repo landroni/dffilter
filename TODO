@@ -1,5 +1,4 @@
 High priority / ASAP:
- - !!'invert selection' for multiple choice filter
  - !!gWidgets vs gWidgets2 compat
  - !!scrolling perf issues (probably related to >128 chars in a cell)
     - long PU load after display of df
@@ -17,7 +16,6 @@ High priority / ASAP:
     - add range radio
     - somehow preserve set.seed() with 'some' preset filter & another filter
     - fix negative input in head(..., )
- - !!make button bold on change, normal after display
  - !!add 'sort items' toggle button in filter
  - !!toggle button to display only unique()/duplicated2() matches (can gdf() support this?)
  - !!tmp re-sort of displayed subset (perhaps via a drop-menu or in gdf())
@@ -55,6 +53,7 @@ Medium priority / soon:
  - ??theme dependent colors
 
 ## gfilter TODO items
+ - ??frame around 'rm' and 'disable' button/cb
  - !!inspect the gfilter code (logical vector selection, use spinners for 'range' & type-ahead updating of filters, manually update filter items to reflect available choices as a 'update filters' button or 'freeze selection' checkbox?, what happens to 'Date' or 'other' classes, use rgtk2editdf, 'enable/disable filter' toggle button next to 'remove', tweak icons in gedit() search boxes, )
  - !!inspect the gfilter code (logical vector selection, use spinners for 'range', head/tail/some/!is.na/na.omit, manually update filter items to reflect available choices as a 'update filters' button or 'freeze selection' checkbox?, what happens to 'Date' or 'other' classes, use rgtk2editdf, 'enable/disable filter' toggle button next to 'remove', )
  - !!adding new filter should consider merged changes (auto-polling of data frame?)
