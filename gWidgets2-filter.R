@@ -13,10 +13,11 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE){
     
     ## ensure we have a data frame of 1x2 dimensions
     stopifnot(is.data.frame(data_set))
-    stopifnot(all(dim(data_set) >= c(1,2)))
     data_set_name <- deparse(substitute(data_set))
     data_set_nms <- names(data_set)
+    ##FIXME find most efficient way to determine size of df
     data_set_dim_orig <- dim(data_set)
+    stopifnot(all(data_set_dim_orig >= c(1,2)))
     
     w <- gwindow(paste(data_set_name, " (", data_set_dim_orig[1], ' x ', 
                        data_set_dim_orig[2], ')', sep=''), visible=FALSE, 
@@ -198,7 +199,8 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE){
         ## detect size of data frame to be displayed
         if(length(cnms)==1){
             data_set_dim <- c(length(idxs), 1)
-        } else data_set_dim <- dim(data_set[idxs, cnms])
+        #} else data_set_dim <- dim(data_set[idxs, cnms])
+        } else data_set_dim <- c(length(idxs), length(cnms))
         if(any(data_set_dim < c(1,2))){
             enabled(b_disp) <- FALSE
         } else enabled(b_disp) <- TRUE
@@ -255,7 +257,9 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE){
         delete(df_box, df_box[1])             # remove child
         
         ## disable editing if so requested
-        data_set_dim <- dim(data_set[idxs, cnms])
+        #data_set_dim <- dim(data_set[idxs, cnms])
+        ##FIXME mv this to global var
+        data_set_dim <- c(length(idxs), length(cnms))
         if(!editable) {
             DF <<- gdf(data_set[rows, cnms], cont=df_box, expand=TRUE, 
                        freeze_attributes=TRUE)
