@@ -210,7 +210,7 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE){
         svalue(b_disp, append=T) <- paste('Display selection (', data_set_dim[1], 
                                           ' x ', data_set_dim[2], ')', sep='')
         b_disp$set_icon("execute")
-        #font(b_disp) <- list(weight = "bold")
+        font(b_disp) <- list(weight = "bold")
         unblockHandler(b_disp)
         
         ## autoupdate when option checked and button enabled
@@ -305,6 +305,8 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE){
             svalue(gs_df) <- paste('Displaying a ', data_set_dim[1], ' x ', 
                                    data_set_dim[2], " subset.", sep='')
         }
+        font(b_disp) <- list(weight = "normal")
+
     }
     
     b_disp <- gbutton(paste("Display selection (", data_set_dim_orig[1], ' x ', 
