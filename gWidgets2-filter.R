@@ -6,8 +6,12 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE){
     require(RGtk2)
 
     DF <- NULL                      # global gdf instance
+    rows <- NULL                    # global rows index
     idxs <- NULL                    # global set of indices that are being edited
     cnms <- NULL                    # global column names
+    len_idxs <- NULL                # global set of indices that are being edited (length)
+    len_cnms <- NULL                # global column names (length)
+    data_set_dim <- NULL            # global df dim
     c_names <- NULL                 # global column names widget
     old_selection <- NULL           # global old selection storage
     
@@ -158,11 +162,11 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE){
     s_gp <- ggroup(cont=c_gp, horizontal=TRUE)
     
     ## Invert selection, select all and select none are all useful in different cases
-    ##FIXME are the h_disp() calls redundant?
     b_invert <- gbutton("", cont=ggroup(cont=s_gp), handler = function(h,...) {
         svalue(c_names, index=TRUE) <<- setdiff(1:length(data_set_nms), 
                                                svalue(c_names, index=TRUE))
-        h_disp()
+        #len_cnms_update()
+        #h_disp()
     })
     tooltip(b_invert) <- 'Invert selection'
     b_invert$set_icon("jump-to")
@@ -171,7 +175,8 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE){
         #svalue(c_names, index=TRUE) <- 1:length(data_set_nms)
         svalue(c_names, index=TRUE) <<- TRUE
         #c_names$invoke_change_handler()
-        h_disp()
+        #len_cnms_update()
+        #h_disp()
     })
     tooltip(b_selall) <- 'Select all'
     b_selall$set_icon("select-all")
@@ -179,7 +184,8 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE){
     b_clear <- gbutton("Clear", cont=ggroup(cont=s_gp), handler = function(h,...) {
         #svalue(c_names, index=TRUE) <- integer()
         svalue(c_names, index=TRUE) <<- FALSE
-        h_disp()
+        #len_cnms_update()
+        #h_disp()
     })
     tooltip(b_clear) <- 'Select none'
     
@@ -189,18 +195,33 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE){
                                                             "preset", stringsAsFactors=FALSE), 
                           cont=r_gp, expand=TRUE)
 
+    ## centralized handler helper fun to update size of row/col selection
+    len_idxs_update <- function(h, ...) {
+        rows <<- svalue(row_filter)
+        idxs <<- which(rows)                  # move to global variable
+        len_idxs <<- length(idxs)                  # move to global variable
+        data_set_dim <<- c(len_idxs, len_cnms)
+    }
+    len_cnms_update <- function(h, ...) {
+        cnms <<- old_selection
+        len_cnms <<- length(cnms)                  # move to global variable
+        data_set_dim <<- c(len_idxs, len_cnms)
+    }
+
     ## centralized handler helper fun to update size in 'display' button
     h_disp <- function(h, ...) {
-        rows <- svalue(row_filter)
+        #rows <<- svalue(row_filter)
+        #idxs <<- which(rows)                  # move to global variable
+        #len_idxs <<- length(idxs)                  # move to global variable
         #cnms <<- svalue(c_names)
-        cnms <<- old_selection
-        idxs <<- which(rows)                  # move to global variable
+        #cnms <<- old_selection
+        #len_cnms <<- length(cnms)                  # move to global variable
         
         ## detect size of data frame to be displayed
-        if(length(cnms)==1){
-            data_set_dim <- c(length(idxs), 1)
-        #} else data_set_dim <- dim(data_set[idxs, cnms])
-        } else data_set_dim <- c(length(idxs), length(cnms))
+        #print(len_idxs)
+        #print(len_cnms)
+        #data_set_dim <<- c(len_idxs, len_cnms)
+        #data_set_dim <- dim(data_set[idxs, cnms])
         if(any(data_set_dim < c(1,2))){
             enabled(b_disp) <- FALSE
         } else enabled(b_disp) <- TRUE
@@ -216,12 +237,19 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE){
         ## autoupdate when option checked and button enabled
         if( svalue(cb_autoupdate) & enabled(b_disp) ) b_disp$invoke_change_handler()
     }
-    #addHandlerChanged(c_names, h_disp)
-    addHandlerChanged(b_selall, h_disp)
-    addHandlerChanged(b_invert, h_disp)
-    addHandlerChanged(b_clear, h_disp)
-    addHandlerChanged(row_filter, h_disp)
+#     addHandlerChanged(c_names, h_disp)
+#     addHandlerChanged(b_selall, h_disp)
+#     addHandlerChanged(b_invert, h_disp)
+#     addHandlerChanged(b_clear, h_disp)
+
+    ##pick-up changes to row selection
+     addHandlerChanged(row_filter, function(h,...) {
+        ##update display button
+        len_idxs_update()
+        h_disp()
+     })
     
+    ##pick-up changes to col selection
     ##handler for fancy search functionality
     ##needs to be after h_disp() is defined
      addHandlerChanged(c_names, function(h,...) {
@@ -243,23 +271,24 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE){
          old_selection <<- setdiff(old_selection, removed)
        }
        old_selection <<- data_set_nms[data_set_nms %in% old_selection]
+       ##update display button
+       len_cnms_update()
        h_disp()
      })                              
     
     ##handler to execute on click of 'display' button
     hb_disp <- function(h,...) {
-        rows <- svalue(row_filter)
+        #rows <- svalue(row_filter)
         #cnms <<- svalue(c_names)
-        cnms <<- old_selection
-        idxs <<- which(rows)                  # move to global variable
+        #cnms <<- old_selection
+        #idxs <<- which(rows)                  # move to global variable
         
         ## now add a data frame
         delete(df_box, df_box[1])             # remove child
         
         ## disable editing if so requested
         #data_set_dim <- dim(data_set[idxs, cnms])
-        ##FIXME mv this to global var
-        data_set_dim <- c(length(idxs), length(cnms))
+        #data_set_dim <- c(len_idxs, len_cnms)
         if(!editable) {
             DF <<- gdf(data_set[rows, cnms], cont=df_box, expand=TRUE, 
                        freeze_attributes=TRUE)
@@ -329,14 +358,24 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE){
     #         })
     #         tooltip(obj=cb_do_btn) <- "If checked allow editing of displayed subsets \nin a spreadsheet-like environment."
     
+    ##init display button label
+    len_idxs_update()
+    len_cnms_update()
+    #print(data_set_dim)
     h_disp()  ##update display button size given 'preset' filter
+
+    ##set GUI window parameters
     size(w) <- c(750, 600)
     visible(w) <- TRUE
     svalue(pg) <- as.integer(size(b_disp)[1] + 20)
-    #if(display) hb_disp()
-    if(display) b_disp$invoke_change_handler()
     #svalue(pg) <- 0.42
     #svalue(pg) <- 250L
+    ## use 5 lines as hight of selection box (less claustrophobic)
+    size(c_names)[2] <- 5*25
+
+    ##activate auto-display of preset filter
+    #if(display) hb_disp()
+    if(display) b_disp$invoke_change_handler()
     
     ## What to do when you do ...
     if(editable){
@@ -355,8 +394,6 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE){
             }
         }) 
     }
-    ## use 5 lines as hight of selection box (less claustrophobic)
-    size(c_names)[2] <- 5*25
     #print(size(pg))
     #print(size(c_names))
     #print(size(s_gp))
