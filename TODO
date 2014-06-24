@@ -1,14 +1,16 @@
 High priority / ASAP:
+ - !!Details (Info) button: display label(..., self=T) & describe()
+ - !!reload data.frame button (when making object copy, save digest, then before saving changes in workspace, check if digest of object is still the same and if not inform the user that the object had already been modified and ask for additional confirmation); bottom-left? 
+ - improve "Name is not a match" UI (- currently in gfilter.R, when adding a filter, if you enter a wrong variable name in the input box (say, 'asdf'), then you get name is not a match message in the console. It would be nicer UI to have a red label in the dialogue)
  - !!gWidgets vs gWidgets2 compat
  - !!scrolling perf issues (probably related to >128 chars in a cell)
-    - long PU load after display of df
+    - long PU load after display of df (perhaps related to Date/logical)
     - jerky re-size of cols (re-adj of col width)
     - CPU load on scroll
- - !!Details (Info) button: display label(..., self=T) & describe()
  - !!tweak preset
-    - make '1000' for head() user-configurable
     - improve speed of preset filter (tweak fun to limit 10^x)
     - tweak seq_sane to jump as in c(10:50,100)
+    - make '1000' for head() user-configurable
 
  - !!use new_item_handler to handle the auto-resize of pane issue (on 'add item')
  - !!throttle requests from preset (see #40)
@@ -19,7 +21,6 @@ High priority / ASAP:
  - !!add 'sort items' toggle button in filter
  - !!toggle button to display only unique()/duplicated2() matches (can gdf() support this?)
  - !!tmp re-sort of displayed subset (perhaps via a drop-menu or in gdf())
- - !!reload data.frame button (when making object copy, save digest, then before saving changes in workspace, check if digest of object is still the same and if not inform the user that the object had already been modified and ask for additional confirmation); bottom-left? 
  - !!bar handle to resize height of var box
  - !!close window using ESC (optional)
  - !!check how you can check.names() or whatever to avoid assignment issues

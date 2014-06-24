@@ -104,6 +104,7 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE){
        ed$set_icon("ed-remove", "end")
        ed$set_icon_handler(function(h,...) {
          svalue(ed) <- ""
+         focus(ed) <- TRUE
        }, where="end")
        
        search_handler <- function(h,..., do_old=TRUE) {
