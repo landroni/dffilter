@@ -106,6 +106,7 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE){
          svalue(ed) <- ""
          focus(ed) <- TRUE
        }, where="end")
+       ed$widget$setIconActivatable("primary", FALSE)
        
        search_handler <- function(h,..., do_old=TRUE) {
          ## we keep track of old selection here
