@@ -87,7 +87,25 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE){
     close_btn <- gbutton("Close", cont=btn_gp, handler=function(h,...){
         dispose(w)
     })
-    gs_df <- gstatusbar('', cont=df_side)
+    #gsb_df <- gstatusbar('', cont=df_side)  ##uncomment to enable gtkSpinner() functionality
+    gsb_dfl <- gstatusbar('', cont=df_side)
+    ##set statusbar for spinner
+    #gsb_dff <- gsb_df$block[[1]]
+
+    #gsb_dff$remove(gsb_dff[[1]])                        #remove old
+    #gsb_dfg <- ggroup()
+    #gsb_dff$add(gsb_dfg$block)                          # add a group
+
+    #gsb_dfl <- glabel("")
+    #add(gsb_dfg, gsb_dfl)
+    #addSpring(gsb_dfg)
+    #gsb_dfsp <- gtkSpinner()
+    
+    ##inital spin
+    #add(gsb_dfg, gsb_dfsp)
+    #gsb_dfsp$start()
+    #gsb_dfsp$stop()
+    #gsb_dfg$widget$remove(gsb_dfsp)
     
     ## set up filters.
     ## Select columns
@@ -285,6 +303,10 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE){
         #cnms <<- old_selection
         #idxs <<- which(rows)                  # move to global variable
         
+        ##gtkSpinner() functionality
+        #add(gsb_dfg, gsb_dfsp)
+        #gsb_dfsp$start()
+        
         ## now add a data frame
         delete(df_box, df_box[1])             # remove child
         
@@ -331,13 +353,14 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE){
         
         ## custom message when displaying full database.
         if(all(data_set_dim == data_set_dim_orig)){
-            svalue(gs_df) <- paste("Displaying the full data set.", sep='')
+            svalue(gsb_dfl) <- paste("Displaying the full data set.", sep='')
         } else {
-            svalue(gs_df) <- paste('Displaying a ', data_set_dim[1], ' x ', 
+            svalue(gsb_dfl) <- paste('Displaying a ', data_set_dim[1], ' x ', 
                                    data_set_dim[2], " subset.", sep='')
         }
+        #gsb_dfsp$stop()
+        #gsb_dfg$widget$remove(gsb_dfsp)
         font(b_disp) <- list(weight = "normal")
-
     }
     
     b_disp <- gbutton(paste("Display selection (", data_set_dim_orig[1], ' x ', 
@@ -410,5 +433,13 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE){
 # Xa[2,'Model1'] <- paste(rep(letters, 26), collapse='')
 # Xa$Man.trans.avail1 <- as.logical(Xa$Man.trans.avail)
 # Xa$Man.trans.avail1 <- ifelse(Xa$Man.trans.avail=='Yes', TRUE, FALSE)
+# x <- mtcars
+# for(i in 1:400) x <- rbind(x, mtcars)
+# for(i in 1:5) x <- cbind(x, x)
 View <- dffilter
 #View(Xa)
+
+dffilter_reload <- function(data_set=data_set, display=display, maximize=maximize, 
+                            editable=editable){
+    
+}
