@@ -1,21 +1,35 @@
 High priority / ASAP:
+ - !!reload data.frame button
+    - FIXME dynamically switch f_side0g from horizontal=T to F
+    - FIXME enable 'reload' button only if digest has changed
+    - editable=T: when making object copy, save digest, then before saving changes in workspace, 
+        check if digest of object is still the same and if not inform the user that 
+        the object had already been modified and ask for additional confirmation 
  - !!Details (Info) button: display label(..., self=T) & describe() & debugging
-    - perhaps tabbed interface (see Scott email)
- - !!reload data.frame button (when making object copy, save digest, then before saving changes in workspace, check if digest of object is still the same and if not inform the user that the object had already been modified and ask for additional confirmation); bottom-left? 
- - !!improve "Name is not a match" UI (- currently in gfilter.R, when adding a filter, if you enter a wrong variable name in the input box (say, 'asdf'), then you get name is not a match message in the console. It would be nicer UI to have a red label in the dialogue)
- - !!gWidgets vs gWidgets2 compat
- - !!scrolling perf issues (probably related to >128 chars in a cell)
+    - perhaps tabbed interface gnotebook() (see Scott email)
+    - display nr of levels for each var
+    - debug var in c-menu: unique(nchar()), levels(), class(), is.na(), is_sane(), etc.
+
+ - !!FIXME make input box read when value is outside bounds (like in Geany)
+    - !!improve "Name is not a match" UI (- currently in gfilter.R, when adding a filter, if you enter a wrong variable name in the input box (say, 'asdf'), then you get name is not a match message in the console. It would be nicer UI to have a red label in the dialogue)
+    - !!disable OK button
+ - !!FIXME close window using ESC (optional)
+ - !!tweak preset
+    - FIXME make '1000' for head() user-configurable
+ - !!FIXME gWidgets vs gWidgets2 compat
+ - !!FIXME scrolling perf issues (probably related to >128 chars in a cell)
     - long PU load after display of df (perhaps related to Date/logical)
     - jerky re-size of cols (re-adj of col width)
     - CPU load on scroll
- - !!tweak preset
-    - improve speed of preset filter (tweak fun to limit 10^x)
-    - tweak seq_sane to jump as in c(10:50,100)
-    - make '1000' for head() user-configurable
- - !!fix issues with prev/next buttons whne input box empty
+ - !!FIXME add WM icon
+ - !!REQ multiple selection in gcomboboxgroup()
+     - multiple selection mode (isntead of shift+select on cehckboxes); 
+        or via c-menu item "select to here"
+ - !!REQ gcombobox(use_completion=T): when only available item has been auto-completed, drop pop-up menu automatically
+ - !!FIXME prev/next buttons: right-click or ctrl+click to go first/last
 
+ - !!allow to display df[x, 1, drop=F]
  - !!use new_item_handler to handle the auto-resize of pane issue (on 'add item')
- - !!throttle requests from preset (see #40)
  - !!tweak preset
     - add range radio
     - somehow preserve set.seed() with 'some' preset filter & another filter
@@ -24,10 +38,9 @@ High priority / ASAP:
  - !!toggle button to display only unique()/duplicated2() matches (can gdf() support this?)
  - !!tmp re-sort of displayed subset (perhaps via a drop-menu or in gdf())
  - !!bar handle to resize height of var box
- - !!close window using ESC (optional)
  - !!check how you can check.names() or whatever to avoid assignment issues
     - bug with cbind() & check.names=F
- - !!add WM icon
+ - !!throttle requests from preset (see #40)
 
 Medium priority / soon:
  - !!highlight gdf() columns (see #12)
@@ -36,8 +49,6 @@ Medium priority / soon:
  - !!introduce hacky diff() functionality on Merge; check if subset objs are identical; use all.equal() and identical() on subset
 ##
  - ??when viewing gdf(), possible to c-menu "copy" cell?
- - !!display nr of levels for each var
- - !!debug var in c-menu: unique(nchar()), levels(), class(), is.na(), is_sane(), etc.
  - !!add hide=F, search.opts=list()
  - ??on display button, log subsetting operation in the console
  - ??what of 5gb dataset or 21297 integer levels: it shouldn't be too slow; if possible use max 1 copy of df; 
@@ -47,7 +58,6 @@ Medium priority / soon:
  - ??waht happens when alter 'other' variables (& robustness of editor)
  - !!investigate cache bug: dffilter(Xa), Xa$var[1:10,] <- NA, dffilter(Xa) without closing first instance. Or dffilter(cbind(Xa, Xb)). 
  - ??some sort of weird --detach-- pop-up to have more scrolling space to choose column names, and maybe to re-arrange them for displaying purposes. 
- - ??multiple selection mode (isntead of shift+select on cehckboxes); or via c-menu item "select to here"
  - ??print
  - !!export subset ("save as" different obj)
  - ??log commands, if possible
@@ -55,21 +65,20 @@ Medium priority / soon:
  - !!main c-menu on gdf() to: debug vars, describe subset, etc.; describ/debug buttons on home screen at start-up, for full data frame; 
  - ??theme dependent colors
 
+
 ## gfilter TODO items
  - ??frame around 'rm' and 'disable' button/cb
  - !!inspect the gfilter code (logical vector selection, use spinners for 'range' & type-ahead updating of filters, manually update filter items to reflect available choices as a 'update filters' button or 'freeze selection' checkbox?, what happens to 'Date' or 'other' classes, use rgtk2editdf, 'enable/disable filter' toggle button next to 'remove', tweak icons in gedit() search boxes, )
  - !!inspect the gfilter code (logical vector selection, use spinners for 'range', head/tail/some/!is.na/na.omit, manually update filter items to reflect available choices as a 'update filters' button or 'freeze selection' checkbox?, what happens to 'Date' or 'other' classes, use rgtk2editdf, 'enable/disable filter' toggle button next to 'remove', )
  - !!adding new filter should consider merged changes (auto-polling of data frame?)
- - ??use fancy search box RStudio/LyX/Xfce-style that filters out the available elements in the filter widgets
+    - dependent on reload data frame functionality
  - ??sort variable components? or use data frame order?
  - ??gfilterpreset (use c("==", "%in%", "!=", ">", ">=", "<", "<=") combo, logical / manual subset, )
- - ??type-ahead search in combobox gfilter and in cehckbox table? (as in LyX?)
  - ??stringr (for options 'whole word' in search; replacement for grepl(); )
+
  
 Low priority / later:
  - !!f4 for hide pane + Opera-style handle
-
-
 
 Low priority / maybe:
  - ??data frame selector (use data frame browser; what about matrix objs?) & label(..., self=T) in tooltip and make  label editable & describe() & class() & nchar() & clone obj & save obj as .RData/csv/etc. & 
