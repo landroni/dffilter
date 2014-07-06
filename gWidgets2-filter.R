@@ -1,7 +1,7 @@
 ## edit a really large data set *after* it has been filtered
 
 dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE, 
-                     data_set_name=NULL, sel.col=NULL){
+                     data_set_name=NULL, sel.col=NULL, sel.row=NULL){
     require(gWidgets2) ## on github not CRAN. (require(devtools); install_github("gWidgets2", "jverzani")
     options(guiToolkit="RGtk2")
     require(RGtk2)
@@ -15,6 +15,11 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
     data_set_dim <- NULL            # global df dim
     c_names <- NULL                 # global column names widget
     old_selection <- NULL           # global old selection storage
+    
+    print(data_set_name)
+    print(class(sel.row))
+    print(length(sel.row))
+    for(i in sel.row) print(class(i)[1])
     
     ## ensure we have a data frame of 1x2 dimensions
     stopifnot(is.data.frame(data_set))
@@ -76,7 +81,7 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
         #print(data_set_name)
         dffilter_reload(data_set=get(data_set_name), display=display, maximize=maximize, 
                         editable=editable, data_set_name=data_set_name, 
-                        sel.col=old_selection)
+                        sel.col=old_selection, sel.row=row_filter$l)
     })
     b_reload$set_icon("refresh")
     tooltip(b_reload) <- "Reload data frame"
