@@ -5,21 +5,26 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
     require(gWidgets2) ## on github not CRAN. (require(devtools); install_github("gWidgets2", "jverzani")
     options(guiToolkit="RGtk2")
     require(RGtk2)
+    require(Hmisc)
+    
 
     DF <- NULL                      # global gdf instance
     rows <- NULL                    # global rows index
+    rows.disp <- NULL               # global rows index (subset currently displayed)
     idxs <- NULL                    # global set of indices that are being edited
     cnms <- NULL                    # global column names
+    cnms.disp <- NULL               # global column names (subset currently displayed)
     len_idxs <- NULL                # global set of indices that are being edited (length)
     len_cnms <- NULL                # global column names (length)
     data_set_dim <- NULL            # global df dim
     c_names <- NULL                 # global column names widget
     old_selection <- NULL           # global old selection storage
     
-    print(data_set_name)
-    print(class(sel.row))
-    print(length(sel.row))
-    for(i in sel.row) print(class(i)[1])
+     #print(data_set_name)
+     #rint(class(sel.row))
+     #print(length(sel.row))
+     #for(i in sel.row) print(class(i)[1])
+    #for(i in 1:length(sel.row)) print(svalue(sel.row[[i]]))
     
     ## ensure we have a data frame of 1x2 dimensions
     stopifnot(is.data.frame(data_set))
@@ -40,7 +45,9 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
     ##maximize window on load
     if(maximize) getToolkitWidget(w)$maximize()
     
-    pg <- gpanedgroup(cont=w, horizontal=TRUE)
+    ##Filter tab
+    ntbk <- gnotebook(3, cont=w)
+    pg <- gpanedgroup(cont=ntbk, horizontal=TRUE, label="Filter")
     #pg <- ggroup(cont=w, horizontal=TRUE)
     
     ## have a hide/show button
@@ -279,10 +286,10 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
         ## autoupdate when option checked and button enabled
         if( svalue(cb_autoupdate) & enabled(b_disp) ) b_disp$invoke_change_handler()
     }
-#     addHandlerChanged(c_names, h_disp)
-#     addHandlerChanged(b_selall, h_disp)
-#     addHandlerChanged(b_invert, h_disp)
-#     addHandlerChanged(b_clear, h_disp)
+    # addHandlerChanged(c_names, h_disp)
+    # addHandlerChanged(b_selall, h_disp)
+    # addHandlerChanged(b_invert, h_disp)
+    # addHandlerChanged(b_clear, h_disp)
 
     ##pick-up changes to row selection
      addHandlerChanged(row_filter, function(h,...) {
@@ -318,12 +325,19 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
        h_disp()
      })                              
     
+    ##init dummy h_descr to avoid "not found" error
+    h_descr <- function() invisible(NULL)
+    
     ##handler to execute on click of 'display' button
     hb_disp <- function(h,...) {
         #rows <- svalue(row_filter)
         #cnms <<- svalue(c_names)
         #cnms <<- old_selection
         #idxs <<- which(rows)                  # move to global variable
+        
+        ##store rows/cnms currently being displayed for use in describe()
+        rows.disp <<- rows
+        cnms.disp <<- cnms
         
         ##gtkSpinner() functionality
         #add(gsb_dfg, gsb_dfsp)
@@ -383,6 +397,9 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
         #gsb_dfsp$stop()
         #gsb_dfg$widget$remove(gsb_dfsp)
         font(b_disp) <- list(weight = "normal")
+        
+        ##update describe() output
+        h_descr()
     }
     
     b_disp <- gbutton(paste("Display selection (", data_set_dim_orig[1], ' x ', 
@@ -445,6 +462,69 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
     #print(size(c_names))
     #print(size(s_gp))
     #print(sapply(f_side0g$children, function(u) size(u)))
+    
+
+    ##Details tab
+    dgg <- ggroup(cont=ntbk, horizontal=TRUE, label="Details")
+    svalue(ntbk) <- 1
+    dntbk <- gnotebook(2, cont=dgg, expand=TRUE, fill=TRUE)
+    dlgg <- ggroup(cont=dntbk, horizontal=F, label="Describe", expand=TRUE, 
+                   use.scrollwindow = T)
+    #tooltip(dlgg) <- "Describe the data set that is currently displayed"
+    dlgg1 <- ggroup(cont=dlgg, expand=F)
+    grdescr <- gradio(c("full"="Full data set", "sel"="Displayed subset", "row"="Row selection", 
+                        "col"="Column selection"), horizontal=TRUE, cont=dlgg1
+                      #, label="Describe data set"
+                      )
+    tooltip(dlgg1) <- "Describe the full data set, the currently displayed subset, the data set filtered only by rows, or only by columns"
+    
+    ##handler to update/init describe() output
+    h_descr <- function(h,...) {
+        radio.sel <- svalue(grdescr, index=TRUE)
+        #print(radio.sel)
+        #print(svalue(grdescr, index=T))
+        #print(svalue(grdescr, drop=F))
+        #print(svalue(grdescr, index=T, drop=F))
+        if(radio.sel==1){
+            ##FIXME speed-up: store describe for full data_set, and reuse when necessary
+            descr.out <- capture.output(describe(data_set, descript=data_set_name))
+        } else if(radio.sel==2){
+            ##FIXME speed-up: if sel is same as full, do nothing 
+            ##FIXME speed-up: use a list where it stores selection, and checks if changed
+            descr.out <- capture.output(describe(DF[], 
+                                                 descript=data_set_name))
+        } else if(radio.sel==3){
+            descr.out <- capture.output(describe(data_set[rows.disp, ], 
+                                                 descript=data_set_name))
+        } else if(radio.sel==4){
+            descr.out <- capture.output(describe(data_set[ , cnms.disp], 
+                                                 descript=data_set_name))
+        }
+        svalue(gtdescr) <- ""
+        insert(gtdescr, descr.out, font.attr=list(family="monospace"))
+    }
+    addHandlerChanged(grdescr, h_descr)
+    gtdescr <- gtext(cont=dlgg, font.attr=list(family="monospace"), 
+                     #width=500, height=1000, 
+                     expand=TRUE)
+    insert(gtdescr, capture.output(describe(data_set, descript=data_set_name)), 
+           font.attr=list(family="monospace"))
+    #insert(gtdescr, '', where="beginning", font.attr=list(family="monospace"))
+    dlevgg <- ggroup(cont=dntbk, horizontal=TRUE, label="Levels")
+    ddebgg <- ggroup(cont=dntbk, horizontal=TRUE, label="Debugging")
+    svalue(dntbk) <- 1
+    
+    
+    ##Structure tab
+    sgg <- ggroup(cont=ntbk, horizontal=TRUE, label="Structure", expand=F, 
+                  use.scrollwindow = T)
+    svalue(ntbk) <- 1
+    gllab <- glabel("Label:", cont=sgg)
+    gtlab <- gtext(cont=sgg, 
+                     #width=400, height=200, 
+                     expand=T)
+    insert(gtlab, label(data_set, self=TRUE), 
+           font.attr=list(family="monospace"))
 }
 
 # require(MASS)
