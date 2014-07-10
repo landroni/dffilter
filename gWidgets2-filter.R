@@ -19,6 +19,8 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
     data_set_dim <- NULL            # global df dim
     c_names <- NULL                 # global column names widget
     old_selection <- NULL           # global old selection storage
+    radio.inst <- NULL
+    radio.sel <- NULL
     
      #print(data_set_name)
      #rint(class(sel.row))
@@ -325,8 +327,9 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
        h_disp()
      })                              
     
-    ##init dummy h_descr to avoid "not found" error
+    ##init dummy h_descr & h_lev funs to avoid "not found" error
     h_descr <- function() invisible(NULL)
+    h_lev <- function() invisible(NULL)
     
     ##handler to execute on click of 'display' button
     hb_disp <- function(h,...) {
@@ -398,8 +401,9 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
         #gsb_dfg$widget$remove(gsb_dfsp)
         font(b_disp) <- list(weight = "normal")
         
-        ##update describe() output
+        ##update details tab
         h_descr()
+        h_lev()
     }
     
     b_disp <- gbutton(paste("Display selection (", data_set_dim_orig[1], ' x ', 
@@ -427,15 +431,6 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
     len_cnms_update()
     #print(data_set_dim)
     h_disp()  ##update display button size given 'preset' filter
-
-    ##set GUI window parameters
-    size(w) <- c(750, 600)
-    visible(w) <- TRUE
-    svalue(pg) <- as.integer(size(b_disp)[1] + 20)
-    #svalue(pg) <- 0.42
-    #svalue(pg) <- 250L
-    ## use 5 lines as hight of selection box (less claustrophobic)
-    size(c_names)[2] <- 5*25
 
     ##activate auto-display of preset filter
     #if(display) hb_disp()
@@ -468,11 +463,13 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
     dgg <- ggroup(cont=ntbk, horizontal=TRUE, label="Details")
     svalue(ntbk) <- 1
     dntbk <- gnotebook(2, cont=dgg, expand=TRUE, fill=TRUE)
-    dlgg <- ggroup(cont=dntbk, horizontal=F, label="Describe", expand=TRUE, 
-                   use.scrollwindow = T)
+
+    ##Describe sub-tab
+    dlgg <- ggroup(cont=dntbk, horizontal=FALSE, label="Describe", expand=TRUE, 
+                   use.scrollwindow = TRUE)
     #tooltip(dlgg) <- "Describe the data set that is currently displayed"
-    dlgg1 <- ggroup(cont=dlgg, expand=F)
-    grdescr <- gradio(c("full"="Full data set", "sel"="Displayed subset", "row"="Row selection", 
+    dlgg1 <- ggroup(cont=dlgg, expand=FALSE)
+    r_descr <- gradio(c("full"="Full data set", "sel"="Displayed subset", "row"="Row selection", 
                         "col"="Column selection"), horizontal=TRUE, cont=dlgg1
                       #, label="Describe data set"
                       )
@@ -480,11 +477,12 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
     
     ##handler to update/init describe() output
     h_descr <- function(h,...) {
-        radio.sel <- svalue(grdescr, index=TRUE)
+        radio.sel <<- svalue(r_descr, index=TRUE)
+        radio.inst <<- "r_descr"
         #print(radio.sel)
-        #print(svalue(grdescr, index=T))
-        #print(svalue(grdescr, drop=F))
-        #print(svalue(grdescr, index=T, drop=F))
+        #print(svalue(r_descr, index=T))
+        #print(svalue(r_descr, drop=F))
+        #print(svalue(r_descr, index=T, drop=F))
         if(radio.sel==1){
             ##FIXME speed-up: store describe for full data_set, and reuse when necessary
             descr.out <- capture.output(describe(data_set, descript=data_set_name))
@@ -500,19 +498,75 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
             descr.out <- capture.output(describe(data_set[ , cnms.disp], 
                                                  descript=data_set_name))
         }
-        svalue(gtdescr) <- ""
-        insert(gtdescr, descr.out, font.attr=list(family="monospace"))
+        svalue(t_descr) <- ""
+        insert(t_descr, descr.out, font.attr=list(family="monospace"))
+        r_sync()
     }
-    addHandlerChanged(grdescr, h_descr)
-    gtdescr <- gtext(cont=dlgg, font.attr=list(family="monospace"), 
+    addHandlerChanged(r_descr, h_descr)
+    t_descr <- gtext(cont=dlgg, font.attr=list(family="monospace"), 
                      #width=500, height=1000, 
                      expand=TRUE)
-    insert(gtdescr, capture.output(describe(data_set, descript=data_set_name)), 
+    insert(t_descr, capture.output(describe(data_set, descript=data_set_name)), 
            font.attr=list(family="monospace"))
-    #insert(gtdescr, '', where="beginning", font.attr=list(family="monospace"))
-    dlevgg <- ggroup(cont=dntbk, horizontal=TRUE, label="Levels")
+    #insert(t_descr, '', where="beginning", font.attr=list(family="monospace"))
+
+    ##Levels sub-tab
+    dlevgg <- ggroup(cont=dntbk, horizontal=FALSE, label="Levels", expand=TRUE, 
+                   use.scrollwindow = TRUE)
+    dlgg2 <- ggroup(cont=dlevgg, expand=FALSE)
+    r_lev <- gradio(c("full"="Full data set", "sel"="Displayed subset", "row"="Row selection", 
+                        "col"="Column selection"), horizontal=TRUE, cont=dlgg2
+                      #, label="Describe data set"
+    )
+    tooltip(dlgg2) <- "Display levels of factors for the full data set, for the currently displayed subset, for the data set filtered only by rows, or only by columns"
+    
+    ##helper fun to list levels in a dataframe
+    list_levs <- function(data=data_set, vars=NULL){
+        if(is.null(vars)) vars <- names(data)
+        lev_nms <- vars[sapply(data, class)=="factor"]
+        if(length(lev_nms)==0) return(NULL)
+        levs <- lapply(lev_nms, function(x) levels(data[ , x]))
+        names(levs) <- lev_nms
+        return(levs)
+    }
+
+    ##handler to update/init describe() output
+    h_lev <- function(h,...) {
+        radio.sel <<- svalue(r_lev, index=TRUE)
+        radio.inst <<- "r_lev"
+        ##FIXME subsetting should be happening only once for describe/levels/debugging
+        if(radio.sel %in% c(1,3)){
+            ##c(1,3) always the same nr of cols
+            levs.out <- capture.output(list_levs(data_set, data_set_nms))
+        } else if(radio.sel %in% c(2,4)){
+            ##c(2,4) always the same col selection
+            levs.out <- capture.output(list_levs(DF[]))
+        #} else if(radio.sel==3){
+        #    levs.out <- capture.output(list_levs(data_set[rows.disp, ]))
+        #} else if(radio.sel==4){
+        #    levs.out <- capture.output(list_levs(data_set[ , cnms.disp]))
+        }
+        svalue(t_lev) <- ""
+        insert(t_lev, levs.out, font.attr=list(family="monospace"))
+        r_sync()
+    }
+    addHandlerChanged(r_lev, h_lev)
+    t_lev <- gtext(cont=dlevgg, font.attr=list(family="monospace"), 
+                     #width=500, height=1000, 
+                     expand=TRUE)
+    insert(t_lev, capture.output(list_levs(data_set, data_set_nms)), 
+           font.attr=list(family="monospace"))
+    
+    ##Debugging sub-tab
     ddebgg <- ggroup(cont=dntbk, horizontal=TRUE, label="Debugging")
     svalue(dntbk) <- 1
+    
+    ##handler to Details radios in sync
+    r_sync <- function(h, ...){
+        ##FIXME isn't there an infinite loop here in this sync? 
+        if(radio.inst!="r_lev") svalue(r_lev, index=TRUE) <- radio.sel
+        if(radio.inst!="r_descr") svalue(r_descr, index=TRUE) <- radio.sel
+    }
     
     
     ##Structure tab
@@ -525,6 +579,16 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
                      expand=T)
     insert(gtlab, label(data_set, self=TRUE), 
            font.attr=list(family="monospace"))
+    
+    ##set GUI window parameters
+    size(w) <- c(750, 600)
+    visible(w) <- TRUE
+    svalue(pg) <- as.integer(size(b_disp)[1] + 20)
+    #svalue(pg) <- 0.42
+    #svalue(pg) <- 250L
+    ## use 5 lines as hight of selection box (less claustrophobic)
+    size(c_names)[2] <- 5*25
+    
 }
 
 # require(MASS)

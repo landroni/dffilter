@@ -11,17 +11,19 @@ High priority / ASAP:
     - auto-polling of data frame? 
     - investigate cache bug: dffilter(Xa), Xa$var[1:10,] <- NA, dffilter(Xa) without closing first instance. Or dffilter(cbind(Xa, Xb)). 
 
-- !!Details (Info) button: display describe()
-    - display nr of levels for each var
-    - debug var in c-menu: unique(nchar()), levels(), class(), is.na(), is.nan(), is_sane(), etc.
+- !!Details
+    - add label tab (if label( , self=T) == "" then NULL)
+    - summary() tab
+    - debugging: class(), sum(is.na()), sum(is.nan()), unique(nchar()), is_sane(), etc.
+        - use gdf()
+        - sapply(Xb, function(x)(sum(is.na(x))))
     - FIXME execute only on focus of tab (throttle execution)
     - REQ icons & tooltips to tabs 
     - REQ tooltip for indiv radio choices
-    - ??add label tab if label( , self=T) exists
-    - ??make tabbed interface optional (allow pure dffilter())
-        - allow dfstr() and dfdescr() too
+    - ??radio: first col, then row?
+    - make tabbed interface optional (allow pure dffilter())
+        - ??allow dfstr() and dfdescr() too
         - use buttons or tabs?
-    - ??take a peek at Rcmdr 
 
  - !!Structure
     - edit data structure: rename & sort & re-order variables/cols, change var type/factors, edit factors, batch rename cols (tolower), etc. w/o displaying data frame; Deducer-style? ; dfstruct(); mutate(), copy vars, create new vars by transforming existing var; 
@@ -100,11 +102,12 @@ Low priority / maybe:
  - ??poor man's loop constructor/debugger/sandbox with automatic interpretation of variables and display of obtained values and working on a head() subset of original input; loop workflow; apply() funs; 
  - ??poor man's formula constructor, given a df; look into Rcmdr for an implementation; allow for * : etc. constructs, maybe by using groupings; log the reproducible, generated command; see pmg; 
  - ??melt/dcast gui for pivot tables (this is still exploratory so fits the scope of the package); use margins et al.; OR use 'tables' tabular() and provide latex/html export & reproducible code
+    - Rcmdr table of statistics
  - ??compat with other GUIs: 
     - rstudio usage ideas: View <- dffilter
     - REQ Rcmdr option for viewer editor
  - ??check code behaviour with tcltk
- - ??investigate dffilter() compatibility with data.table package
+ - ??investigate dffilter() compatibility with data.table package & plm
  - ??possible to use Rgtk2Extras widget
  - ??what of 5gb dataset or 21297 integer levels: 
     - it shouldn't be too slow; 
