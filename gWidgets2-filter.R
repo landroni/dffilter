@@ -636,14 +636,14 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
     
     
     ##Structure tab
-    sgg <- ggroup(cont=ntbk, horizontal=TRUE, label="Structure", expand=F, 
-                  use.scrollwindow = T)
-    gllab <- glabel("Label:", cont=sgg)
-    gtlab <- gtext(cont=sgg, 
-                     #width=400, height=200, 
-                     expand=T)
-    insert(gtlab, label(data_set, self=TRUE), 
-           font.attr=list(family="monospace"))
+    #sgg <- ggroup(cont=ntbk, horizontal=TRUE, label="Structure", expand=F, 
+    #              use.scrollwindow = T)
+    #gllab <- glabel("Label:", cont=sgg)
+    #gtlab <- gtext(cont=sgg, 
+    #                 #width=400, height=200, 
+    #                 expand=T)
+    #insert(gtlab, label(data_set, self=TRUE), 
+    #       font.attr=list(family="monospace"))
     
     ##focus Filter tab
     svalue(ntbk) <- 1
