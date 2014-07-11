@@ -330,6 +330,7 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
     ##init dummy h_descr & h_lev funs to avoid "not found" error
     h_descr <- function() invisible(NULL)
     h_lev <- function() invisible(NULL)
+    h_summ <- function() invisible(NULL)
     
     ##handler to execute on click of 'display' button
     hb_disp <- function(h,...) {
@@ -402,8 +403,10 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
         font(b_disp) <- list(weight = "normal")
         
         ##update details tab
+        ##FIXME speed-up: mv this to handler on tab selection
         h_descr()
         h_lev()
+        h_summ()
     }
     
     b_disp <- gbutton(paste("Display selection (", data_set_dim_orig[1], ' x ', 
@@ -531,6 +534,47 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
            font.attr=list(family="monospace"))
     #insert(t_descr, '', where="beginning", font.attr=list(family="monospace"))
 
+    ##Summary sub-tab
+    dsgg <- ggroup(cont=dntbk, horizontal=FALSE, label="Summary", expand=TRUE, 
+                   use.scrollwindow = TRUE)
+    #tooltip(dsgg) <- "Describe the data set that is currently displayed"
+    ##radio buttons
+    dsgg1 <- ggroup(cont=dsgg, expand=FALSE)
+    r_summ <- gradio(c("full"="Full data set", "sel"="Displayed subset", "row"="Row selection", 
+                        "col"="Column selection"), horizontal=TRUE, cont=dsgg1
+                      #, label="Describe data set"
+                      )
+    tooltip(dsgg1) <- "Summarise the full data set, the currently displayed subset, the data set filtered only by rows, or only by columns"
+    
+    ##handler to update/init describe() output
+    h_summ <- function(h,...) {
+        radio.sel <<- svalue(r_summ, index=TRUE)
+        radio.inst <<- "r_summ"
+        if(radio.sel==1){
+            ##FIXME speed-up: cache summary for full data_set, and reuse when necessary; 
+            ##it should be computed only *once*
+            summ.out <- capture.output(summary(data_set))
+        } else if(radio.sel==2){
+            ##FIXME speed-up: if sel is same as full, do nothing 
+            ##FIXME speed-up: use a list where it stores selection, and checks if changed
+            summ.out <- capture.output(summary(DF[]))
+        } else if(radio.sel==3){
+            summ.out <- capture.output(summary(data_set[rows.disp, ]))
+        } else if(radio.sel==4){
+            summ.out <- capture.output(summary(data_set[ , cnms.disp]))
+        }
+        svalue(t_summ) <- ""
+        insert(t_summ, summ.out, font.attr=list(family="monospace"))
+        r_sync()
+    }
+    addHandlerChanged(r_summ, h_summ)
+    t_summ <- gtext(cont=dsgg, font.attr=list(family="monospace"), 
+                     #width=500, height=1000, 
+                     expand=TRUE)
+    insert(t_summ, capture.output(summary(data_set)), 
+           font.attr=list(family="monospace"))
+
+
     ##Levels sub-tab
     dlevgg <- ggroup(cont=dntbk, horizontal=FALSE, label="Levels", expand=TRUE, 
                    use.scrollwindow = TRUE)
@@ -587,6 +631,7 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
         ##FIXME isn't there an infinite loop here in this sync? 
         if(radio.inst!="r_lev") svalue(r_lev, index=TRUE) <- radio.sel
         if(radio.inst!="r_descr") svalue(r_descr, index=TRUE) <- radio.sel
+        if(radio.inst!="r_summ") svalue(r_summ, index=TRUE) <- radio.sel
     }
     
     

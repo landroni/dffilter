@@ -12,19 +12,18 @@ High priority / ASAP:
     - investigate cache bug: dffilter(Xa), Xa$var[1:10,] <- NA, dffilter(Xa) without closing first instance. Or dffilter(cbind(Xa, Xb)). 
 
 - !!Details
-    - summary() tab
+    - execute only on focus of tab (throttle execution)
+        - use addHandlerChanged(ntbk, function(h, ...){print(svalue(ntbk))})
     - debugging: class(), sum(is.na()), sum(is.nan()), unique(nchar()), is_sane(), etc.
         - use gdf()
         - sapply(Xb, function(x)(sum(is.na(x))))
-    - execute only on focus of tab (throttle execution)
-        - use addHandlerChanged(ntbk, function(h, ...){print(svalue(ntbk))})
     - REQ icons & tooltips to tabs 
     - REQ tooltip for indiv radio choices
     - FIXME dynamic height for expandgp: same as label if <7 lines; else 7 lines
-    - ??radio: first col, then row?
     - make tabbed interface optional (allow pure dffilter())
         - ??allow dfstr() and dfdescr() too
         - use buttons or tabs?
+        - radio buttons: first col, then row?
 
  - !!Structure
     - edit data structure: rename & sort & re-order variables/cols, change var type/factors, edit factors, batch rename cols (tolower), etc. w/o displaying data frame; Deducer-style? ; dfstruct(); mutate(), copy vars, create new vars by transforming existing var; 
