@@ -461,19 +461,40 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
 
     ##Details tab
     dgg <- ggroup(cont=ntbk, horizontal=TRUE, label="Details")
-    svalue(ntbk) <- 1
+    #svalue(ntbk) <- 1
     dntbk <- gnotebook(2, cont=dgg, expand=TRUE, fill=TRUE)
 
+
+    ##helper fun to list label in a dataframe
+    list_lab <- function(data=data_set){
+        lab <- label(data, self=TRUE)
+        if(lab=="") return(NULL)
+        return(lab)
+    }
+    
     ##Describe sub-tab
     dlgg <- ggroup(cont=dntbk, horizontal=FALSE, label="Describe", expand=TRUE, 
                    use.scrollwindow = TRUE)
     #tooltip(dlgg) <- "Describe the data set that is currently displayed"
+    ##radio buttons
     dlgg1 <- ggroup(cont=dlgg, expand=FALSE)
     r_descr <- gradio(c("full"="Full data set", "sel"="Displayed subset", "row"="Row selection", 
                         "col"="Column selection"), horizontal=TRUE, cont=dlgg1
                       #, label="Describe data set"
                       )
     tooltip(dlgg1) <- "Describe the full data set, the currently displayed subset, the data set filtered only by rows, or only by columns"
+    ##hide-able label
+    ##FIXME will need to update label when reloading df
+    dlgg2 <- gexpandgroup("Label:", cont=dlgg, horizontal=FALSE,expand=F, fill=T)
+    tooltip(dlgg2) <- "Label stored in `label(data, self=TRUE)`"
+    t_lab <- gtext(cont=dlgg2, font.attr=list(family="monospace"), 
+                     width=300, height=25*6, 
+                     expand=T, fill=T)
+    lab.out <- list_lab()
+    lab.out.ins <- if(!is.null(lab.out)) capture.output(cat(lab.out)) else 
+        capture.output(lab.out)
+    insert(t_lab, lab.out.ins, font.attr=list(family="monospace"))
+    if(is.null(lab.out)) visible(dlgg2) <- FALSE
     
     ##handler to update/init describe() output
     h_descr <- function(h,...) {
@@ -572,7 +593,6 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
     ##Structure tab
     sgg <- ggroup(cont=ntbk, horizontal=TRUE, label="Structure", expand=F, 
                   use.scrollwindow = T)
-    svalue(ntbk) <- 1
     gllab <- glabel("Label:", cont=sgg)
     gtlab <- gtext(cont=sgg, 
                      #width=400, height=200, 
@@ -580,8 +600,13 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
     insert(gtlab, label(data_set, self=TRUE), 
            font.attr=list(family="monospace"))
     
+    ##focus Filter tab
+    svalue(ntbk) <- 1
+
     ##set GUI window parameters
+    ##set sizes
     size(w) <- c(750, 600)
+    ##FIXME if mv visible call down, then pg doesn't resize correctly
     visible(w) <- TRUE
     svalue(pg) <- as.integer(size(b_disp)[1] + 20)
     #svalue(pg) <- 0.42

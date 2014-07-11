@@ -12,14 +12,15 @@ High priority / ASAP:
     - investigate cache bug: dffilter(Xa), Xa$var[1:10,] <- NA, dffilter(Xa) without closing first instance. Or dffilter(cbind(Xa, Xb)). 
 
 - !!Details
-    - add label tab (if label( , self=T) == "" then NULL)
     - summary() tab
     - debugging: class(), sum(is.na()), sum(is.nan()), unique(nchar()), is_sane(), etc.
         - use gdf()
         - sapply(Xb, function(x)(sum(is.na(x))))
-    - FIXME execute only on focus of tab (throttle execution)
+    - execute only on focus of tab (throttle execution)
+        - use addHandlerChanged(ntbk, function(h, ...){print(svalue(ntbk))})
     - REQ icons & tooltips to tabs 
     - REQ tooltip for indiv radio choices
+    - FIXME dynamic height for expandgp: same as label if <7 lines; else 7 lines
     - ??radio: first col, then row?
     - make tabbed interface optional (allow pure dffilter())
         - ??allow dfstr() and dfdescr() too
