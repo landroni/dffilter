@@ -43,6 +43,10 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
                      #if(identical)
                      #return(data_set)
                  })
+    
+    ##set WM icon (gtk-only)
+    w_img <- gdkPixbufNewFromFile("gtk-logo-rgb.gif")
+    getToolkitWidget(w)$setIcon(w_img$retval)
                  
     ##maximize window on load
     if(maximize) getToolkitWidget(w)$maximize()
