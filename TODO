@@ -1,12 +1,11 @@
 High priority / ASAP:
 - !!Details
-    - droplevels(): remove unused factors in subset
-    - execute only on focus of tab (throttle execution)
-        - use one handler to rule them all (since subsetting is the bitch)
-        - use addHandlerChanged(ntbk, function(h, ...){print(svalue(ntbk))})
     - debugging: class(), mode(), sum(is.na()), sum(is.nan()), unique(nchar()), is_sane(), etc.
         - use gdf()
         - sapply(Xb, function(x)(sum(is.na(x))))
+    - speed-up: execute only on focus of tab (throttle execution)
+        - use one handler to rule them all (since subsetting is the bitch)
+        - use addHandlerChanged(ntbk, function(h, ...){print(svalue(ntbk))})
     - REQ icons & tooltips to tabs 
     - REQ tooltip for indiv radio choices
     - FIXME dynamic height for expandgp: same as label if <7 lines; else 7 lines

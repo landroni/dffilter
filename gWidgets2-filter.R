@@ -518,13 +518,13 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
         } else if(radio.sel==2){
             ##FIXME speed-up: if sel is same as full, do nothing 
             ##FIXME speed-up: use a list where it stores selection, and checks if changed
-            descr.out <- capture.output(describe(DF[], 
+            descr.out <- capture.output(describe(droplevels(DF[]), 
                                                  descript=data_set_name))
         } else if(radio.sel==3){
-            descr.out <- capture.output(describe(data_set[rows.disp, ], 
+            descr.out <- capture.output(describe(droplevels(data_set[rows.disp, ]), 
                                                  descript=data_set_name))
         } else if(radio.sel==4){
-            descr.out <- capture.output(describe(data_set[ , cnms.disp], 
+            descr.out <- capture.output(describe(droplevels(data_set[ , cnms.disp]), 
                                                  descript=data_set_name))
         }
         svalue(t_descr) <- ""
@@ -563,11 +563,11 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
         } else if(radio.sel==2){
             ##FIXME speed-up: if sel is same as full, do nothing 
             ##FIXME speed-up: use a list where it stores selection, and checks if changed
-            summ.out <- capture.output(summary(DF[]))
+            summ.out <- capture.output(summary(droplevels(DF[])))
         } else if(radio.sel==3){
-            summ.out <- capture.output(summary(data_set[rows.disp, ]))
+            summ.out <- capture.output(summary(droplevels(data_set[rows.disp, ])))
         } else if(radio.sel==4){
-            summ.out <- capture.output(summary(data_set[ , cnms.disp]))
+            summ.out <- capture.output(summary(droplevels(data_set[ , cnms.disp])))
         }
         svalue(t_summ) <- ""
         insert(t_summ, summ.out, font.attr=list(family="monospace"))
@@ -607,16 +607,14 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
         radio.sel <<- svalue(r_lev, index=TRUE)
         radio.inst <<- "r_lev"
         ##FIXME subsetting should be happening only once for describe/levels/debugging
-        if(radio.sel %in% c(1,3)){
-            ##c(1,3) always the same nr of cols
+        if(radio.sel==1){
             levs.out <- capture.output(list_levs(data_set, data_set_nms))
-        } else if(radio.sel %in% c(2,4)){
-            ##c(2,4) always the same col selection
-            levs.out <- capture.output(list_levs(DF[]))
-        #} else if(radio.sel==3){
-        #    levs.out <- capture.output(list_levs(data_set[rows.disp, ]))
-        #} else if(radio.sel==4){
-        #    levs.out <- capture.output(list_levs(data_set[ , cnms.disp]))
+        } else if(radio.sel==2){
+            levs.out <- capture.output(list_levs(droplevels(DF[])))
+        } else if(radio.sel==3){
+            levs.out <- capture.output(list_levs(droplevels(data_set[rows.disp, ])))
+        } else if(radio.sel==4){
+            levs.out <- capture.output(list_levs(droplevels(data_set[ , cnms.disp])))
         }
         svalue(t_lev) <- ""
         insert(t_lev, levs.out, font.attr=list(family="monospace"))
