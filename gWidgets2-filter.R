@@ -497,6 +497,7 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
     t_lab <- gtext(cont=dlgg2, font.attr=list(family="monospace"), 
                      width=300, height=25*6, 
                      expand=T, fill=T)
+    editable(t_lab) <- FALSE
     lab.out <- list_lab()
     lab.out.ins <- if(!is.null(lab.out)) capture.output(cat(lab.out)) else 
         capture.output(lab.out)
@@ -534,6 +535,7 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
     t_descr <- gtext(cont=dlgg, font.attr=list(family="monospace"), 
                      #width=500, height=1000, 
                      expand=TRUE)
+    editable(t_descr) <- FALSE
     insert(t_descr, capture.output(describe(data_set, descript=data_set_name)), 
            font.attr=list(family="monospace"))
     #insert(t_descr, '', where="beginning", font.attr=list(family="monospace"))
@@ -575,6 +577,7 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
     t_summ <- gtext(cont=dsgg, font.attr=list(family="monospace"), 
                      #width=500, height=1000, 
                      expand=TRUE)
+    editable(t_summ) <- FALSE
     insert(t_summ, capture.output(summary(data_set)), 
            font.attr=list(family="monospace"))
 
@@ -623,6 +626,7 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
     t_lev <- gtext(cont=dlevgg, font.attr=list(family="monospace"), 
                      #width=500, height=1000, 
                      expand=TRUE)
+    editable(t_lev) <- FALSE
     insert(t_lev, capture.output(list_levs(data_set, data_set_nms)), 
            font.attr=list(family="monospace"))
     
