@@ -29,9 +29,7 @@ High priority / ASAP:
 
  - !!FIXME make input box red when value is outside bounds (like in Geany)
     - !!improve "Name is not a match" UI (- currently in gfilter.R, when adding a filter, if you enter a wrong variable name in the input box (say, 'asdf'), then you get name is not a match message in the console. It would be nicer UI to have a red label in the dialogue)
-    - !!disable OK button
- - !!FIXME close window using ESC (optional)
-     - f4 for hide pane + Opera-style handle
+    - !!disable OK button ( http://stackoverflow.com/questions/24711369/how-to-disable-ok-button-in-gbasicdialog-instance-of-gwidgets2/ )
  - !!tweak preset
     - choose horizontal layout
     - FIXME make '1000' for head() user-configurable
@@ -63,12 +61,12 @@ High priority / ASAP:
 
 
 Medium priority / soon:
- - !!bug with search auto-select checkboxes not triggering update on label (do we want that?)
- - !!use new_item_handler to handle the auto-resize of pane issue (on 'add item')
- - !!toggle button to display only unique()/duplicated2() matches (can gdf() support this?)
- - !!tmp re-sort of displayed subset (perhaps via a drop-menu or in gdf())
- - !!bar handle to resize height of var box
  - REQ when viewing gdf(), possible to c-menu "copy" cell?
+ - !!bar handle to resize height of var box
+ - !!tmp re-sort of displayed subset (perhaps via a drop-menu or in gdf())
+ - !!toggle button to display only unique()/duplicated2() matches (can gdf() support this?)
+ - FIXME bind f4 for hide button
+ - !!use new_item_handler to handle the auto-resize of pane issue (on 'add item')
 ###
 - !!Structure
     - edit data structure: rename & sort & re-order variables/cols, change var type/factors, edit factors, batch rename cols (tolower), etc. w/o displaying data frame; Deducer-style? ; dfstruct(); mutate(), copy vars, create new vars by transforming existing var; 

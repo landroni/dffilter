@@ -665,6 +665,12 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
     ## use 5 lines as hight of selection box (less claustrophobic)
     size(c_names)[2] <- 5*25
     
+    ##set some key-bindings
+    if(esc){
+        addHandlerKeystroke(w, function(h, ...){
+            if(h$key=="\033") dispose(w)
+        })
+    }
 }
 
 # require(MASS)
