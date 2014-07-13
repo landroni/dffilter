@@ -15,3 +15,8 @@ You will need to install [gWidgets2](http://cran.r-project.org/web/packages/gWid
     install.packages(c("gWidgets2", "gWidgets2RGtk2"))
 
 Then download and source `gWidgets2-filter.R`. (Proper R packaging is on the way.)
+
+NOTE: Since the code is still alpha and moving a lot, most of the times you would need to install the development versions of gWidgets2:
+
+    install_github('gWidgets2RGtk2', 'jverzani')
+    install_github('gWidgets2', 'jverzani')
