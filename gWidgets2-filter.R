@@ -489,7 +489,7 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
     ##radio buttons
     dlgg1 <- ggroup(cont=dlgg, expand=FALSE)
     r_descr <- gradio(c("full"="Full data set", "sel"="Displayed subset", "row"="Row selection", 
-                        "col"="Column selection"), horizontal=TRUE, cont=dlgg1
+                        "col"="Column selection"), 1, horizontal=TRUE, cont=dlgg1
                       #, label="Describe data set"
                       )
     tooltip(dlgg1) <- "Describe the full data set, the currently displayed subset, the data set filtered only by rows, or only by columns"
@@ -550,7 +550,7 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
     ##radio buttons
     dsgg1 <- ggroup(cont=dsgg, expand=FALSE)
     r_summ <- gradio(c("full"="Full data set", "sel"="Displayed subset", "row"="Row selection", 
-                        "col"="Column selection"), horizontal=TRUE, cont=dsgg1
+                        "col"="Column selection"), 1, horizontal=TRUE, cont=dsgg1
                       #, label="Describe data set"
                       )
     tooltip(dsgg1) <- "Summarise the full data set, the currently displayed subset, the data set filtered only by rows, or only by columns"
@@ -590,7 +590,7 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
                    use.scrollwindow = TRUE)
     dlgg2 <- ggroup(cont=dlevgg, expand=FALSE)
     r_lev <- gradio(c("full"="Full data set", "sel"="Displayed subset", "row"="Row selection", 
-                        "col"="Column selection"), horizontal=TRUE, cont=dlgg2
+                        "col"="Column selection"), 1, horizontal=TRUE, cont=dlgg2
                       #, label="Describe data set"
     )
     tooltip(dlgg2) <- "Display levels of factors for the full data set, for the currently displayed subset, for the data set filtered only by rows, or only by columns"
@@ -689,7 +689,9 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
         if(radio.inst!="r_summ") svalue(r_summ, index=TRUE) <- radio.sel
         if(radio.inst!="r_deb") svalue(r_deb, index=TRUE) <- radio.sel
     }
-    
+    radio.sel <- 2
+    radio.inst <- ""
+    r_sync()
     
     ##Structure tab
     #sgg <- ggroup(cont=ntbk, horizontal=TRUE, label="Structure", expand=F, 
