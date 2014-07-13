@@ -21,6 +21,7 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
     old_selection <- NULL           # global old selection storage
     radio.inst <- NULL
     radio.sel <- NULL
+    DF_deb <- NULL
     
      #print(data_set_name)
      #rint(class(sel.row))
@@ -103,7 +104,7 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
     
     df_side <- gvbox(cont = pg, expand=TRUE)
     
-    df_box <- ggroup(cont=df_side, expand=TRUE) ## holds df instance
+    df_box <- ggroup(cont=df_side, expand=TRUE) ## holds DF instance
     glabel("Select columns to be displayed \nand define appropriate row filters,\nthen click the 'Display selection' button. \nIf you make changes to your data, you \ncan merge them into the original dataset.", cont=df_box)
     
     btn_gp <- ggroup(cont = df_side)
@@ -335,6 +336,7 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
     h_descr <- function() invisible(NULL)
     h_lev <- function() invisible(NULL)
     h_summ <- function() invisible(NULL)
+    h_deb <- function() invisible(NULL)
     
     ##handler to execute on click of 'display' button
     hb_disp <- function(h,...) {
@@ -411,6 +413,7 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
         h_descr()
         h_lev()
         h_summ()
+        h_deb()
     }
     
     b_disp <- gbutton(paste("Display selection (", data_set_dim_orig[1], ' x ', 
@@ -629,15 +632,62 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
            font.attr=list(family="monospace"))
     
     ##Debugging sub-tab
-    ddebgg <- ggroup(cont=dntbk, horizontal=TRUE, label="Debugging")
-    svalue(dntbk) <- 1
+    ddebgg <- ggroup(cont=dntbk, horizontal=FALSE, label="Debugging", expand=TRUE
+                    #, use.scrollwindow = TRUE
+                   )
+    #ddebgg <- gvbox(cont = dntbk, expand=TRUE)
+    #tooltip(dsgg) <- "Describe the data set that is currently displayed"
+    ##radio buttons
+    ddebgg1 <- ggroup(cont=ddebgg, expand=FALSE)
+    r_deb <- gradio(c("full"="Full data set", "sel"="Displayed subset", "row"="Row selection", 
+                        "col"="Column selection"), 1, horizontal=TRUE, cont=ddebgg1
+                      #, label="Describe data set"
+                      )
+    tooltip(ddebgg1) <- "Display debugging info for the full data set, the currently displayed subset, the data set filtered only by rows, or only by columns"
     
-    ##handler to Details radios in sync
+    ##handler to update/init describe() output
+    h_deb <- function(h,...) {
+        radio.sel <<- svalue(r_deb, index=TRUE)
+        radio.inst <<- "r_deb"
+        if(radio.sel==1){
+            ##FIXME speed-up: cache summary for full data_set, and reuse when necessary; 
+            ##it should be computed only *once*
+            deb.out <- debug_data.frame(data_set)
+        } else if(radio.sel==2){
+            ##FIXME speed-up: if sel is same as full, do nothing 
+            ##FIXME speed-up: use a list where it stores selection, and checks if changed
+            deb.out <- (debug_data.frame(droplevels(DF[])))
+        } else if(radio.sel==3){
+            deb.out <- (debug_data.frame(droplevels(data_set[rows.disp, ])))
+        } else if(radio.sel==4){
+            deb.out <- (debug_data.frame(droplevels(data_set[ , cnms.disp])))
+        }
+        delete(df_deb_box, df_deb_box[1])             # remove child
+        DF_deb <- gdf(deb.out, cont=df_deb_box, expand=TRUE, 
+                      freeze_attributes=TRUE)
+        sapply(1:data_set_dim[2], function(j) editable(DF_deb, j) <- FALSE)
+        r_sync()
+    }
+    addHandlerChanged(r_deb, h_deb)
+    df_deb_box <- ggroup(cont=ddebgg, expand=TRUE) ## holds DF_deb instance
+    ## now add a data frame
+    #delete(df_deb_box, df_deb_box[1])             # remove child
+    ##FIXME inneficient approach: upon reload the df may be a subset
+    DF_deb <- gdf(debug_data.frame(data_set), cont=df_deb_box, expand=TRUE, 
+               freeze_attributes=TRUE)
+    sapply(1:data_set_dim[2], function(j) editable(DF_deb, j) <- FALSE)
+
+
+    ##focus Describe sub-tab
+    svalue(dntbk) <- 1
+
+    ##handler to keep Details radios in sync
     r_sync <- function(h, ...){
         ##FIXME isn't there an infinite loop here in this sync? 
         if(radio.inst!="r_lev") svalue(r_lev, index=TRUE) <- radio.sel
         if(radio.inst!="r_descr") svalue(r_descr, index=TRUE) <- radio.sel
         if(radio.inst!="r_summ") svalue(r_summ, index=TRUE) <- radio.sel
+        if(radio.inst!="r_deb") svalue(r_deb, index=TRUE) <- radio.sel
     }
     
     
@@ -691,3 +741,25 @@ dffilter_reload <- function(...){
     #dffilter(data_set=.data_set, display, maximize, editable)
     dffilter(...)
 }
+
+debug_data.frame <- function(data, funs.def=c("class"=class, "mode"=mode, 
+                             "complete.cases"=function(x) sum(complete.cases(x)), 
+                             "is.na"=function(x) sum(is.na(x)), 
+                             "is.nan"=function(x) sum(is.na(x)),
+                             "is.finite"=function(x) sum(is.finite(x)),
+                             "is.infinite"=function(x) sum(is.infinite(x))
+                             #"unique(nchar())"=function(x) unique(nchar(x))
+                             ), 
+                             funs.add=NULL){
+    funs <- c(funs.def, funs.add)
+    #out <- data[ FALSE , ]
+    out <- as.data.frame(lapply(data[ FALSE , ], as.character), stringsAsFactors=FALSE)
+    for(i in 1:length(funs)){
+        #if(names(funs[i])=="unique(nchar())") break.point()
+        ##FIXME put checks on what fun outputs
+        out[i, ] <- sapply(data, funs[[i]])
+        row.names(out)[i] <- names(funs[i])
+    }
+    return(out)
+}
+#debug_data.frame(iris)

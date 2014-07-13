@@ -7,7 +7,7 @@ The GUI allows the user to search and filter rows in a data frame, select only t
 
 At the moment the software is alpha, and the editing feature is ***experimental***. Testers welcome. 
 
-Installation intructions
+Installation instructions
 ================
 
 You will need to install [gWidgets2](http://cran.r-project.org/web/packages/gWidgets2) and [gWidgets2RGtk2](http://cran.r-project.org/web/packages/gWidgets2RGtk2). The data frame viewer may work with [gWidgets2tcltk](http://cran.r-project.org/web/packages/gWidgets2tcltk), but this wasn't thoroughly tested.
