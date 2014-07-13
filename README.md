@@ -18,5 +18,6 @@ Then download and source `gWidgets2-filter.R`. (Proper R packaging is on the way
 
 NOTE: Since the code is still alpha and moving a lot, most of the times you would need to install the development versions of gWidgets2:
 
+    library(devtools)
     install_github('gWidgets2RGtk2', 'jverzani')
     install_github('gWidgets2', 'jverzani')
