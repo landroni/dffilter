@@ -1,7 +1,7 @@
 High priority / ASAP:
 - !!Details
     - Chars expandgroup: unique(nchar(x))
-        - better as same gdf() & cb, or separate gdf()?
+        - better as same gdf() & "extended" cb, or separate gdf()?
     - debugging: is_sane(), is_alnum(), etc.
     - speed-up: execute only on focus of tab (throttle execution)
         - use one handler to rule them all (since subsetting is the bitch)
@@ -114,7 +114,7 @@ Low priority / maybe:
  - ??possible to use Rgtk2Extras widget
  - ??what of 5gb dataset or 21297 integer levels: 
     - it shouldn't be too slow; 
-    - if possible use max 1 copy of df; 
+    - if possible use max 1 copy/subs of df; 
 
 
 ###

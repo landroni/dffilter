@@ -1,7 +1,7 @@
 ## edit a really large data set *after* it has been filtered
 
 dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE, 
-                     data_set_name=NULL, sel.col=NULL, sel.row=NULL, esc=TRUE){
+                     data_set_name=NULL, sel.col=NULL, sel.row=NULL, esc=FALSE){
     require(gWidgets2) ## on github not CRAN. (require(devtools); install_github("gWidgets2", "jverzani")
     options(guiToolkit="RGtk2")
     require(RGtk2)
