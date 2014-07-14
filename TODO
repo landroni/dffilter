@@ -1,16 +1,17 @@
 High priority / ASAP:
 - !!Details
-    - debugging: length(unique(nchar(x))), is_sane(), is_alnum(), etc.
     - Chars expandgroup: unique(nchar(x))
+        - better as same gdf() & cb, or separate gdf()?
+    - debugging: is_sane(), is_alnum(), etc.
     - speed-up: execute only on focus of tab (throttle execution)
         - use one handler to rule them all (since subsetting is the bitch)
         - use addHandlerChanged(ntbk, function(h, ...){print(svalue(ntbk))})
-    - REQ icons & tooltips to tabs 
-    - REQ tooltip for indiv radio choices
+    - REQ icons & tooltips for tabs 
+    - REQ tooltip for indiv radio choices & for gdf() row/col
+        - hack gradio() to allow disable individual choices
     - FIXME dynamic height for expandgp: same as label if <7 lines; else 7 lines
     - make tabbed interface optional (allow pure dffilter())
         - ??allow dfstr() and dfdescr() too
-        - use buttons or tabs?
         - radio buttons: first col, then row?
 
 - !!Reload data.frame button
@@ -58,7 +59,7 @@ High priority / ASAP:
     - ??add subs=NULL option & col.subs=NULL (&disallow [] in df name)
  - FIXME gWidgets vs gWidgets2 compat
  - REQ gdf() precision of decimal points
- - ??mv some funs to a livmisc package
+ - !!mv some funs to a Lmisc package
  - FIXME bug with ESC to close window when WM menu is poped-up
 
 

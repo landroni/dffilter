@@ -749,8 +749,9 @@ debug_data.frame <- function(data, funs.def=c("class"=class, "mode"=mode,
                              "is.na"=function(x) sum(is.na(x)), 
                              "is.nan"=function(x) sum(is.na(x)),
                              "is.finite"=function(x) sum(is.finite(x)),
-                             "is.infinite"=function(x) sum(is.infinite(x))
-                             #"unique(nchar())"=function(x) unique(nchar(x))
+                             "is.infinite"=function(x) sum(is.infinite(x)),
+                             "unique(nchar())"=function(x) 
+                                 length(unique(nchar(as.character(x))))
                              ), 
                              funs.add=NULL){
     funs <- c(funs.def, funs.add)
