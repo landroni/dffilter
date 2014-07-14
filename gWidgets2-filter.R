@@ -703,6 +703,10 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
     #insert(gtlab, label(data_set, self=TRUE), 
     #       font.attr=list(family="monospace"))
     
+    ##add tab icons
+    add_stock_icon(ntbk, "find", 1)
+    add_stock_icon(ntbk, "info", 2)
+    
     ##focus Filter tab
     svalue(ntbk) <- 1
 
@@ -742,6 +746,14 @@ View <- dffilter
 dffilter_reload <- function(...){
     #dffilter(data_set=.data_set, display, maximize, editable)
     dffilter(...)
+}
+
+add_stock_icon <- function(nb, nm, page, left=TRUE){
+    child <- nb$widget$getNthPage(page-1)
+    box <- nb$widget$getTabLabel(child)
+    icon <- gimage(stock.id=nm)
+    box$packStart(icon$widget$parent)
+    if(left) box$reorderChild(icon$widget$parent, 0)
 }
 
 debug_data.frame <- function(data, funs.def=c("class"=class, "mode"=mode, 

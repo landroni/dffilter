@@ -1,12 +1,12 @@
 High priority / ASAP:
 - !!Details
-    - Chars expandgroup: unique(nchar(x))
-        - better as same gdf() & "extended" cb, or separate gdf()?
+    - drop Chars expandgroup: unique(nchar(x))
+        - use same gdf() & "Extended debugging details" cb right-top corner
     - debugging: is_sane(), is_alnum(), etc.
     - speed-up: execute only on focus of tab (throttle execution)
         - use one handler to rule them all (since subsetting is the bitch)
         - use addHandlerChanged(ntbk, function(h, ...){print(svalue(ntbk))})
-    - REQ icons & tooltips for tabs 
+    - FIXME tooltips for tabs 
     - REQ tooltip for indiv radio choices & for gdf() row/col
         - hack gradio() to allow disable individual choices
     - FIXME dynamic height for expandgp: same as label if <7 lines; else 7 lines
