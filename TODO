@@ -1,18 +1,12 @@
 High priority / ASAP:
 - !!Details
-    - drop Chars expandgroup: unique(nchar(x))
+    - rm Chars expandgroup: unique(nchar(x))
         - use same gdf() & "Extended debugging details" cb right-top corner
     - debugging: is_sane(), is_alnum(), etc.
     - speed-up: execute only on focus of tab (throttle execution)
         - use one handler to rule them all (since subsetting is the bitch)
         - use addHandlerChanged(ntbk, function(h, ...){print(svalue(ntbk))})
-    - FIXME tooltips for tabs 
-    - REQ tooltip for indiv radio choices & for gdf() row/col
-        - hack gradio() to allow disable individual choices
     - FIXME dynamic height for expandgp: same as label if <7 lines; else 7 lines
-    - make tabbed interface optional (allow pure dffilter())
-        - ??allow dfstr() and dfdescr() too
-        - radio buttons: first col, then row?
 
 - !!Reload data.frame button
     - FIXME dynamically switch f_side0g from horizontal=T to F
@@ -30,6 +24,8 @@ High priority / ASAP:
  - !!FIXME make input box red when value is outside bounds (like in Geany)
     - !!improve "Name is not a match" UI (- currently in gfilter.R, when adding a filter, if you enter a wrong variable name in the input box (say, 'asdf'), then you get name is not a match message in the console. It would be nicer UI to have a red label in the dialogue)
     - !!disable OK button ( http://stackoverflow.com/questions/24711369/how-to-disable-ok-button-in-gbasicdialog-instance-of-gwidgets2/ )
+ - FIXME tooltip for indiv radio choices & for gdf() row/col
+    - hack gradio() to allow disable individual choices
  - !!tweak preset
     - choose horizontal layout
     - FIXME make '1000' for head() user-configurable
@@ -61,6 +57,8 @@ High priority / ASAP:
  - REQ gdf() precision of decimal points
  - !!mv some funs to a Lmisc package
  - FIXME bug with ESC to close window when WM menu is poped-up
+ - ??make tabbed interface optional (allow pure dffilter())
+    - ??allow dfstr() and dfdescr() too
 
 
 Medium priority / soon:
@@ -126,4 +124,6 @@ gfilter.R TODO items:
  - !!inspect the gfilter code (logical vector selection, use spinners for 'range', head/tail/some/!is.na/na.omit, manually update filter items to reflect available choices as a 'update filters' button or 'freeze selection' checkbox?, what happens to 'Date' or 'other' classes, use rgtk2editdf)
  - ??gfilterpreset (use c("==", "%in%", "!=", ">", ">=", "<", "<=") combo, logical / manual subset, )
  - ??stringr (for options 'whole word' in search; replacement for grepl(); )
+ - ??gdf()
+    - rm row numbers or improve separation between row.nr and data
 
