@@ -704,7 +704,7 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
     #       font.attr=list(family="monospace"))
     
     ##add tab icons
-    ntbk$add_tab_icon(1, "find")
+    ntbk$add_tab_icon(1, "find-and-replace")
     ntbk$add_tab_icon(2, "info")
     
     ##focus Filter tab
