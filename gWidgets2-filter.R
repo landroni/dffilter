@@ -1,7 +1,9 @@
 ## edit a really large data set *after* it has been filtered
 
 dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE, 
-                     data_set_name=NULL, sel.col=NULL, sel.row=NULL, esc=FALSE){
+                     data_set_name=NULL, sel.col=NULL, sel.row=NULL, esc=FALSE, 
+                     def.col=100
+                     ){
     require(gWidgets2) ## on github not CRAN. (require(devtools); install_github("gWidgets2", "jverzani")
     options(guiToolkit="RGtk2")
     require(RGtk2)
@@ -202,12 +204,16 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
 
     c_names <- gcheckboxgroup(data_set_nms, checked=TRUE, cont=c_gp, 
                               use.table=TRUE, expand=TRUE, fill=TRUE)
+                              
     
     ##if sel.col is supplied (e.g. for reload) check structure to see if all 
     ##selected variables are still present in reloaded data frame
+    if(def.col!=0){
+        svalue(c_names, index=TRUE) <- 1:min(def.col, data_set_dim_orig[2])
+    }
     if(!is.null(sel.col)){
         if(all(sel.col %in% data_set_nms)) svalue(c_names) <- sel.col
-    }
+    } 
 
     ##continue fancy search functionality
     ##initialize old_selection which will be the output value of c_names
@@ -219,7 +225,7 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
     
     ## Invert selection, select all and select none are all useful in different cases
     b_invert <- gbutton("", cont=ggroup(cont=s_gp), handler = function(h,...) {
-        svalue(c_names, index=TRUE) <<- setdiff(1:length(data_set_nms), 
+        svalue(c_names, index=TRUE) <<- setdiff(1:data_set_dim_orig[2], 
                                                svalue(c_names, index=TRUE))
         #len_cnms_update()
         #h_disp()
@@ -741,7 +747,6 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
 # for(i in 1:400) x <- rbind(x, mtcars)
 # for(i in 1:5) x <- cbind(x, x)
 View <- dffilter
-#View(Xa)
 
 dffilter_reload <- function(...){
     #dffilter(data_set=.data_set, display, maximize, editable)

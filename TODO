@@ -1,12 +1,17 @@
 High priority / ASAP:
 - !!Details
+    - mv col sel to 2nd radio
+    - !!speed-ups: 
+        - check if output already exists and if no changes to sel
+        - execute only on focus of Debug tab (throttle execution)
+        - Automatically update Details tab cb
+        - 1: In cnms.disp != cnms.disp_old :
+			longer object length is not a multiple of shorter object length
+
     - rm Chars expandgroup: unique(nchar(x))
-        - use same gdf() & "Extended debugging details" cb right-top corner
+        - use same gdf() & "Extended debugging details" cb right-top corner (or beneath)
     - debugging: is_sane(), is_alnum(), etc.
-    - speed-up: execute only on focus of tab (throttle execution)
-        - use one handler to rule them all (since subsetting is the bitch)
-        - use addHandlerChanged(ntbk, function(h, ...){print(svalue(ntbk))})
-    - FIXME dynamic height for expandgp: same as label if <7 lines; else 7 lines
+    - FIXME dynamic height for expandgp: same as 'label' if <7 lines; else 7 lines
 
 - !!Reload data.frame button
     - FIXME dynamically switch f_side0g from horizontal=T to F
@@ -21,6 +26,7 @@ High priority / ASAP:
     - investigate cache bug: dffilter(Xa), Xa$var[1:10,] <- NA, dffilter(Xa) without closing first instance. Or dffilter(cbind(Xa, Xb)). 
 
 
+ - !!warn when display > 500K cells
  - !!FIXME make input box red when value is outside bounds (like in Geany)
     - !!improve "Name is not a match" UI (- currently in gfilter.R, when adding a filter, if you enter a wrong variable name in the input box (say, 'asdf'), then you get name is not a match message in the console. It would be nicer UI to have a red label in the dialogue)
     - !!disable OK button ( http://stackoverflow.com/questions/24711369/how-to-disable-ok-button-in-gbasicdialog-instance-of-gwidgets2/ )
@@ -57,12 +63,20 @@ High priority / ASAP:
  - REQ gdf() precision of decimal points
  - !!mv some funs to a Lmisc package
  - FIXME bug with ESC to close window when WM menu is poped-up
- - ??make tabbed interface optional (allow pure dffilter())
-    - ??allow dfstr() and dfdescr() too
+ - ??'Enter' should activate display button
+
+ - REQ when viewing gdf(), possible to c-menu "copy" cell?
+    - min window with up to 5th digit nrs, restore window, hover cells, 
+        changes to displaying only up to 4th digit
+ - gdf(): 
+    - do not treat NA logical as TRUE
+    - rethink display of checboxes for logical (e.g. NAs or visibility with dark themes)
+ - investigate: gtk_tree_view_unref_tree_helper errors
 
 
 Medium priority / soon:
- - REQ when viewing gdf(), possible to c-menu "copy" cell?
+ - ??intersection/union checkbox in gfilter.R
+ - ??tooltip nr of uniq items for variable filters
  - !!bar handle to resize height of var box
  - !!tmp re-sort of displayed subset (perhaps via a drop-menu or in gdf())
  - !!toggle button to display only unique()/duplicated2() matches (can gdf() support this?)
@@ -90,6 +104,7 @@ Medium priority / soon:
 
 
 Low priority / maybe:
+ - ??allow dfstr() and dfdescr() too
  - !!export subset ("save as" different obj)
  - ??on display button, log subsetting operation in the console or Log window
     - log commands, if possible
@@ -126,4 +141,5 @@ gfilter.R TODO items:
  - ??stringr (for options 'whole word' in search; replacement for grepl(); )
  - ??gdf()
     - rm row numbers or improve separation between row.nr and data
+ - REQ gcomboboxgrp: search, then jerky jump on focus
 
