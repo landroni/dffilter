@@ -56,7 +56,9 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
     
     ##Filter tab
     ntbk <- gnotebook(3, cont=w)
-    pg <- gpanedgroup(cont=ntbk, horizontal=TRUE, label="Filter")
+    pg <- gpanedgroup(cont=ntbk, horizontal=TRUE, label=" Filter")
+    ntbk$add_tab_icon(1, "find")
+    ntbk$add_tab_tooltip(1, "Filter data frame and display subset")
     #pg <- ggroup(cont=w, horizontal=TRUE)
     
     ## have a hide/show button
@@ -476,7 +478,9 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
     
 
     ##Details tab
-    dgg <- ggroup(cont=ntbk, horizontal=TRUE, label="Details")
+    dgg <- ggroup(cont=ntbk, horizontal=TRUE, label=" Details")
+    ntbk$add_tab_icon(2, "info")
+    ntbk$add_tab_tooltip(2, "Display data frame details")
     #svalue(ntbk) <- 1
     dntbk <- gnotebook(2, cont=dgg, expand=TRUE, fill=TRUE)
 
@@ -709,10 +713,7 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
     #insert(gtlab, label(data_set, self=TRUE), 
     #       font.attr=list(family="monospace"))
     
-    ##add tab icons
-    ntbk$add_tab_icon(1, "find-and-replace")
-    ntbk$add_tab_icon(2, "info")
-    
+
     ##focus Filter tab
     svalue(ntbk) <- 1
 
