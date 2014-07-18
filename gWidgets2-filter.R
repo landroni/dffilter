@@ -498,11 +498,12 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
     #tooltip(dlgg) <- "Describe the data set that is currently displayed"
     ##radio buttons
     dlgg1 <- ggroup(cont=dlgg, expand=FALSE)
-    r_descr <- gradio(c("full"="Full data set", "sel"="Displayed subset", "row"="Row selection", 
-                        "col"="Column selection"), 1, horizontal=TRUE, cont=dlgg1
+    details_choices <- c("full"="Full data set", "col"="Column selection", 
+                        "sel"="Displayed subset", "row"="Row selection")
+    r_descr <- gradio(details_choices, 2, horizontal=TRUE, cont=dlgg1
                       #, label="Describe data set"
                       )
-    tooltip(dlgg1) <- "Describe the full data set, the currently displayed subset, the data set filtered only by rows, or only by columns"
+    tooltip(dlgg1) <- "Describe the full data set, a column selection (all rows), the currently displayed subset, a row selection (all columns)"
     ##hide-able label
     ##FIXME will need to update label when reloading df
     dlgg2 <- gexpandgroup("Label:", cont=dlgg, horizontal=FALSE,expand=F, fill=T)
@@ -559,11 +560,10 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
     #tooltip(dsgg) <- "Describe the data set that is currently displayed"
     ##radio buttons
     dsgg1 <- ggroup(cont=dsgg, expand=FALSE)
-    r_summ <- gradio(c("full"="Full data set", "sel"="Displayed subset", "row"="Row selection", 
-                        "col"="Column selection"), 1, horizontal=TRUE, cont=dsgg1
+    r_summ <- gradio(details_choices, 2, horizontal=TRUE, cont=dsgg1
                       #, label="Describe data set"
                       )
-    tooltip(dsgg1) <- "Summarise the full data set, the currently displayed subset, the data set filtered only by rows, or only by columns"
+    tooltip(dsgg1) <- "Summarise the full data set, a column selection (all rows), the currently displayed subset, a row selection (all columns)"
     
     ##handler to update/init describe() output
     h_summ <- function(h,...) {
@@ -599,11 +599,10 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
     dlevgg <- ggroup(cont=dntbk, horizontal=FALSE, label="Levels", expand=TRUE, 
                    use.scrollwindow = TRUE)
     dlgg2 <- ggroup(cont=dlevgg, expand=FALSE)
-    r_lev <- gradio(c("full"="Full data set", "sel"="Displayed subset", "row"="Row selection", 
-                        "col"="Column selection"), 1, horizontal=TRUE, cont=dlgg2
+    r_lev <- gradio(details_choices, 2, horizontal=TRUE, cont=dlgg2
                       #, label="Describe data set"
     )
-    tooltip(dlgg2) <- "Display levels of factors for the full data set, for the currently displayed subset, for the data set filtered only by rows, or only by columns"
+    tooltip(dlgg2) <- "Display levels of factors for the full data set, a column selection (all rows), the currently displayed subset, a row selection (all columns)"
     
     ##helper fun to list levels in a dataframe
     list_levs <- function(data=data_set, vars=NULL){
@@ -649,11 +648,10 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
     #tooltip(dsgg) <- "Describe the data set that is currently displayed"
     ##radio buttons
     ddebgg1 <- ggroup(cont=ddebgg, expand=FALSE)
-    r_deb <- gradio(c("full"="Full data set", "sel"="Displayed subset", "row"="Row selection", 
-                        "col"="Column selection"), 1, horizontal=TRUE, cont=ddebgg1
+    r_deb <- gradio(details_choices, 2, horizontal=TRUE, cont=ddebgg1
                       #, label="Describe data set"
                       )
-    tooltip(ddebgg1) <- "Display debugging info for the full data set, the currently displayed subset, the data set filtered only by rows, or only by columns"
+    tooltip(ddebgg1) <- "Display debugging info for the full data set, a column selection (all rows), the currently displayed subset, a row selection (all columns)"
     
     ##handler to update/init describe() output
     h_deb <- function(h,...) {
