@@ -752,14 +752,23 @@ dffilter_reload <- function(...){
     dffilter(...)
 }
 
+##FIXME more efficient way of doing this? 
 debug_data.frame <- function(data, funs.def=c("class"=class, "mode"=mode, 
                              "complete.cases"=function(x) sum(complete.cases(x)), 
                              "is.na"=function(x) sum(is.na(x)), 
                              "is.nan"=function(x) sum(is.na(x)),
                              "is.finite"=function(x) sum(is.finite(x)),
                              "is.infinite"=function(x) sum(is.infinite(x)),
-                             "unique(nchar())"=function(x) 
-                                 length(unique(nchar(as.character(x))))
+                             "length(unique(nchar(x)))"=function(x) 
+                                 length(unique(nchar(as.character(x)))),
+                             "unique(nchar(x))"=function(x) 
+                                 paste(sort(unique(nchar(as.character(x)))), 
+                                       collapse=" "), 
+                             "is_alnum"=function(x) sum(is_alnum(x)),
+                             "is_alpha"=function(x) sum(is_alpha(x)),
+                             "is_digit"=function(x) sum(is_digit(x)),
+                             "is_punct"=function(x) sum(is_punct(x)),
+                             "is_notalnum"=function(x) sum(is_notalnum(x))
                              ), 
                              funs.add=NULL){
     funs <- c(funs.def, funs.add)
@@ -774,3 +783,10 @@ debug_data.frame <- function(data, funs.def=c("class"=class, "mode"=mode,
     return(out)
 }
 #debug_data.frame(iris)
+
+##FIXME add is_notalpha, is_notdigit, etc.?
+is_alnum <- function(x) {grepl("[[:alnum:]]", x)}  ##Alphanumeric characters
+is_alpha <- function(x) {grepl("[[:alpha:]]", x)}  ##Alphabetic characters
+is_digit <- function(x) {grepl("[[:digit:]]", x)}  ##Digits
+is_punct <- function(x) {grepl("[[:punct:]]", x)}  ##Punctuation characters
+is_notalnum <- function(x) {grepl("[^[:alnum:]]", x)}  ##Non-Alphanumeric characters
