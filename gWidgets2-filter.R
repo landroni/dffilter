@@ -756,7 +756,7 @@ dffilter_reload <- function(...){
 debug_data.frame <- function(data, funs.def=c("class"=class, "mode"=mode, 
                              "complete.cases"=function(x) sum(complete.cases(x)), 
                              "is.na"=function(x) sum(is.na(x)), 
-                             "is.nan"=function(x) sum(is.na(x)),
+                             "is.nan"=function(x) sum(is.nan(x)),
                              "is.finite"=function(x) sum(is.finite(x)),
                              "is.infinite"=function(x) sum(is.infinite(x)),
                              "length(unique(nchar(x)))"=function(x) 
