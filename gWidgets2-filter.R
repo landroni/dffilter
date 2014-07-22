@@ -176,13 +176,19 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
 
          if(val == "") {
            c_names[] <<- data_set_nms
+           ed$widget$modifyBase(GtkStateType["normal"], NULL)
+           ed$widget$modifyText(GtkStateType["normal"], NULL) 
          } else {
            l <- c(list(pattern=val, x=data_set_nms), search_type)
            new_vals = data_set_nms[do.call(grepl, l)]
            if (length(new_vals)) {
              c_names[] <<- new_vals
+             ed$widget$modifyBase(GtkStateType["normal"], NULL)
+             ed$widget$modifyText(GtkStateType["normal"], NULL) 
            } else {
              c_names[] <<- character(0) 
+             ed$widget$modifyBase(GtkStateType["normal"], "#FF6666")
+             ed$widget$modifyText(GtkStateType["normal"], "white") 
              return()
            }
          }
