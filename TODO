@@ -1,6 +1,6 @@
 High priority / ASAP:
  - visible(DF_deb) <- on "Extended debugging details" cb 
- - add Variables, Labels, numSummary tabs
+ - move gnotebook alongside Hide/Reload buttons
 
  - !!Reload data.frame button
 	- restore row filters
@@ -15,6 +15,7 @@ High priority / ASAP:
     - auto-polling of data frame? 
     - investigate cache bug: dffilter(Xa), Xa$var[1:10,] <- NA, dffilter(Xa) without closing first instance. Or dffilter(cbind(Xa, Xb)). 
 
+ - add Labels tab
  - FIXME prev/next buttons: right-click or ctrl+click to go first/last
  - FIXME dynamically switch f_side0g from horizontal=T to F
  - !!add hide=F, search.opts=list(), auto.update=F
@@ -30,7 +31,7 @@ High priority / ASAP:
         - check out for freeze seed issue when only modifying col sel
     - fix negative input in head(..., )
     - slow for big input numbers
-    - red only for zero?
+    - red only for zero? (actually this is how code behaves now)
 
 
  - !!FIXME scrolling perf issues (probably related to >128 chars in a cell)
@@ -81,6 +82,7 @@ High priority / ASAP:
  - FIXME issue with 'asdf' in numeric gcombobox(edit=T)
     - 8: In svalue.default(widget) : NAs introduced by coercion
  - make Details sub-tabs optional
+ - add numSummary tab
 
 
 

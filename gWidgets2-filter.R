@@ -532,6 +532,7 @@ Do you want to proceed?', title="Warning", icon="warning")
         return(lab)
     }
     
+    #####
     ##Describe sub-tab
     dlgg <- ggroup(cont=dntbk, horizontal=FALSE, label="Describe", expand=TRUE, 
                    use.scrollwindow = TRUE)
@@ -570,6 +571,7 @@ Do you want to proceed?', title="Warning", icon="warning")
                      expand=TRUE)
     editable(t_descr) <- FALSE
 
+    #####
     ##Summary sub-tab
     dsgg <- ggroup(cont=dntbk, horizontal=FALSE, label="Summary", expand=TRUE, 
                    use.scrollwindow = TRUE)
@@ -594,14 +596,15 @@ Do you want to proceed?', title="Warning", icon="warning")
     editable(t_summ) <- FALSE
 
 
+    #####
     ##Levels sub-tab
     dlevgg <- ggroup(cont=dntbk, horizontal=FALSE, label="Levels", expand=TRUE, 
                    use.scrollwindow = TRUE)
-    dlgg2 <- ggroup(cont=dlevgg, expand=FALSE)
-    r_lev <- gradio(details_choices, 2, horizontal=TRUE, cont=dlgg2
+    dlevgg2 <- ggroup(cont=dlevgg, expand=FALSE)
+    r_lev <- gradio(details_choices, 2, horizontal=TRUE, cont=dlevgg2
                       #, label="Describe data set"
     )
-    tooltip(dlgg2) <- "Display levels of factors for the full data set, a column selection (all rows), the currently displayed subset, a row selection (all columns)"
+    tooltip(dlevgg2) <- "Display levels of factors for the full data set, a column selection (all rows), the currently displayed subset, a row selection (all columns)"
     
     ##helper fun to list levels in a dataframe
     list_levs <- function(data=data_set, vars=NULL){
