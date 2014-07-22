@@ -728,17 +728,6 @@ Do you want to proceed?', title="Warning", icon="warning")
     radio.sel <- 2
     radio.inst <- ""
     r_sync()
-    
-    ##Structure tab
-    #sgg <- ggroup(cont=ntbk, horizontal=TRUE, label="Structure", expand=F, 
-    #              use.scrollwindow = T)
-    #gllab <- glabel("Label:", cont=sgg)
-    #gtlab <- gtext(cont=sgg, 
-    #                 #width=400, height=200, 
-    #                 expand=T)
-    #insert(gtlab, label(data_set, self=TRUE), 
-    #       font.attr=list(family="monospace"))
-    
     ##by default update Details only when the tab is selected
     if(!details.on.tab.sel){
         h_details()
