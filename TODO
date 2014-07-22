@@ -1,10 +1,10 @@
 High priority / ASAP:
- - ??frame around 'rm' and 'disable' button/cb
-    - reinstate 'Remove' label
- - !!warn when display > 500K cells
+ - visible(DF_deb) <- on "Extended debugging details" cb 
+ - add Variables, Labels, numSummary tabs
 
-- !!Reload data.frame button
-    - FIXME dynamically switch f_side0g from horizontal=T to F
+ - !!Reload data.frame button
+	- restore row filters
+		- use initial.vars=sel.row and construct sel.row as an appropriate df for gfilter() call
     - FIXME if digest has NOT changed then on 'reload' simply display a statusbar message
     - editable=T: when making object copy, save digest, then before saving changes in workspace, 
         check if digest of object is still the same and if not inform the user that 
@@ -15,15 +15,24 @@ High priority / ASAP:
     - auto-polling of data frame? 
     - investigate cache bug: dffilter(Xa), Xa$var[1:10,] <- NA, dffilter(Xa) without closing first instance. Or dffilter(cbind(Xa, Xb)). 
 
+ - FIXME prev/next buttons: right-click or ctrl+click to go first/last
+ - FIXME dynamically switch f_side0g from horizontal=T to F
+ - !!add hide=F, search.opts=list(), auto.update=F
+ - !!make.names() or disallow data frames with duplicate names to avoid assignment issues
+    - bug with cbind() & check.names=F
+ - !!allow to display df[x, 1, drop=F]
 
- - !!FIXME make input box red when value is outside bounds (like in Geany)
-    - !!improve "Name is not a match" UI (- currently in gfilter.R, when adding a filter, if you enter a wrong variable name in the input box (say, 'asdf'), then you get name is not a match message in the console. It would be nicer UI to have a red label in the dialogue)
-    - !!disable OK button ( http://stackoverflow.com/questions/24711369/how-to-disable-ok-button-in-gbasicdialog-instance-of-gwidgets2/ )
- - FIXME tooltip for indiv radio choices & for gdf() row/col
-    - hack gradio() to allow disable individual choices
  - !!tweak preset
     - choose horizontal layout
     - FIXME make '1000' for head() user-configurable
+    - ??add range radio
+    - 'preserve/freeze set.seed()' cb with 'some' preset filter
+        - check out for freeze seed issue when only modifying col sel
+    - fix negative input in head(..., )
+    - slow for big input numbers
+    - red only for zero?
+
+
  - !!FIXME scrolling perf issues (probably related to >128 chars in a cell)
     - long PU load after display of df (perhaps related to Date/logical)
     - jerky re-size of cols (re-adj of col width)
@@ -32,53 +41,65 @@ High priority / ASAP:
  - !!REQ multiple selection in gcomboboxgroup()
      - multiple selection mode (isntead of shift+select on cehckboxes); 
         or via c-menu item "select to here"
- - !!REQ gcombobox(use_completion=T): when only available item has been auto-completed, drop pop-up menu automatically
- - !!FIXME prev/next buttons: right-click or ctrl+click to go first/last
- - !!tweak preset
-    - add range radio
-    - 'preserve/freeze set.seed()' cb with 'some' preset filter
-    - fix negative input in head(..., )
-
 
  - !!proper packaging for CRAN
     - name ideas: "interactive/exploratory data manipulation"
- - !!add hide=F, search.opts=list(), auto.update=F
- - !!check.names() or disallow data frames with duplicate names to avoid assignment issues
-    - bug with cbind() & check.names=F
- - !!allow to display df[x, 1, drop=F]
-    - investigate what happens on merge for such a "tmp" df
-    - ??add subs=NULL option & col.subs=NULL (&disallow [] in df name)
- - FIXME gWidgets vs gWidgets2 compat
+ - investigate what happens on merge for such a "tmp" df
+ - ??add subs=NULL option & col.subs=NULL (&disallow [] in df name)
  - REQ gdf() precision of decimal points
  - !!mv some funs to a Lmisc package
- - FIXME bug with ESC to close window when WM menu is poped-up
  - ??'Enter' should activate display button
  - opts c-menu & automatically update cbs: 
     - 'Automatically update Details' tab cb
+ - focus input box after pressing buttons in c_names
 
  - REQ when viewing gdf(), possible to c-menu "copy" cell?
     - min window with up to 5th digit nrs, restore window, hover cells, 
         changes to displaying only up to 4th digit
  - gdf(): 
-    - do not treat NA logical as TRUE
-    - rethink display of checboxes for logical (e.g. NAs or visibility with dark themes)
- - investigate: gtk_tree_view_unref_tree_helper errors
+    - REQ do not treat NA logical as TRUE
+    - REQ rethink display of checboxes for logical (e.g. NAs or visibility with dark themes)
+ - REQ investigate: gtk_tree_view_unref_tree_helper errors
  - investigate Debug tab: 
      [1] "col"
     Error in widget$getColumns()[[j + 1L]] : subscript out of bounds
  - FIXME disable resize handle when panel Hidden
  - ?? Details speed-up: display gdf() only on focus of Debug tab (<- NULL after display)
  - FIXME Details: dynamic height for expandgp: same as 'label' if <7 lines; else 7 lines
- - FIXME do.subset on "Extended debugging details" cb 
+ - improve "Name is not a match" UI (- currently in gfilter.R, when adding a filter, if you enter a wrong variable name in the input box (say, 'asdf'), then you get name is not a match message in the console. It would be nicer UI to have a red label in the dialogue)
+    - FIXME disable OK button in gbasicdialog() ( http://stackoverflow.com/questions/24711369/how-to-disable-ok-button-in-gbasicdialog-instance-of-gwidgets2/ )
+    - FIXME tooltip for indiv radio choices & for gdf() row/col
+    - FIXME hack gradio() to allow disable individual choices
+ - FIXME gWidgets vs gWidgets2 compat
+ - FIXME bug with ESC to close window when WM menu is poped-up
+ - REQ gcombobox(use_completion=T): when only available item has been auto-completed, drop pop-up menu automatically
+ - REQ gcomboboxgrp: search, then jerky jump on focus
+ - REQ gdf(): rm row numbers or improve separation between row.nr and data
+ - FIXME search for `a\` in c_names
+ Error in (function (pattern, x, ignore.case = FALSE, perl = FALSE, fixed = FALSE,  : 
+  invalid regular expression 'a\', reason 'Trailing backslash'
+ - FIXME issue with 'asdf' in numeric gcombobox(edit=T)
+    - 8: In svalue.default(widget) : NAs introduced by coercion
+ - make Details sub-tabs optional
 
 
+
+gfilter.R TODO items:
+ - ??sort variable components? or use data frame order?
+     - add 'sort items' toggle button in filter
+ - !!inspect the gfilter code (logical vector selection, use spinners for 'range' & type-ahead updating of filters, manually update filter items to reflect available choices as a 'update filters' button or 'freeze selection' checkbox?)
+ - !!inspect the gfilter code (logical vector selection, use spinners for 'range', manually update filter items to reflect available choices as a 'update filters' button or 'freeze selection' checkbox?)
+ - !!gfilter generic preset (use c("==", "%in%", "!=", ">", ">=", "<", "<=") combo, logical / manual subset)
+ - ??stringr (for options 'whole word' in search; replacement for grepl(); )
+
+
+#####
 Medium priority / soon:
  - ??intersection/union checkbox in gfilter.R
  - ??tooltip nr of uniq items for variable filters
  - !!bar handle to resize height of var box
  - !!tmp re-sort of displayed subset (perhaps via a drop-menu or in gdf())
  - !!toggle button to display only unique()/duplicated2() matches (can gdf() support this?)
- - FIXME bind f4 for hide button
  - !!use new_item_handler to handle the auto-resize of pane issue (on 'add item')
 ###
 - !!Structure
@@ -127,17 +148,4 @@ Low priority / maybe:
  - ??what of 5gb dataset or 21297 integer levels: 
     - it shouldn't be too slow; 
     - if possible use max 1 copy/subs of df; 
-
-
-###
-gfilter.R TODO items:
- - REQ gcomboboxgrp: search, then jerky jump on focus
- - ??sort variable components? or use data frame order?
-     - add 'sort items' toggle button in filter
- - !!inspect the gfilter code (logical vector selection, use spinners for 'range' & type-ahead updating of filters, manually update filter items to reflect available choices as a 'update filters' button or 'freeze selection' checkbox?)
- - !!inspect the gfilter code (logical vector selection, use spinners for 'range', manually update filter items to reflect available choices as a 'update filters' button or 'freeze selection' checkbox?)
- - !!gfilter generic preset (use c("==", "%in%", "!=", ">", ">=", "<", "<=") combo, logical / manual subset)
- - ??stringr (for options 'whole word' in search; replacement for grepl(); )
- - ??gdf()
-    - rm row numbers or improve separation between row.nr and data
 

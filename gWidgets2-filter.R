@@ -2,20 +2,23 @@
 
 dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE, 
                      data_set_name=NULL, sel.col=NULL, sel.row=NULL, esc=FALSE, 
-                     def.col=100
+                     def.col=100, details=TRUE, details.on.tab.sel=TRUE
                      ){
     require(gWidgets2) ## on github not CRAN. (require(devtools); install_github("gWidgets2", "jverzani")
     options(guiToolkit="RGtk2")
     require(RGtk2)
-    require(Hmisc)
+    ##FIXME put this in the handler
+    if(details) require(Hmisc)
     
 
     DF <- NULL                      # global gdf instance
     rows <- NULL                    # global rows index
     rows.disp <- NULL               # global rows index (subset currently displayed)
+    rows.disp_old <- list()               # global rows index (subset previously displayed)
     idxs <- NULL                    # global set of indices that are being edited
     cnms <- NULL                    # global column names
     cnms.disp <- NULL               # global column names (subset currently displayed)
+    cnms.disp_old <- list()               # global column names (subset currently displayed)
     len_idxs <- NULL                # global set of indices that are being edited (length)
     len_cnms <- NULL                # global column names (length)
     data_set_dim <- NULL            # global df dim
@@ -24,6 +27,8 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
     radio.inst <- NULL
     radio.sel <- NULL
     DF_deb <- NULL
+    details.out <- list()
+    new.disp <- FALSE
     
      #print(data_set_name)
      #rint(class(sel.row))
@@ -340,11 +345,13 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
        h_disp()
      })                              
     
-    ##init dummy h_descr & h_lev funs to avoid "not found" error
+    ##init dummy handler funs to avoid "not found" error
     h_descr <- function() invisible(NULL)
     h_lev <- function() invisible(NULL)
     h_summ <- function() invisible(NULL)
     h_deb <- function() invisible(NULL)
+    h_details <- function() invisible(NULL)
+    h_details.ins <- function() invisible(NULL)
     
     ##handler to execute on click of 'display' button
     hb_disp <- function(h,...) {
@@ -418,10 +425,17 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
         
         ##update details tab
         ##FIXME speed-up: mv this to handler on tab selection
-        h_descr()
-        h_lev()
-        h_summ()
-        h_deb()
+        if(details){
+			h_descr()
+			h_lev()
+			h_summ()
+			h_deb()
+            if(!details.on.tab.sel){
+                h_details()
+                h_details.ins()
+            }
+            new.disp <<- TRUE
+        }
     }
     
     b_disp <- gbutton(paste("Display selection (", data_set_dim_orig[1], ' x ', 
@@ -476,11 +490,14 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
     #print(size(s_gp))
     #print(sapply(f_side0g$children, function(u) size(u)))
     
-
+    
+    ############################
     ##Details tab
+    if(details){
     dgg <- ggroup(cont=ntbk, horizontal=TRUE, label=" Details")
     ntbk$add_tab_icon(2, "info")
     ntbk$add_tab_tooltip(2, "Display data frame details")
+    
     #svalue(ntbk) <- 1
     dntbk <- gnotebook(2, cont=dgg, expand=TRUE, fill=TRUE)
 
@@ -522,27 +539,6 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
     h_descr <- function(h,...) {
         radio.sel <<- svalue(r_descr, index=TRUE)
         radio.inst <<- "r_descr"
-        #print(radio.sel)
-        #print(svalue(r_descr, index=T))
-        #print(svalue(r_descr, drop=F))
-        #print(svalue(r_descr, index=T, drop=F))
-        if(radio.sel==1){
-            ##FIXME speed-up: store describe for full data_set, and reuse when necessary
-            descr.out <- capture.output(describe(data_set, descript=data_set_name))
-        } else if(radio.sel==2){
-            ##FIXME speed-up: if sel is same as full, do nothing 
-            ##FIXME speed-up: use a list where it stores selection, and checks if changed
-            descr.out <- capture.output(describe(droplevels(DF[]), 
-                                                 descript=data_set_name))
-        } else if(radio.sel==3){
-            descr.out <- capture.output(describe(droplevels(data_set[rows.disp, ]), 
-                                                 descript=data_set_name))
-        } else if(radio.sel==4){
-            descr.out <- capture.output(describe(droplevels(data_set[ , cnms.disp]), 
-                                                 descript=data_set_name))
-        }
-        svalue(t_descr) <- ""
-        insert(t_descr, descr.out, font.attr=list(family="monospace"))
         r_sync()
     }
     addHandlerChanged(r_descr, h_descr)
@@ -550,9 +546,6 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
                      #width=500, height=1000, 
                      expand=TRUE)
     editable(t_descr) <- FALSE
-    insert(t_descr, capture.output(describe(data_set, descript=data_set_name)), 
-           font.attr=list(family="monospace"))
-    #insert(t_descr, '', where="beginning", font.attr=list(family="monospace"))
 
     ##Summary sub-tab
     dsgg <- ggroup(cont=dntbk, horizontal=FALSE, label="Summary", expand=TRUE, 
@@ -569,21 +562,6 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
     h_summ <- function(h,...) {
         radio.sel <<- svalue(r_summ, index=TRUE)
         radio.inst <<- "r_summ"
-        if(radio.sel==1){
-            ##FIXME speed-up: cache summary for full data_set, and reuse when necessary; 
-            ##it should be computed only *once*
-            summ.out <- capture.output(summary(data_set))
-        } else if(radio.sel==2){
-            ##FIXME speed-up: if sel is same as full, do nothing 
-            ##FIXME speed-up: use a list where it stores selection, and checks if changed
-            summ.out <- capture.output(summary(droplevels(DF[])))
-        } else if(radio.sel==3){
-            summ.out <- capture.output(summary(droplevels(data_set[rows.disp, ])))
-        } else if(radio.sel==4){
-            summ.out <- capture.output(summary(droplevels(data_set[ , cnms.disp])))
-        }
-        svalue(t_summ) <- ""
-        insert(t_summ, summ.out, font.attr=list(family="monospace"))
         r_sync()
     }
     addHandlerChanged(r_summ, h_summ)
@@ -591,8 +569,6 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
                      #width=500, height=1000, 
                      expand=TRUE)
     editable(t_summ) <- FALSE
-    insert(t_summ, capture.output(summary(data_set)), 
-           font.attr=list(family="monospace"))
 
 
     ##Levels sub-tab
@@ -618,18 +594,6 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
     h_lev <- function(h,...) {
         radio.sel <<- svalue(r_lev, index=TRUE)
         radio.inst <<- "r_lev"
-        ##FIXME subsetting should be happening only once for describe/levels/debugging
-        if(radio.sel==1){
-            levs.out <- capture.output(list_levs(data_set, data_set_nms))
-        } else if(radio.sel==2){
-            levs.out <- capture.output(list_levs(droplevels(DF[])))
-        } else if(radio.sel==3){
-            levs.out <- capture.output(list_levs(droplevels(data_set[rows.disp, ])))
-        } else if(radio.sel==4){
-            levs.out <- capture.output(list_levs(droplevels(data_set[ , cnms.disp])))
-        }
-        svalue(t_lev) <- ""
-        insert(t_lev, levs.out, font.attr=list(family="monospace"))
         r_sync()
     }
     addHandlerChanged(r_lev, h_lev)
@@ -637,8 +601,6 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
                      #width=500, height=1000, 
                      expand=TRUE)
     editable(t_lev) <- FALSE
-    insert(t_lev, capture.output(list_levs(data_set, data_set_nms)), 
-           font.attr=list(family="monospace"))
     
     ##Debugging sub-tab
     ddebgg <- ggroup(cont=dntbk, horizontal=FALSE, label="Debugging", expand=TRUE
@@ -657,34 +619,13 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
     h_deb <- function(h,...) {
         radio.sel <<- svalue(r_deb, index=TRUE)
         radio.inst <<- "r_deb"
-        if(radio.sel==1){
-            ##FIXME speed-up: cache summary for full data_set, and reuse when necessary; 
-            ##it should be computed only *once*
-            deb.out <- debug_data.frame(data_set)
-        } else if(radio.sel==2){
-            ##FIXME speed-up: if sel is same as full, do nothing 
-            ##FIXME speed-up: use a list where it stores selection, and checks if changed
-            deb.out <- (debug_data.frame(droplevels(DF[])))
-        } else if(radio.sel==3){
-            deb.out <- (debug_data.frame(droplevels(data_set[rows.disp, ])))
-        } else if(radio.sel==4){
-            deb.out <- (debug_data.frame(droplevels(data_set[ , cnms.disp])))
-        }
-        delete(df_deb_box, df_deb_box[1])             # remove child
-        DF_deb <- gdf(deb.out, cont=df_deb_box, expand=TRUE, 
-                      freeze_attributes=TRUE)
-        sapply(1:data_set_dim[2], function(j) editable(DF_deb, j) <- FALSE)
         r_sync()
     }
     addHandlerChanged(r_deb, h_deb)
     df_deb_box <- ggroup(cont=ddebgg, expand=TRUE) ## holds DF_deb instance
-    ## now add a data frame
-    #delete(df_deb_box, df_deb_box[1])             # remove child
-    ##FIXME inneficient approach: upon reload the df may be a subset
-    DF_deb <- gdf(debug_data.frame(data_set), cont=df_deb_box, expand=TRUE, 
-               freeze_attributes=TRUE)
-    sapply(1:data_set_dim[2], function(j) editable(DF_deb, j) <- FALSE)
-
+    ## create a place-holder that can later be deleted
+    DF_deb <- glabel("", cont=df_deb_box, expand=TRUE)
+    
 
     ##focus Describe sub-tab
     svalue(dntbk) <- 1
@@ -697,6 +638,76 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
         if(radio.inst!="r_summ") svalue(r_summ, index=TRUE) <- radio.sel
         if(radio.inst!="r_deb") svalue(r_deb, index=TRUE) <- radio.sel
     }
+    
+    f_details <- function(x=data_set, nm=data_set_name, nms=data_set_nms){
+        out <- list()
+        out[["descr"]] <- describe(x, descript=nm)
+        out[["summ"]] <- capture.output(summary(x))
+        out[["lev"]] <- capture.output(list_levs(x, NULL))
+        out[["vars"]] <- capture.output(dput(names(x)))
+        out[["deb"]] <- debug_data.frame(x)
+        return(out)
+    }
+    
+    ##use one handler to rule them all (since subsetting is the bitch)
+    h_details <- function(h, choice=radio.sel, ...) {
+        choice <- names(details_choices)[choice]
+        #print(choice)
+        if(choice=='full'){
+            ##avoid re-computing if output already exists
+            if(is.null(details.out[[choice]])) details.out[[choice]] <<- f_details()
+        } else if(choice=='col'){
+            ##compute if output does NOT exist
+            if(is.null(details.out[[choice]])){
+                details.out[[choice]] <<- f_details(droplevels(data_set[ , cnms.disp]))
+            ##avoid re-computing if output already exists & selection same
+            } else if(!isTRUE(all.equal(cnms.disp, cnms.disp_old[[choice]]))){
+                details.out[[choice]] <<- f_details(droplevels(data_set[ , cnms.disp]))
+            }
+            ##store selection of displayed details
+            cnms.disp_old[[choice]] <<- cnms.disp
+        } else if(choice=='sel'){
+            if(is.null(details.out[[choice]])){
+                details.out[[choice]] <<- f_details(droplevels(DF[]))
+            } else if(any(!isTRUE(all.equal(cnms.disp, cnms.disp_old[[choice]])), 
+                !isTRUE(all.equal(rows.disp, rows.disp_old[[choice]])))){
+                details.out[[choice]] <<- f_details(droplevels(DF[]))
+            }
+            cnms.disp_old[[choice]] <<- cnms.disp
+            rows.disp_old[[choice]] <<- rows.disp
+        } else if(choice=='row'){
+            if(is.null(details.out[[choice]])){
+                details.out[[choice]] <<- f_details(droplevels(data_set[rows.disp, ]))
+            } else if(!isTRUE(all.equal(rows.disp, rows.disp_old[[choice]]))){
+                details.out[[choice]] <<- f_details(droplevels(data_set[rows.disp, ]))
+            }
+            rows.disp_old[[choice]] <<- rows.disp
+        }
+        new.disp <<- FALSE
+    }
+
+    h_details.ins <- function(h, choice=radio.sel, ins=details.out,...) {
+        choice <- names(details_choices)[choice]
+        svalue(t_descr) <- ""
+        insert(t_descr, capture.output(ins[[choice]][["descr"]]), 
+            font.attr=list(family="monospace"))
+        svalue(t_summ) <- ""
+        insert(t_summ, ins[[choice]][["summ"]], font.attr=list(family="monospace"))
+        svalue(t_lev) <- ""
+        insert(t_lev, ins[[choice]][["lev"]], font.attr=list(family="monospace"))
+        delete(df_deb_box, df_deb_box[1])             # remove child
+        DF_deb <- gdf(ins[[choice]][["deb"]], cont=df_deb_box, expand=TRUE, 
+                      freeze_attributes=TRUE)
+        sapply(1:data_set_dim[2], function(j) editable(DF_deb, j) <- FALSE)
+        DF_deb$set_selectmode("multiple")
+    }
+    
+    addHandlerChanged(r_descr, function(h, ...){
+        h_details()
+        h_details.ins()
+    })
+    
+    ##init Details tab
     radio.sel <- 2
     radio.inst <- ""
     r_sync()
@@ -711,9 +722,25 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
     #insert(gtlab, label(data_set, self=TRUE), 
     #       font.attr=list(family="monospace"))
     
+    ##by default update Details only when the tab is selected
+    if(!details.on.tab.sel){
+        h_details()
+        h_details.ins()
+    }
 
     ##focus Filter tab
     svalue(ntbk) <- 1
+    if(details.on.tab.sel){
+        ##by default update Details only when the tab is selected
+        ##and if there is a newly displayed data frame
+        addHandlerChanged(ntbk, function(h, ...){
+                if(all(h$page.no==2, new.disp)){
+                    h_details()
+                    h_details.ins()
+                }
+            })
+    }
+	}
 
     ##set GUI window parameters
     ##set sizes
