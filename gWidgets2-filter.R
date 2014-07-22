@@ -3,6 +3,7 @@
 dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE, 
                      data_set_name=NULL, sel.col=NULL, sel.row=NULL, esc=FALSE, 
                      def.col=100, details=TRUE, details.on.tab.sel=TRUE
+                     , confirm.big.df=TRUE
                      ){
     require(gWidgets2) ## on github not CRAN. (require(devtools); install_github("gWidgets2", "jverzani")
     options(guiToolkit="RGtk2")
@@ -363,6 +364,16 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
         ##store rows/cnms currently being displayed for use in describe()
         rows.disp <<- rows
         cnms.disp <<- cnms
+        
+        ##check if loading a huge data frame and warn user
+        if(all( (sum(rows) * length(cnms)) >= 500000, confirm.big.df)){
+            bd_huge <- gconfirm('You are about to load a large data frame, 
+which may take a long time to display (in 
+some cases up to several minutes). 
+                   
+Do you want to proceed?', title="Warning", icon="warning")
+            if(!bd_huge) return()
+        }
         
         ##gtkSpinner() functionality
         #add(gsb_dfg, gsb_dfsp)
