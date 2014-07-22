@@ -274,8 +274,14 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
     ## centralized handler helper fun to update size of row/col selection
     len_idxs_update <- function(h, ...) {
         rows <<- svalue(row_filter)
-        idxs <<- which(rows)                  # move to global variable
-        len_idxs <<- length(idxs)                  # move to global variable
+        ##catch if row_filter outputs all FALSE or empty selection
+        if(!any(rows)){
+            idxs <<- integer()
+            len_idxs <<- 0L
+        } else {
+            idxs <<- which(rows)                  # move to global variable
+            len_idxs <<- length(idxs)                  # move to global variable
+        }
         data_set_dim <<- c(len_idxs, len_cnms)
     }
     len_cnms_update <- function(h, ...) {
