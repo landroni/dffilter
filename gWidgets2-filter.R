@@ -628,6 +628,29 @@ Do you want to proceed?', title="Warning", icon="warning")
                      expand=TRUE)
     editable(t_lev) <- FALSE
     
+    #####
+    ##Variables sub-tab
+    dvargg <- ggroup(cont=dntbk, horizontal=FALSE, label="Variables", expand=TRUE, 
+                   use.scrollwindow = TRUE)
+    dvargg2 <- ggroup(cont=dvargg, expand=FALSE)
+    r_var <- gradio(details_choices, 2, horizontal=TRUE, cont=dvargg2
+                      #, label="Describe data set"
+    )
+    tooltip(dvargg2) <- "Display levels of factors for the full data set, a column selection (all rows), the currently displayed subset, a row selection (all columns)"
+    
+    ##handler to update/init describe() output
+    h_var <- function(h,...) {
+        radio.sel <<- svalue(r_var, index=TRUE)
+        radio.inst <<- "r_var"
+        r_sync()
+    }
+    addHandlerChanged(r_var, h_var)
+    t_var <- gtext(cont=dvargg, font.attr=list(family="monospace"), 
+                     #width=500, height=1000, 
+                     expand=TRUE)
+    editable(t_var) <- FALSE
+    
+    #####
     ##Debugging sub-tab
     ddebgg <- ggroup(cont=dntbk, horizontal=FALSE, label="Debugging", expand=TRUE
                     #, use.scrollwindow = TRUE
@@ -659,9 +682,10 @@ Do you want to proceed?', title="Warning", icon="warning")
     ##handler to keep Details radios in sync
     r_sync <- function(h, ...){
         ##FIXME isn't there an infinite loop here in this sync? 
-        if(radio.inst!="r_lev") svalue(r_lev, index=TRUE) <- radio.sel
         if(radio.inst!="r_descr") svalue(r_descr, index=TRUE) <- radio.sel
         if(radio.inst!="r_summ") svalue(r_summ, index=TRUE) <- radio.sel
+        if(radio.inst!="r_lev") svalue(r_lev, index=TRUE) <- radio.sel
+        if(radio.inst!="r_var") svalue(r_var, index=TRUE) <- radio.sel
         if(radio.inst!="r_deb") svalue(r_deb, index=TRUE) <- radio.sel
     }
     
@@ -670,7 +694,7 @@ Do you want to proceed?', title="Warning", icon="warning")
         out[["descr"]] <- describe(x, descript=nm)
         out[["summ"]] <- capture.output(summary(x))
         out[["lev"]] <- capture.output(list_levs(x, NULL))
-        out[["vars"]] <- capture.output(dput(names(x)))
+        out[["var"]] <- capture.output(dput(names(x)))
         out[["deb"]] <- debug_data.frame(x)
         return(out)
     }
@@ -721,6 +745,8 @@ Do you want to proceed?', title="Warning", icon="warning")
         insert(t_summ, ins[[choice]][["summ"]], font.attr=list(family="monospace"))
         svalue(t_lev) <- ""
         insert(t_lev, ins[[choice]][["lev"]], font.attr=list(family="monospace"))
+        svalue(t_var) <- ""
+        insert(t_var, ins[[choice]][["var"]], font.attr=list(family="monospace"))
         delete(df_deb_box, df_deb_box[1])             # remove child
         DF_deb <- gdf(ins[[choice]][["deb"]], cont=df_deb_box, expand=TRUE, 
                       freeze_attributes=TRUE)
