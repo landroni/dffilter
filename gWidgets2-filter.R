@@ -395,6 +395,7 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
     ##init dummy handler funs to avoid "not found" error
     h_descr <- function() invisible(NULL)
     h_lev <- function() invisible(NULL)
+    h_var <- function() invisible(NULL)
     h_summ <- function() invisible(NULL)
     h_deb <- function() invisible(NULL)
     h_details <- function() invisible(NULL)
@@ -485,6 +486,7 @@ Do you want to proceed?', title="Warning", icon="warning")
         if(details){
 			h_descr()
 			h_lev()
+			h_var()
 			h_summ()
 			h_deb()
             if(!details.on.tab.sel){
