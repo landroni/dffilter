@@ -2,8 +2,10 @@
 
 dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE, 
                      data_set_name=NULL, sel.col=NULL, sel.row=NULL, esc=FALSE, 
-                     def.col=100, details=TRUE, details.on.tab.sel=TRUE
-                     , confirm.big.df=TRUE
+                     def.col=100, details=TRUE, details.on.tab.sel=TRUE, 
+                     confirm.big.df=TRUE, 
+                     initial.vars=data.frame(data_set_nms[1], "preset", "preset", 
+                        stringsAsFactors=FALSE)
                      ){
     require(gWidgets2) ## on github not CRAN. (require(devtools); install_github("gWidgets2", "jverzani")
     options(guiToolkit="RGtk2")
@@ -30,9 +32,11 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
     DF_deb <- NULL
     details.out <- list()
     new.disp <- FALSE
+    filter.types <- c("single"="RadioItem", "multiple"="ChoiceItem", 
+        "range"="RangeItem", "preset"="PresetItem")
     
      #print(data_set_name)
-     #rint(class(sel.row))
+     #print(class(sel.row))
      #print(length(sel.row))
      #for(i in sel.row) print(class(i)[1])
     #for(i in 1:length(sel.row)) print(svalue(sel.row[[i]]))
@@ -101,11 +105,16 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
     addSpring(f_side0g)
     b_reload <- gbutton("Reload", cont=ggroup(cont=f_side0g))
     addHandlerClicked(b_reload, handler=function(h, ...) {
-        dispose(w)
+        #break.point()
         #print(data_set_name)
+        #print(class(row_filter))
+        #for(i in sel.row) print(class(i)[1])
+        #for(i in 1:length(sel.row)) print(svalue(sel.row[[i]]))
+        
+        dispose(w)
         dffilter_reload(data_set=get(data_set_name), display=display, maximize=maximize, 
                         editable=editable, data_set_name=data_set_name, 
-                        sel.col=old_selection, sel.row=row_filter$l)
+                        sel.col=old_selection, sel.row=row_filter)
     })
     b_reload$set_icon("refresh")
     tooltip(b_reload) <- "Reload data frame"
@@ -226,6 +235,7 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
         svalue(c_names, index=TRUE) <- 1:min(def.col, data_set_dim_orig[2])
     }
     if(!is.null(sel.col)){
+        ##FIXME message to inform user when selection couldn't be restored
         if(all(sel.col %in% data_set_nms)) svalue(c_names) <- sel.col
     } 
 
@@ -266,10 +276,34 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
     tooltip(b_clear) <- 'Select none'
     
     ## Filter rows by logical
+    if(!is.null(sel.row)){
+       #sel.row[[1]]$make_ui(visible=TRUE)
+        #print(length(sel.row$l))
+        #print(sel.row$l[[1]]$name)
+        #print(sel.row$l[[1]]$type)
+        #print(class(sel.row$l[[1]])[1])
+        filter.type <- c()
+        filter.var <- c()
+        for(i in sel.row$l){ 
+            filter.type <- c(filter.type , class(i)[1])
+            filter.var <- c(filter.var , i$name)
+        }
+        for(i in 1:length(filter.type)) names(filter.type)[i] <- names(
+            filter.types)[filter.types == filter.type[i]]
+        initial.vars <- data.frame(vars=filter.var, names=filter.var, 
+            filter=names(filter.type), stringsAsFactors=FALSE)
+        initial.vars[ initial.vars$filter=="preset", "vars"] <- data_set_nms[1]
+        print(initial.vars)
+       ##FIXME this should work, but ends up in an error
+       #sel.row$l[[1]]$initialize_item()
+       #sel.row[[1]]$initialize_item()
+       #row_filter <- sel.row
+       #row_filter$l[[1]]$initialize_item()
+    }
     r_gp <- gframe("<b>Filter rows:</b>", markup=TRUE, cont=f_side1, horizontal=FALSE)
-    row_filter <- gfilter(data_set, initial.vars=data.frame(data_set_nms[1], "preset", 
-                                                            "preset", stringsAsFactors=FALSE), 
-                          cont=r_gp, expand=TRUE)
+    row_filter <- gfilter(data_set, initial.vars=initial.vars, 
+                          cont=r_gp, expand=TRUE, head.def=500)
+
 
     ## centralized handler helper fun to update size of row/col selection
     len_idxs_update <- function(h, ...) {

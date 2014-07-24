@@ -1,25 +1,29 @@
 High priority / ASAP:
- - visible(DF_deb) <- on "Extended debugging details" cb 
  - move gnotebook alongside Hide/Reload buttons
+    -  dfview() & dfdescr()
+ - add Labels tab
+ - focus input box after pressing buttons in c_names
 
  - !!Reload data.frame button
-	- restore row filters
-		- use initial.vars=sel.row and construct sel.row as an appropriate df for gfilter() call
-    - FIXME if digest has NOT changed then on 'reload' simply display a statusbar message
+    - restore actual selection of row filters after checking that structure has not changed
+        - adding new filter should consider merged changes 
+        - when modifying a level and merging changes, it should automatically update the filters
+    - implement digest
+        - if digest has NOT changed then on 'reload' simply display a statusbar message, OR disable 'reload'
+        - ??auto-polling of the data frame? 
+    - reload fails if loaded df is not in workspace: df[ subs, ]
+		- check if get('df') works, if not disable 'Reload' button and set editable=F
+    - FIXME investigate cache bug: dffilter(Xa), Xa$var[1:10,] <- NA, dffilter(Xa) without closing first instance. Or dffilter(cbind(Xa, Xb)). 
     - editable=T: when making object copy, save digest, then before saving changes in workspace, 
         check if digest of object is still the same and if not inform the user that 
         the object had already been modified and ask for additional confirmation 
-    - FIXME reload fails if loaded df is not in workspace: df[ subs, ]
-    - adding new filter should consider merged changes 
-        - bug when modifying a level and merging changes, it should automatically update the filters; 
-    - auto-polling of data frame? 
-    - investigate cache bug: dffilter(Xa), Xa$var[1:10,] <- NA, dffilter(Xa) without closing first instance. Or dffilter(cbind(Xa, Xb)). 
 
- - add Labels tab
+ - FIXME visible(DF_deb) <- on "Extended debugging details" cb 
  - FIXME prev/next buttons: right-click or ctrl+click to go first/last
  - FIXME dynamically switch f_side0g from horizontal=T to F
  - !!add hide=F, search.opts=list(), auto.update=F
- - !!make.names() or disallow data frames with duplicate names to avoid assignment issues
+ - !!make.names() & set editable=F & message to inform user
+	- ??disallow data frames with duplicate names to avoid assignment issues
     - bug with cbind() & check.names=F
  - !!allow to display df[x, 1, drop=F]
 
@@ -44,7 +48,11 @@ High priority / ASAP:
         or via c-menu item "select to here"
 
  - !!proper packaging for CRAN
-    - name ideas: "interactive/exploratory data manipulation"
+    - name ideas: 
+		- "interactive data manipulation"
+		- "The Data Explorer"
+		- "Data exploration and interactive data manipulation"
+		- ??exploratory
  - investigate what happens on merge for such a "tmp" df
  - ??add subs=NULL option & col.subs=NULL (&disallow [] in df name)
  - REQ gdf() precision of decimal points
@@ -52,7 +60,6 @@ High priority / ASAP:
  - ??'Enter' should activate display button
  - opts c-menu & automatically update cbs: 
     - 'Automatically update Details' tab cb
- - focus input box after pressing buttons in c_names
 
  - REQ when viewing gdf(), possible to c-menu "copy" cell?
     - min window with up to 5th digit nrs, restore window, hover cells, 
@@ -76,9 +83,11 @@ High priority / ASAP:
  - REQ gcombobox(use_completion=T): when only available item has been auto-completed, drop pop-up menu automatically
  - REQ gcomboboxgrp: search, then jerky jump on focus
  - REQ gdf(): rm row numbers or improve separation between row.nr and data
- - FIXME search for `a\` in c_names
+ - FIXME search for `a\` or `asdf[.` in c_names
  Error in (function (pattern, x, ignore.case = FALSE, perl = FALSE, fixed = FALSE,  : 
   invalid regular expression 'a\', reason 'Trailing backslash'
+  Error in (function (pattern, x, ignore.case = FALSE, perl = FALSE, fixed = FALSE,  : 
+  invalid regular expression 'comp[', reason 'Missing ']''
  - FIXME issue with 'asdf' in numeric gcombobox(edit=T)
     - 8: In svalue.default(widget) : NAs introduced by coercion
  - make Details sub-tabs optional
@@ -104,16 +113,6 @@ Medium priority / soon:
  - !!toggle button to display only unique()/duplicated2() matches (can gdf() support this?)
  - !!use new_item_handler to handle the auto-resize of pane issue (on 'add item')
 ###
-- !!Structure
-    - edit data structure: rename & sort & re-order variables/cols, change var type/factors, edit factors, batch rename cols (tolower), etc. w/o displaying data frame; Deducer-style? ; dfstruct(); mutate(), copy vars, create new vars by transforming existing var; 
-    - use dnd to re-order columns in list, for display purposes & tooltip
-    - sort & re-order columns (in gdf()? or separately w/o loading the full data frame?; have distinct window)
-    - label(..., self=T) 
-        - ulabel -- graphically update label (in style of clabel); 
-        - FIXME how deal with cbind() that discards label? 
-            - maybe store in special object that documents all up-to-date labelled objs in workspace; 
-        - append 'last modified on date time'; 
-###
  - !!throttle requests from preset (see #40)
  - REQ highlight gdf() columns (see #12)
  - !!dfdiff() functionality on Merge; check if subset objs are identical; use all.equal() and identical() on subset
@@ -124,23 +123,14 @@ Medium priority / soon:
  - ??theme dependent colors
  - ??Details speed-up: if sel is same as full, do nothing 
     - unlikely in big data frames, irrelevant in small ones
+ - document `initial.vars` in gfilter()
 
 
-Low priority / maybe:
- - ??allow dfstr() and dfdescr() too
+Low priority / maybe / later:
  - !!export subset ("save as" different obj)
- - ??on display button, log subsetting operation in the console or Log window
-    - log commands and/or print commands 
- - ??data frame selector (use data frame browser; what about matrix objs?) & label(..., self=T) in tooltip and make  label editable & describe() & class() & nchar() & clone obj & save obj as .RData/csv/etc. & 
- - ??data frame selector (use data frame browser; what about matrix objs?) & label(..., self=T) in tooltip and make  label editable & describe() & class() & nchar() & auto-load on package load & allow to set gtimer(check_digest) on data frames or maybe allow to set polling using digests on specific objects/subsets; debug var with nchar, etc.; allow to compare to variables, even when vars from two different data frames (all.equal()); allow to compare two objects (all.equal()); 
- - ??diff (papertrail; setdiff2 {prob} or {compare} using github green/red & darkgreen/darkred colouring approach; 'dataview'; split-window with side-by-side display as in diffPDF; what happens when the two df have different nr of rows/columns?; also diff two variables within data.frame?; preview pane with head(X, 20) including class/mode, etc.; )
- - ??diff (papertrail; setdiff2 {prob} using github green/red & darkgreen/darkred colouring approach; 'dataview'; split-window with side-by-side display as in diffPDF; what happens when the two df have different nr of rows/columns?; also diff two variables within data.frame?; display all.equal() results and doublecheck with identical() on subset; dfdiff(); )
- - ??replace2 (gui for replacement tables); merge; 
- - ??poor man's loop constructor/debugger/sandbox with automatic interpretation of variables and display of obtained values and working on a head() subset of original input; loop workflow; apply() funs; 
- - ??poor man's formula constructor, given a df; look into Rcmdr for an implementation; allow for * : etc. constructs, maybe by using groupings; log the reproducible, generated command; see pmg; 
+	- save details output to text file
  - ??melt/dcast gui for pivot tables (this is still exploratory so fits the scope of the package); use margins et al.; OR use 'tables' tabular() and provide latex/html export & reproducible code
     - Rcmdr table of statistics
- - ??include dynamic subset feature in latticist
  - ??compat with other GUIs: 
     - rstudio usage ideas: View <- dffilter
     - REQ Rcmdr option for viewer editor
@@ -150,4 +140,26 @@ Low priority / maybe:
  - ??what of 5gb dataset or 21297 integer levels: 
     - it shouldn't be too slow; 
     - if possible use max 1 copy/subs of df; 
+
+ - ??on display button, log subsetting operation in the console or Log window
+    - log commands and/or print commands 
+ - ??data frame selector (use data frame browser; what about matrix objs?) & label(..., self=T) in tooltip and make  label editable & describe() & class() & nchar() & clone obj & save obj as .RData/csv/etc. & 
+ - ??data frame selector (use data frame browser; what about matrix objs?) & label(..., self=T) in tooltip and make  label editable & describe() & class() & nchar() & auto-load on package load & allow to set gtimer(check_digest) on data frames or maybe allow to set polling using digests on specific objects/subsets; debug var with nchar, etc.; allow to compare to variables, even when vars from two different data frames (all.equal()); allow to compare two objects (all.equal()); 
+ - ??diff (papertrail; setdiff2 {prob} or {compare} using github green/red & darkgreen/darkred colouring approach; 'dataview'; split-window with side-by-side display as in diffPDF; what happens when the two df have different nr of rows/columns?; also diff two variables within data.frame?; preview pane with head(X, 20) including class/mode, etc.; )
+ - ??diff (papertrail; setdiff2 {prob} using github green/red & darkgreen/darkred colouring approach; 'dataview'; split-window with side-by-side display as in diffPDF; what happens when the two df have different nr of rows/columns?; also diff two variables within data.frame?; display all.equal() results and doublecheck with identical() on subset; dfdiff(); )
+ - ??replace2 (gui for replacement tables); merge; 
+ - ??poor man's loop constructor/debugger/sandbox with automatic interpretation of variables and display of obtained values and working on a head() subset of original input; loop workflow; apply() funs; 
+ - ??poor man's formula constructor, given a df; look into Rcmdr for an implementation; allow for * : etc. constructs, maybe by using groupings; log the reproducible, generated command; see pmg; 
+ - ??include subset feature in latticist
+###
+- !!Structure
+	- allow dfstr()
+    - edit data structure: rename & sort & re-order variables/cols, change var type/factors, edit factors, batch rename cols (tolower), etc. w/o displaying data frame; Deducer-style? ; dfstruct(); mutate(), copy vars, create new vars by transforming existing var; 
+    - use dnd to re-order columns in list, for display purposes & tooltip
+    - sort & re-order columns (in gdf()? or separately w/o loading the full data frame?; have distinct window)
+    - label(..., self=T) 
+        - ulabel -- graphically update label (in style of clabel); 
+        - FIXME how deal with cbind() that discards label? 
+            - maybe store in special object that documents all up-to-date labelled objs in workspace; 
+        - append 'last modified on date time'; 
 
