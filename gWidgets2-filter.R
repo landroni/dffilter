@@ -32,6 +32,7 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
     DF_deb <- NULL
     details.out <- list()
     new.disp <- FALSE
+    rows.df.deb <- NULL               # global rows index (subset currently displayed)
     filter.types <- c("single"="RadioItem", "multiple"="ChoiceItem", 
         "range"="RangeItem", "preset"="PresetItem")
     
@@ -275,6 +276,8 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
     })
     tooltip(b_clear) <- 'Select none'
     
+    
+    ###############################
     ## Filter rows by logical
     if(!is.null(sel.row)){
        #sel.row[[1]]$make_ui(visible=TRUE)
@@ -430,8 +433,6 @@ Do you want to proceed?', title="Warning", icon="warning")
         delete(df_box, df_box[1])             # remove child
         
         ## disable editing if so requested
-        #data_set_dim <- dim(data_set[idxs, cnms])
-        #data_set_dim <- c(len_idxs, len_cnms)
         if(!editable) {
             DF <<- gdf(data_set[rows, cnms], cont=df_box, expand=TRUE, 
                        freeze_attributes=TRUE)
@@ -700,6 +701,9 @@ Do you want to proceed?', title="Warning", icon="warning")
                       )
     tooltip(ddebgg1) <- "Display debugging info for the full data set, a column selection (all rows), the currently displayed subset, a row selection (all columns)"
     
+    cb_deb <- gcheckbox("Extended debugging details", checked=FALSE, cont=ddebgg)
+    tooltip(cb_deb) <- "Check to see additional debugging information"
+
     ##handler to update/init describe() output
     h_deb <- function(h,...) {
         radio.sel <<- svalue(r_deb, index=TRUE)
@@ -711,6 +715,18 @@ Do you want to proceed?', title="Warning", icon="warning")
     ## create a place-holder that can later be deleted
     DF_deb <- glabel("", cont=df_deb_box, expand=TRUE)
     
+    ##hide extended debugging details when requested
+    h_cb_deb <- function(h, ...){
+        #print(svalue(cb_deb))
+        #print(rows.df.deb)
+        #if(svalue(cb_deb)) print(rep(TRUE, rows.df.deb)) else
+        #    print(1:rows.df.deb %in% 1:8)
+        if(svalue(cb_deb)) visible(DF_deb) <<- rep(TRUE, rows.df.deb) else
+            ##FIXME need to generalize this
+            visible(DF_deb) <<- 1:rows.df.deb %in% 1:8
+    }
+    addHandlerChanged(cb_deb, h_cb_deb)
+
 
     ##focus Describe sub-tab
     svalue(dntbk) <- 1
@@ -772,7 +788,7 @@ Do you want to proceed?', title="Warning", icon="warning")
         new.disp <<- FALSE
     }
 
-    h_details.ins <- function(h, choice=radio.sel, ins=details.out,...) {
+    h_details.ins <- function(h, choice=radio.sel, ins=details.out, ...){
         choice <- names(details_choices)[choice]
         svalue(t_descr) <- ""
         insert(t_descr, capture.output(ins[[choice]][["descr"]]), 
@@ -784,8 +800,10 @@ Do you want to proceed?', title="Warning", icon="warning")
         svalue(t_var) <- ""
         insert(t_var, ins[[choice]][["var"]], font.attr=list(family="monospace"))
         delete(df_deb_box, df_deb_box[1])             # remove child
-        DF_deb <- gdf(ins[[choice]][["deb"]], cont=df_deb_box, expand=TRUE, 
+        DF_deb <<- gdf(ins[[choice]][["deb"]], cont=df_deb_box, expand=TRUE, 
                       freeze_attributes=TRUE)
+        if(is.null(rows.df.deb)) rows.df.deb <<- nrow(DF_deb)
+        h_cb_deb()
         sapply(1:data_set_dim[2], function(j) editable(DF_deb, j) <- FALSE)
         DF_deb$set_selectmode("multiple")
     }
@@ -793,9 +811,10 @@ Do you want to proceed?', title="Warning", icon="warning")
     addHandlerChanged(r_descr, function(h, ...){
         h_details()
         h_details.ins()
+        #h_cb_deb()
     })
     
-    ##init Details tab
+    ##init Details tab on start-up
     radio.sel <- 2
     radio.inst <- ""
     r_sync()
@@ -803,6 +822,7 @@ Do you want to proceed?', title="Warning", icon="warning")
     if(!details.on.tab.sel){
         h_details()
         h_details.ins()
+        #h_cb_deb()
     }
 
     ##focus Filter tab
@@ -814,6 +834,7 @@ Do you want to proceed?', title="Warning", icon="warning")
                 if(all(h$page.no==2, new.disp)){
                     h_details()
                     h_details.ins()
+                    #h_cb_deb()
                 }
             })
     }

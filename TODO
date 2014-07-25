@@ -1,5 +1,6 @@
 High priority / ASAP:
- - move gnotebook alongside Hide/Reload buttons
+ - !!move gnotebook alongside Hide/Reload buttons
+    - add filter=F
     -  dfview() & dfdescr()
  - add Labels tab
  - focus input box after pressing buttons in c_names
@@ -18,9 +19,7 @@ High priority / ASAP:
         check if digest of object is still the same and if not inform the user that 
         the object had already been modified and ask for additional confirmation 
 
- - FIXME visible(DF_deb) <- on "Extended debugging details" cb 
  - FIXME prev/next buttons: right-click or ctrl+click to go first/last
- - FIXME dynamically switch f_side0g from horizontal=T to F
  - !!add hide=F, search.opts=list(), auto.update=F
  - !!make.names() & set editable=F & message to inform user
 	- ??disallow data frames with duplicate names to avoid assignment issues
@@ -92,6 +91,8 @@ High priority / ASAP:
     - 8: In svalue.default(widget) : NAs introduced by coercion
  - make Details sub-tabs optional
  - add numSummary tab
+ - ??is_empty for ""
+ - FIXME dynamically switch f_side0g from horizontal=T to F
 
 
 
