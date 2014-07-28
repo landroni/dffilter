@@ -1,9 +1,11 @@
 High priority / ASAP:
  - !!move gnotebook alongside Hide/Reload buttons
+    - !!fix Display DF always being triggered
     - add filter=F
     -  dfview() & dfdescr()
- - add Labels tab
  - focus input box after pressing buttons in c_names
+ - add hide=F
+
 
  - !!Reload data.frame button
     - restore actual selection of row filters after checking that structure has not changed
@@ -20,7 +22,7 @@ High priority / ASAP:
         the object had already been modified and ask for additional confirmation 
 
  - FIXME prev/next buttons: right-click or ctrl+click to go first/last
- - !!add hide=F, search.opts=list(), auto.update=F
+ - !!search.opts=list(), auto.update=F
  - !!make.names() & set editable=F & message to inform user
 	- ??disallow data frames with duplicate names to avoid assignment issues
     - bug with cbind() & check.names=F
@@ -92,7 +94,10 @@ High priority / ASAP:
  - make Details sub-tabs optional
  - add numSummary tab
  - ??is_empty for ""
- - FIXME dynamically switch f_side0g from horizontal=T to F
+ - REQ gdf() label() trouble?
+     Warning messages:
+    1: In `[<-.data.frame`(`*tmp*`, i, , value = list(Sepal.Length = c("labelled",  :
+      replacement element 1 has 2 rows to replace 1 rows
 
 
 

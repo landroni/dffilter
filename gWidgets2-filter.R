@@ -71,42 +71,39 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
     ntbk$add_tab_icon(1, "find")
     ntbk$add_tab_tooltip(1, "Filter data frame and display subset")
     #pg <- ggroup(cont=w, horizontal=TRUE)
+    f_side0 <- gvbox(cont=pg, use.scrollwindow=FALSE, 
+                     resize=FALSE, shrink=FALSE)  ##1st side of paned grp
     
     ## have a hide/show button
-    f_side0 <- gvbox(cont=pg, use.scrollwindow=FALSE, 
-                     resize=FALSE, shrink=FALSE)
     f_side0g <- ggroup(cont=f_side0)
-    b_hide <- gbutton("Hide", cont=ggroup(cont=f_side0g))
-    addHandlerClicked(b_hide, handler=function(h, ...) {
+    f_side0g1 <- ggroup(cont=f_side0g)
+    b_hide <- gbutton("Hide", cont=f_side0g1)
+    h_hide <- function(h, ...){
         val <- svalue(h$obj)
         if(val == "Hide") {
             delete(f_side0, f_side1)
+            add(f_side0g, f_side0g2)
+            delete(f_side0g, f_side0g1)
+            svalue(pg) <- as.integer(size(b_show)[1])
         } else {
             add(f_side0, f_side1, expand=T)
-        }
-        blockHandlers(h$obj)
-        svalue(h$obj) = ifelse(val == "Hide", "Show", "Hide")
-        if(svalue(h$obj) == "Hide") {
-            b_hide$set_icon("go-back")
             #print(sapply(f_side0$children, function(u) size(u)))
+            add(f_side0g, f_side0g1)
+            delete(f_side0g, f_side0g2)
+            ##FIXME this slowly enlargens panel size after multiple clicks
             svalue(pg) <- as.integer(size(c_names)[1] + 10)
-            tooltip(b_hide) <- "Hide panel"
-        } else {
-            b_hide$set_icon("go-forward")
-            #print(sapply(f_side0$children, function(u) size(u)))
-            svalue(pg) <- as.integer(size(b_hide)[1])
-            tooltip(b_hide) <- "Show panel"
         }
-        unblockHandler(h$obj)
-    })
+        #blockHandlers(h$obj)
+        #unblockHandler(h$obj)
+    }
+    addHandlerClicked(b_hide, h_hide)
     b_hide$set_icon("go-back")
     tooltip(b_hide) <- "Hide panel"
 
     ## have a reload button
-    addSpring(f_side0g)
-    b_reload <- gbutton("Reload", cont=ggroup(cont=f_side0g))
-    addHandlerClicked(b_reload, handler=function(h, ...) {
-        #break.point()
+    #addSpring(f_side0g)
+    b_reload <- gbutton("Reload", cont=f_side0g1)
+    h_reload <- function(h, ...) {
         #print(data_set_name)
         #print(class(row_filter))
         #for(i in sel.row) print(class(i)[1])
@@ -116,10 +113,25 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
         dffilter_reload(data_set=get(data_set_name), display=display, maximize=maximize, 
                         editable=editable, data_set_name=data_set_name, 
                         sel.col=old_selection, sel.row=row_filter)
-    })
+    }
+    addHandlerClicked(b_reload, h_reload)
     b_reload$set_icon("refresh")
     tooltip(b_reload) <- "Reload data frame"
     
+    ##vertically aligned buttons for when panel is hidden
+    f_side0g2 <- ggroup(horizontal = FALSE, cont=f_side0g)
+    b_show <- gbutton("", cont=f_side0g2)
+    addHandlerClicked(b_show, h_hide)
+    b_show$set_icon("go-forward")
+    tooltip(b_show) <- "Show panel"
+    #add(f_side0g2, b_reload)
+    b_reload2 <- gbutton("", cont=f_side0g2)
+    addHandlerClicked(b_reload2, h_reload)
+    b_reload2$set_icon("refresh")
+    tooltip(b_reload2) <- "Reload data frame"
+    delete(f_side0g, f_side0g2)  ##init the vertical buttons
+
+
     f_side1 <- gvbox(cont=f_side0, use.scrollwindow=TRUE, expand=TRUE)
     
     df_side <- gvbox(cont = pg, expand=TRUE)
