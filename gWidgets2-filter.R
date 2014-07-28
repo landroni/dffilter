@@ -139,7 +139,7 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
     df_box <- ggroup(cont=df_side, expand=TRUE) ## holds DF instance
     glabel("Select columns to be displayed \nand define appropriate row filters,\nthen click the 'Display selection' button. \nIf you make changes to your data, you \ncan merge them into the original dataset.", cont=df_box)
     
-    btn_gp <- ggroup(cont = df_side)
+    btn_gp <- ggroup(cont=df_side)
     if(editable) {
         do_btn <- gbutton("Merge changes...", cont=btn_gp)
         do_btn$set_icon("ok")
@@ -340,7 +340,7 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
     }
 
     ## centralized handler helper fun to update size in 'display' button
-    h_disp <- function(h, ...) {
+    h_disp <- function(h, ...){
         #rows <<- svalue(row_filter)
         #idxs <<- which(rows)                  # move to global variable
         #len_idxs <<- length(idxs)                  # move to global variable
@@ -349,10 +349,6 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
         #len_cnms <<- length(cnms)                  # move to global variable
         
         ## detect size of data frame to be displayed
-        #print(len_idxs)
-        #print(len_cnms)
-        #data_set_dim <<- c(len_idxs, len_cnms)
-        #data_set_dim <- dim(data_set[idxs, cnms])
         if(any(data_set_dim < c(1,2))){
             enabled(b_disp) <- FALSE
         } else enabled(b_disp) <- TRUE
@@ -445,7 +441,7 @@ Do you want to proceed?', title="Warning", icon="warning")
         delete(df_box, df_box[1])             # remove child
         
         ## disable editing if so requested
-        if(!editable) {
+        if(!editable){
             DF <<- gdf(data_set[rows, cnms], cont=df_box, expand=TRUE, 
                        freeze_attributes=TRUE)
             sapply(1:data_set_dim[2], function(j) editable(DF, j) <- FALSE)
@@ -568,7 +564,7 @@ Do you want to proceed?', title="Warning", icon="warning")
     if(details){
     dgg <- ggroup(cont=ntbk, horizontal=TRUE, label=" Details")
     ntbk$add_tab_icon(2, "info")
-    ntbk$add_tab_tooltip(2, "Display data frame details")
+    ntbk$add_tab_tooltip(2, "Describe data frame")
     
     #svalue(ntbk) <- 1
     dntbk <- gnotebook(2, cont=dgg, expand=TRUE, fill=TRUE)
@@ -627,12 +623,10 @@ Do you want to proceed?', title="Warning", icon="warning")
     #tooltip(dsgg) <- "Describe the data set that is currently displayed"
     ##radio buttons
     dsgg1 <- ggroup(cont=dsgg, expand=FALSE)
-    r_summ <- gradio(details_choices, 2, horizontal=TRUE, cont=dsgg1
-                      #, label="Describe data set"
-                      )
+    r_summ <- gradio(details_choices, 2, horizontal=TRUE, cont=dsgg1)
     tooltip(dsgg1) <- "Summarise the full data set, a column selection (all rows), the currently displayed subset, a row selection (all columns)"
     
-    ##handler to update/init describe() output
+    ##handler to update/init summary() output
     h_summ <- function(h,...) {
         radio.sel <<- svalue(r_summ, index=TRUE)
         radio.inst <<- "r_summ"
@@ -685,7 +679,7 @@ Do you want to proceed?', title="Warning", icon="warning")
     r_var <- gradio(details_choices, 2, horizontal=TRUE, cont=dvargg2
                       #, label="Describe data set"
     )
-    tooltip(dvargg2) <- "Display levels of factors for the full data set, a column selection (all rows), the currently displayed subset, a row selection (all columns)"
+    tooltip(dvargg2) <- "Display variable names for the full data set, a column selection (all rows), the currently displayed subset, a row selection (all columns)"
     
     ##handler to update/init describe() output
     h_var <- function(h,...) {
@@ -823,7 +817,6 @@ Do you want to proceed?', title="Warning", icon="warning")
     addHandlerChanged(r_descr, function(h, ...){
         h_details()
         h_details.ins()
-        #h_cb_deb()
     })
     
     ##init Details tab on start-up
@@ -834,7 +827,6 @@ Do you want to proceed?', title="Warning", icon="warning")
     if(!details.on.tab.sel){
         h_details()
         h_details.ins()
-        #h_cb_deb()
     }
 
     ##focus Filter tab
