@@ -1,13 +1,13 @@
 High priority / ASAP:
- - !!move gnotebook alongside Hide/Reload buttons
-    - !!fix Display DF always being triggered
+ - add hide=F
+ - move gnotebook alongside Hide/Reload buttons
     - add filter=F
     -  dfview() & dfdescr()
  - focus input box after pressing buttons in c_names
- - add hide=F
 
 
  - !!Reload data.frame button
+    - respect hide=T/F and selected tab
     - restore actual selection of row filters after checking that structure has not changed
         - adding new filter should consider merged changes 
         - when modifying a level and merging changes, it should automatically update the filters
@@ -21,11 +21,11 @@ High priority / ASAP:
         check if digest of object is still the same and if not inform the user that 
         the object had already been modified and ask for additional confirmation 
 
- - FIXME prev/next buttons: right-click or ctrl+click to go first/last
- - !!search.opts=list(), auto.update=F
  - !!make.names() & set editable=F & message to inform user
 	- ??disallow data frames with duplicate names to avoid assignment issues
     - bug with cbind() & check.names=F
+ - FIXME prev/next buttons: right-click or ctrl+click to go first/last
+ - !!search.opts=list(), auto.update=F
  - !!allow to display df[x, 1, drop=F]
 
  - !!tweak preset
@@ -98,7 +98,6 @@ High priority / ASAP:
      Warning messages:
     1: In `[<-.data.frame`(`*tmp*`, i, , value = list(Sepal.Length = c("labelled",  :
       replacement element 1 has 2 rows to replace 1 rows
-
 
 
 gfilter.R TODO items:

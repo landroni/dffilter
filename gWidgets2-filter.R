@@ -404,11 +404,11 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
      })                              
     
     ##init dummy handler funs to avoid "not found" error
-    h_descr <- function() invisible(NULL)
-    h_lev <- function() invisible(NULL)
-    h_var <- function() invisible(NULL)
-    h_summ <- function() invisible(NULL)
-    h_deb <- function() invisible(NULL)
+    #h_descr <- function() invisible(NULL)
+    #h_lev <- function() invisible(NULL)
+    #h_var <- function() invisible(NULL)
+    #h_summ <- function() invisible(NULL)
+    #h_deb <- function() invisible(NULL)
     h_details <- function() invisible(NULL)
     h_details.ins <- function() invisible(NULL)
     
