@@ -5,7 +5,7 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
                      def.col=100, details=TRUE, details.on.tab.sel=TRUE, 
                      confirm.big.df=TRUE, 
                      initial.vars=data.frame(data_set_nms[1], "preset", "preset", 
-                        stringsAsFactors=FALSE)
+                        stringsAsFactors=FALSE), filter.on.tab.sel=TRUE
                      ){
     require(gWidgets2) ## on github not CRAN. (require(devtools); install_github("gWidgets2", "jverzani")
     options(guiToolkit="RGtk2")
@@ -32,9 +32,14 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
     DF_deb <- NULL
     details.out <- list()
     new.disp <- FALSE
+    new.descr <- FALSE
     rows.df.deb <- NULL               # global rows index (subset currently displayed)
     filter.types <- c("single"="RadioItem", "multiple"="ChoiceItem", 
         "range"="RangeItem", "preset"="PresetItem")
+    h_disp_lab <- NULL
+    
+    ##if there is no Details tab, we always want to display subset
+    if(!details) filter.on.tab.sel <- FALSE
     
      #print(data_set_name)
      #print(class(sel.row))
@@ -65,11 +70,8 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
     ##maximize window on load
     if(maximize) getToolkitWidget(w)$maximize()
     
-    ##Filter tab
-    ntbk <- gnotebook(3, cont=w)
-    pg <- gpanedgroup(cont=ntbk, horizontal=TRUE, label=" Filter")
-    ntbk$add_tab_icon(1, "find")
-    ntbk$add_tab_tooltip(1, "Filter data frame and display subset")
+    #pg <- gpanedgroup(cont=ntbk, horizontal=TRUE, label=" Filter")
+    pg <- gpanedgroup(cont=w, horizontal=TRUE)
     #pg <- ggroup(cont=w, horizontal=TRUE)
     f_side0 <- gvbox(cont=pg, use.scrollwindow=FALSE, 
                      resize=FALSE, shrink=FALSE)  ##1st side of paned grp
@@ -133,8 +135,15 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
 
 
     f_side1 <- gvbox(cont=f_side0, use.scrollwindow=TRUE, expand=TRUE)
-    
-    df_side <- gvbox(cont = pg, expand=TRUE)
+
+    ##FIXME mv this to appropriate location in code
+    ############################
+    ##Filter *tab*
+    #df_side <- gvbox(cont=pg, expand=TRUE)
+    ntbk <- gnotebook(3, cont=pg)  ##2nd side of paned grp
+    df_side <- gvbox(cont=ntbk, expand=TRUE, label=" Filter")
+    ntbk$add_tab_icon(1, "find")
+    ntbk$add_tab_tooltip(1, "Display data frame")
     
     df_box <- ggroup(cont=df_side, expand=TRUE) ## holds DF instance
     glabel("Select columns to be displayed \nand define appropriate row filters,\nthen click the 'Display selection' button. \nIf you make changes to your data, you \ncan merge them into the original dataset.", cont=df_box)
@@ -308,7 +317,7 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
         initial.vars <- data.frame(vars=filter.var, names=filter.var, 
             filter=names(filter.type), stringsAsFactors=FALSE)
         initial.vars[ initial.vars$filter=="preset", "vars"] <- data_set_nms[1]
-        print(initial.vars)
+        #print(initial.vars)
        ##FIXME this should work, but ends up in an error
        #sel.row$l[[1]]$initialize_item()
        #sel.row[[1]]$initialize_item()
@@ -353,13 +362,15 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
             enabled(b_disp) <- FALSE
         } else enabled(b_disp) <- TRUE
         
-        blockHandler(b_disp)
+        blockHandlers(b_disp)
         ## dynamically update 'display' button label given current selection
-        svalue(b_disp, append=T) <- paste('Display selection (', data_set_dim[1], 
+        h_disp_lab <<- paste(' selection (', data_set_dim[1], 
                                           ' x ', data_set_dim[2], ')', sep='')
+        svalue(b_disp, append=T) <- paste(if(svalue(ntbk)==1) 'Display' else 
+            if(svalue(ntbk)==2) 'Describe', h_disp_lab, sep='')
         b_disp$set_icon("execute")
         font(b_disp) <- list(weight = "bold")
-        unblockHandler(b_disp)
+        unblockHandlers(b_disp)
         
         ## autoupdate when option checked and button enabled
         if( svalue(cb_autoupdate) & enabled(b_disp) ) b_disp$invoke_change_handler()
@@ -401,7 +412,7 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
        ##update display button
        len_cnms_update()
        h_disp()
-     })                              
+     })
     
     ##init dummy handler funs to avoid "not found" error
     #h_descr <- function() invisible(NULL)
@@ -423,6 +434,7 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
         rows.disp <<- rows
         cnms.disp <<- cnms
         
+        ##FIXME need to make this message tab specific
         ##check if loading a huge data frame and warn user
         if(all( (sum(rows) * length(cnms)) >= 500000, confirm.big.df)){
             bd_huge <- gconfirm('You are about to load a large data frame, 
@@ -437,6 +449,45 @@ Do you want to proceed?', title="Warning", icon="warning")
         #add(gsb_dfg, gsb_dfsp)
         #gsb_dfsp$start()
         
+        ##by default Display data frame only when the tab is selected
+        if(any(!filter.on.tab.sel, svalue(ntbk)==1)){
+            h_filter()
+            new.disp <<- TRUE
+        }
+        
+        ## custom message when displaying full database.
+        if(all(data_set_dim == data_set_dim_orig)){
+            svalue(gsb_dfl) <- paste("Displaying the full data set.", sep='')
+        } else {
+            svalue(gsb_dfl) <- paste('Displaying a ', data_set_dim[1], ' x ', 
+                                   data_set_dim[2], " subset.", sep='')
+        }
+        #gsb_dfsp$stop()
+        #gsb_dfg$widget$remove(gsb_dfsp)
+        font(b_disp) <- list(weight = "normal")
+        
+        ##update details tab
+        ##FIXME ??speed-up: mv this to handler on tab selection
+        if(details){
+            ##FIXME this looks obsolete and should be removed
+            #h_descr()
+            #h_lev()
+            #h_var()
+            #h_summ()
+            #h_deb()
+            #print(svalue(ntbk))
+            if(any(!details.on.tab.sel, svalue(ntbk)==2)){
+                h_details()
+                h_details.ins()
+                new.descr <<- TRUE
+            }
+        }
+        #print("end-of-button handler")
+        #print(paste("new.disp:", new.disp))
+        #print(paste("new.descr:", new.descr))
+    }
+    
+    h_filter <- function(h, ...){
         ## now add a data frame
         delete(df_box, df_box[1])             # remove child
         
@@ -467,6 +518,7 @@ Do you want to proceed?', title="Warning", icon="warning")
         }
         DF$set_selectmode("multiple")
         
+        ##FIXME move this outside handler? 
         ## use "edited" dirty flag
         addHandlerChanged(DF, handler=function(h,...){
             if(!grepl('*', svalue(w), fixed=T)){
@@ -478,32 +530,10 @@ Do you want to proceed?', title="Warning", icon="warning")
             enabled(do_btn) <- FALSE
             svalue(w) <- paste( substr(svalue(w), 1, (nchar(svalue(w))-1)), sep='')
         }
-        
-        ## custom message when displaying full database.
-        if(all(data_set_dim == data_set_dim_orig)){
-            svalue(gsb_dfl) <- paste("Displaying the full data set.", sep='')
-        } else {
-            svalue(gsb_dfl) <- paste('Displaying a ', data_set_dim[1], ' x ', 
-                                   data_set_dim[2], " subset.", sep='')
-        }
-        #gsb_dfsp$stop()
-        #gsb_dfg$widget$remove(gsb_dfsp)
-        font(b_disp) <- list(weight = "normal")
-        
-        ##update details tab
-        ##FIXME speed-up: mv this to handler on tab selection
-        if(details){
-			h_descr()
-			h_lev()
-			h_var()
-			h_summ()
-			h_deb()
-            if(!details.on.tab.sel){
-                h_details()
-                h_details.ins()
-            }
-            new.disp <<- TRUE
-        }
+        new.descr <<- FALSE
+        #print("display event")
+        #print(paste("new.disp:", new.disp))
+        #print(paste("new.descr:", new.descr))
     }
     
     b_disp <- gbutton(paste("Display selection (", data_set_dim_orig[1], ' x ', 
@@ -826,6 +856,9 @@ Do you want to proceed?', title="Warning", icon="warning")
             rows.disp_old[[choice]] <<- rows.disp
         }
         new.disp <<- FALSE
+        #print("describe event")
+        #print(paste("new.disp:", new.disp))
+        #print(paste("new.descr:", new.descr))
     }
 
     h_details.ins <- function(h, choice=radio.sel, ins=details.out, ...){
@@ -876,14 +909,49 @@ Do you want to proceed?', title="Warning", icon="warning")
         ##by default update Details only when the tab is selected
         ##and if there is a newly displayed data frame
         addHandlerChanged(ntbk, function(h, ...){
-                if(all(h$page.no==2, new.disp)){
-                    h_details()
-                    h_details.ins()
-                    #h_cb_deb()
+                if(h$page.no==2){
+                    if(new.disp){
+                        h_details()
+                        h_details.ins()
+                        #new.descr <<- TRUE
+                    }
+                    blockHandlers(b_disp)
+                    svalue(b_disp, append=T) <- paste('Describe', h_disp_lab, sep='')
+                    b_disp$set_icon("execute")
+                    unblockHandlers(b_disp)
+                    #print("switch-to-tab-2 event")
+                    #print(paste("new.disp:", new.disp))
+                    #print(paste("new.descr:", new.descr))
                 }
             })
     }
 	}
+    if(filter.on.tab.sel){
+        ##by default update Filter only when the tab is selected
+        ##and if there is a newly displayed data frame
+        addHandlerChanged(ntbk, function(h, ...){
+                if(h$page.no==1){
+                    if(new.descr){
+                        h_filter()
+                    }
+                    blockHandlers(b_disp)
+                    svalue(b_disp, append=T) <- paste('Display', h_disp_lab, sep='')
+                    b_disp$set_icon("execute")
+                    unblockHandlers(b_disp)
+                    #print("switch-to-tab-1 event")
+                    #print(paste("new.disp:", new.disp))
+                    #print(paste("new.descr:", new.descr))
+                }
+            })
+    }
+
+    ##update button label given tab selection
+    ##FIXME something doesn't work as expected
+#     addHandlerChanged(ntbk, function(h, ...){
+#         svalue(b_disp, append=T) <- paste(if(h$page.no==1) 'Display' else 
+#             if(h$page.no==2) 'Describe', h_disp_lab, sep='')
+#         b_disp$set_icon("execute")
+#     })
 
     ##set GUI window parameters
     ##set sizes

@@ -1,9 +1,9 @@
 High priority / ASAP:
  - add hide=F
- - move gnotebook alongside Hide/Reload buttons
-    - add filter=F
-    -  dfview() & dfdescr()
  - focus input box after pressing buttons in c_names
+ - !!make.names() & set editable=F & message to inform user
+    - ??disallow data frames with duplicate names to avoid assignment issues
+    - bug with cbind() & check.names=F
 
 
  - !!Reload data.frame button
@@ -21,9 +21,6 @@ High priority / ASAP:
         check if digest of object is still the same and if not inform the user that 
         the object had already been modified and ask for additional confirmation 
 
- - !!make.names() & set editable=F & message to inform user
-	- ??disallow data frames with duplicate names to avoid assignment issues
-    - bug with cbind() & check.names=F
  - FIXME prev/next buttons: right-click or ctrl+click to go first/last
  - !!search.opts=list(), auto.update=F
  - !!allow to display df[x, 1, drop=F]
@@ -98,6 +95,9 @@ High priority / ASAP:
      Warning messages:
     1: In `[<-.data.frame`(`*tmp*`, i, , value = list(Sepal.Length = c("labelled",  :
       replacement element 1 has 2 rows to replace 1 rows
+ - FIXME how to manipulate tabs by label/name (NOT by nr)
+    - add filter=F
+    -  dfview() & dfdescr()
 
 
 gfilter.R TODO items:
