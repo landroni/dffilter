@@ -1,13 +1,14 @@
 High priority / ASAP:
- - add hide=F
- - focus input box after pressing buttons in c_names
  - !!make.names() & set editable=F & message to inform user
     - ??disallow data frames with duplicate names to avoid assignment issues
     - bug with cbind() & check.names=F
+ - focus input box after pressing buttons in c_names
+ - FIXME prev/next buttons: ctrl+click to go first/last
+ - FIXME keybindings: alt+c, alt+d
 
 
  - !!Reload data.frame button
-    - respect hide=T/F and selected tab
+    - respect selected tab
     - restore actual selection of row filters after checking that structure has not changed
         - adding new filter should consider merged changes 
         - when modifying a level and merging changes, it should automatically update the filters
@@ -21,19 +22,16 @@ High priority / ASAP:
         check if digest of object is still the same and if not inform the user that 
         the object had already been modified and ask for additional confirmation 
 
- - FIXME prev/next buttons: right-click or ctrl+click to go first/last
  - !!search.opts=list(), auto.update=F
  - !!allow to display df[x, 1, drop=F]
-
  - !!tweak preset
-    - choose horizontal layout
-    - FIXME make '1000' for head() user-configurable
+    - ??choose horizontal layout
+    - fix negative input in head(..., )
     - ??add range radio
     - 'preserve/freeze set.seed()' cb with 'some' preset filter
         - check out for freeze seed issue when only modifying col sel
-    - fix negative input in head(..., )
     - slow for big input numbers
-    - red only for zero? (actually this is how code behaves now)
+    - FIXME make '1000' for head() user-configurable
 
 
  - !!FIXME scrolling perf issues (probably related to >128 chars in a cell)
@@ -98,7 +96,6 @@ High priority / ASAP:
  - FIXME how to manipulate tabs by label/name (NOT by nr)
     - add filter=F
     -  dfview() & dfdescr()
-
 
 gfilter.R TODO items:
  - ??sort variable components? or use data frame order?

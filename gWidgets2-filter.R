@@ -6,6 +6,7 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
                      confirm.big.df=TRUE, 
                      initial.vars=data.frame(data_set_nms[1], "preset", "preset", 
                         stringsAsFactors=FALSE), filter.on.tab.sel=TRUE
+                    , hide=FALSE
                      ){
     require(gWidgets2) ## on github not CRAN. (require(devtools); install_github("gWidgets2", "jverzani")
     options(guiToolkit="RGtk2")
@@ -37,6 +38,7 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
     filter.types <- c("single"="RadioItem", "multiple"="ChoiceItem", 
         "range"="RangeItem", "preset"="PresetItem")
     h_disp_lab <- NULL
+    hidden.panel <- hide
     
     ##if there is no Details tab, we always want to display subset
     if(!details) filter.on.tab.sel <- FALSE
@@ -87,6 +89,7 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
             add(f_side0g, f_side0g2)
             delete(f_side0g, f_side0g1)
             svalue(pg) <- as.integer(size(b_show)[1])
+            hidden.panel <<- TRUE
         } else {
             add(f_side0, f_side1, expand=T)
             #print(sapply(f_side0$children, function(u) size(u)))
@@ -94,6 +97,7 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
             delete(f_side0g, f_side0g2)
             ##FIXME this slowly enlargens panel size after multiple clicks
             svalue(pg) <- as.integer(size(c_names)[1] + 10)
+            hidden.panel <<- FALSE
         }
         #blockHandlers(h$obj)
         #unblockHandler(h$obj)
@@ -114,7 +118,8 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
         dispose(w)
         dffilter_reload(data_set=get(data_set_name), display=display, maximize=maximize, 
                         editable=editable, data_set_name=data_set_name, 
-                        sel.col=old_selection, sel.row=row_filter)
+                        sel.col=old_selection, sel.row=row_filter, 
+                        hide=hidden.panel)
     }
     addHandlerClicked(b_reload, h_reload)
     b_reload$set_icon("refresh")
@@ -963,6 +968,12 @@ Do you want to proceed?', title="Warning", icon="warning")
     #svalue(pg) <- 250L
     ## use 5 lines as hight of selection box (less claustrophobic)
     size(c_names)[2] <- 5*25
+    
+    ##initially focus the c_names search box
+    focus(ed) <- TRUE
+
+    ##activate hidden panel
+    if(hide) b_hide$invoke_change_handler()
     
     ##set some key-bindings
     if(esc){
