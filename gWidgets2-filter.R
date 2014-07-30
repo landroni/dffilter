@@ -570,13 +570,6 @@ Do you want to proceed?', title="Warning", icon="warning")
     dntbk <- gnotebook(2, cont=dgg, expand=TRUE, fill=TRUE)
 
 
-    ##helper fun to list label in a dataframe
-    list_lab <- function(data=data_set){
-        lab <- label(data, self=TRUE)
-        if(lab=="") return(NULL)
-        return(lab)
-    }
-    
     #####
     ##Describe sub-tab
     dlgg <- ggroup(cont=dntbk, horizontal=FALSE, label="Describe", expand=TRUE, 
@@ -590,19 +583,6 @@ Do you want to proceed?', title="Warning", icon="warning")
                       #, label="Describe data set"
                       )
     tooltip(dlgg1) <- "Describe the full data set, a column selection (all rows), the currently displayed subset, a row selection (all columns)"
-    ##hide-able label
-    ##FIXME will need to update label when reloading df
-    dlgg2 <- gexpandgroup("Label:", cont=dlgg, horizontal=FALSE,expand=F, fill=T)
-    tooltip(dlgg2) <- "Label stored in `label(data, self=TRUE)`"
-    t_lab <- gtext(cont=dlgg2, font.attr=list(family="monospace"), 
-                     width=300, height=25*6, 
-                     expand=T, fill=T)
-    editable(t_lab) <- FALSE
-    lab.out <- list_lab()
-    lab.out.ins <- if(!is.null(lab.out)) capture.output(cat(lab.out)) else 
-        capture.output(lab.out)
-    insert(t_lab, lab.out.ins, font.attr=list(family="monospace"))
-    if(is.null(lab.out)) visible(dlgg2) <- FALSE
     
     ##handler to update/init describe() output
     h_descr <- function(h,...) {
@@ -638,6 +618,55 @@ Do you want to proceed?', title="Warning", icon="warning")
                      expand=TRUE)
     editable(t_summ) <- FALSE
 
+    #####
+    ##Labels sub-tab
+    dlabgg <- ggroup(cont=dntbk, horizontal=FALSE, label="Labels", expand=TRUE, 
+                   use.scrollwindow = TRUE)
+    dlabgg2 <- ggroup(cont=dlabgg, expand=FALSE)
+    r_lab <- gradio(details_choices, 2, horizontal=TRUE, cont=dlabgg2)
+    tooltip(dlabgg2) <- "Display labels for the full data set, a column selection (all rows), the currently displayed subset, a row selection (all columns)"
+    
+    ##hideable label
+    dlabgg3 <- gexpandgroup("Data frame:", cont=dlabgg, horizontal=FALSE, 
+        expand=F, fill=T)
+    tooltip(dlabgg3) <- "Label stored in `label(data, self=TRUE)`"
+    t_lab.df <- gtext(cont=dlabgg3, font.attr=list(family="monospace"), 
+                     width=300, height=25*6, 
+                     expand=T, fill=T)
+    editable(t_lab.df) <- FALSE
+    
+    ##helper fun to list label in a dataframe
+    list_lab <- function(data=data_set){
+        lab <- label(data, self=TRUE)
+        if(lab=="") return(NULL)
+        cat(lab)
+    }
+
+    #lab.out <- list_lab()
+    #lab.out.ins <- if(!is.null(lab.out)) capture.output(cat(lab.out)) else 
+    #    capture.output(lab.out)
+    #lab.out.ins <- capture.output(list_lab())
+    #insert(t_lab.df, lab.out.ins, font.attr=list(family="monospace"))
+    #if(is.null(lab.out.ins)) visible(dlabgg3) <- FALSE
+    #if(all(lab.out.ins=="NULL", 
+    #    label(data_set, self=TRUE)!="NULL")) visible(dlabgg3) <- FALSE
+
+    ##handler to update/init label() output
+    h_lab <- function(h,...){
+        radio.sel <<- svalue(r_lab, index=TRUE)
+        radio.inst <<- "h_lab"
+        r_sync()
+    }
+    addHandlerChanged(r_lab, h_lab)
+
+    dlabgg4 <- gexpandgroup("Variables:", cont=dlabgg, horizontal=FALSE, 
+        expand=T, fill=T)
+    tooltip(dlabgg4) <- "Labels stored in `label(data)`"
+    t_lab.var <- gtext(cont=dlabgg4, font.attr=list(family="monospace"), 
+                     #width=500, height=1000, 
+                     expand=TRUE)
+    editable(t_lab.var) <- FALSE
+    
 
     #####
     ##Levels sub-tab
@@ -739,9 +768,9 @@ Do you want to proceed?', title="Warning", icon="warning")
 
     ##handler to keep Details radios in sync
     r_sync <- function(h, ...){
-        ##FIXME isn't there an infinite loop here in this sync? 
         if(radio.inst!="r_descr") svalue(r_descr, index=TRUE) <- radio.sel
         if(radio.inst!="r_summ") svalue(r_summ, index=TRUE) <- radio.sel
+        if(radio.inst!="r_lab") svalue(r_lab, index=TRUE) <- radio.sel
         if(radio.inst!="r_lev") svalue(r_lev, index=TRUE) <- radio.sel
         if(radio.inst!="r_var") svalue(r_var, index=TRUE) <- radio.sel
         if(radio.inst!="r_deb") svalue(r_deb, index=TRUE) <- radio.sel
@@ -751,6 +780,8 @@ Do you want to proceed?', title="Warning", icon="warning")
         out <- list()
         out[["descr"]] <- describe(x, descript=nm)
         out[["summ"]] <- capture.output(summary(x))
+        out[["lab.df"]] <- capture.output(list_lab(x))
+        out[["lab.var"]] <- capture.output(label(x))
         out[["lev"]] <- capture.output(list_levs(x, NULL))
         out[["var"]] <- capture.output(dput(names(x)))
         out[["deb"]] <- debug_data.frame(x)
@@ -776,10 +807,13 @@ Do you want to proceed?', title="Warning", icon="warning")
             cnms.disp_old[[choice]] <<- cnms.disp
         } else if(choice=='sel'){
             if(is.null(details.out[[choice]])){
-                details.out[[choice]] <<- f_details(droplevels(DF[]))
+                ##FIXME if possible use DF[] conditionally
+                #details.out[[choice]] <<- f_details(droplevels(DF[]))
+                details.out[[choice]] <<- f_details(droplevels(data_set[rows.disp, cnms.disp]))
             } else if(any(!isTRUE(all.equal(cnms.disp, cnms.disp_old[[choice]])), 
                 !isTRUE(all.equal(rows.disp, rows.disp_old[[choice]])))){
-                details.out[[choice]] <<- f_details(droplevels(DF[]))
+                #details.out[[choice]] <<- f_details(droplevels(DF[]))
+                details.out[[choice]] <<- f_details(droplevels(data_set[rows.disp, cnms.disp]))
             }
             cnms.disp_old[[choice]] <<- cnms.disp
             rows.disp_old[[choice]] <<- rows.disp
@@ -801,6 +835,13 @@ Do you want to proceed?', title="Warning", icon="warning")
             font.attr=list(family="monospace"))
         svalue(t_summ) <- ""
         insert(t_summ, ins[[choice]][["summ"]], font.attr=list(family="monospace"))
+        ##FIXME speed-up: check if you can do this only when reloading df
+        svalue(t_lab.df) <- ""
+        insert(t_lab.df, ins[[choice]][["lab.df"]], font.attr=list(family="monospace"))
+        #if(all(ins[[choice]][["lab.df"]]=="NULL", 
+        #    label(data_set, self=TRUE)!="NULL")) visible(dlabgg3) <- FALSE
+        svalue(t_lab.var) <- ""
+        insert(t_lab.var, ins[[choice]][["lab.var"]], font.attr=list(family="monospace"))
         svalue(t_lev) <- ""
         insert(t_lev, ins[[choice]][["lev"]], font.attr=list(family="monospace"))
         svalue(t_var) <- ""
