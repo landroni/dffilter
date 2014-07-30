@@ -96,7 +96,7 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
             add(f_side0g, f_side0g1)
             delete(f_side0g, f_side0g2)
             ##FIXME this slowly enlargens panel size after multiple clicks
-            svalue(pg) <- as.integer(size(c_names)[1] + 10)
+            svalue(pg) <- as.integer(size(c_names)[1] + 9)
             hidden.panel <<- FALSE
         }
         #blockHandlers(h$obj)
