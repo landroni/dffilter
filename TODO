@@ -3,12 +3,10 @@ High priority / ASAP:
     - ??disallow data frames with duplicate names to avoid assignment issues
     - bug with cbind() & check.names=F
  - focus input box after pressing buttons in c_names
- - FIXME prev/next buttons: ctrl+click to go first/last
- - FIXME keybindings: alt+c, alt+d
+ - respect selected tab on reload
 
 
  - !!Reload data.frame button
-    - respect selected tab
     - restore actual selection of row filters after checking that structure has not changed
         - adding new filter should consider merged changes 
         - when modifying a level and merging changes, it should automatically update the filters
@@ -17,11 +15,19 @@ High priority / ASAP:
         - ??auto-polling of the data frame? 
     - reload fails if loaded df is not in workspace: df[ subs, ]
 		- check if get('df') works, if not disable 'Reload' button and set editable=F
-    - FIXME investigate cache bug: dffilter(Xa), Xa$var[1:10,] <- NA, dffilter(Xa) without closing first instance. Or dffilter(cbind(Xa, Xb)). 
+    - FIXME investigate cache bug: 
+        - dffilter(Xa); Xa$var[1:10,] <- NA; dffilter(Xa) 
+            without closing first instance. 
+        - Or dffilter(cbind(Xa, Xb)). 
     - editable=T: when making object copy, save digest, then before saving changes in workspace, 
         check if digest of object is still the same and if not inform the user that 
         the object had already been modified and ask for additional confirmation 
 
+ - ??melt/dcast gui for pivot tables 
+    - (this is still exploratory so fits the scope of the package); 
+    - use margins et al.; 
+    - OR use 'tables' tabular() and provide latex/html export & reproducible code
+    - Rcmdr table of statistics
  - !!search.opts=list(), auto.update=F
  - !!allow to display df[x, 1, drop=F]
  - !!tweak preset
@@ -96,6 +102,9 @@ High priority / ASAP:
  - FIXME how to manipulate tabs by label/name (NOT by nr)
     - add filter=F
     -  dfview() & dfdescr()
+ - FIXME prev/next buttons: ctrl+click to go first/last
+ - FIXME keybindings: alt+c, alt+d
+
 
 gfilter.R TODO items:
  - ??sort variable components? or use data frame order?
@@ -131,8 +140,6 @@ Medium priority / soon:
 Low priority / maybe / later:
  - !!export subset ("save as" different obj)
 	- save details output to text file
- - ??melt/dcast gui for pivot tables (this is still exploratory so fits the scope of the package); use margins et al.; OR use 'tables' tabular() and provide latex/html export & reproducible code
-    - Rcmdr table of statistics
  - ??compat with other GUIs: 
     - rstudio usage ideas: View <- dffilter
     - REQ Rcmdr option for viewer editor
@@ -164,4 +171,5 @@ Low priority / maybe / later:
         - FIXME how deal with cbind() that discards label? 
             - maybe store in special object that documents all up-to-date labelled objs in workspace; 
         - append 'last modified on date time'; 
+    - melt/cast thingy
 

@@ -39,6 +39,7 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
         "range"="RangeItem", "preset"="PresetItem")
     h_disp_lab <- NULL
     hidden.panel <- hide
+    b_disp_font <- list(weight = "normal")
     
     ##if there is no Details tab, we always want to display subset
     if(!details) filter.on.tab.sel <- FALSE
@@ -374,7 +375,8 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
         svalue(b_disp, append=T) <- paste(if(svalue(ntbk)==1) 'Display' else 
             if(svalue(ntbk)==2) 'Describe', h_disp_lab, sep='')
         b_disp$set_icon("execute")
-        font(b_disp) <- list(weight = "bold")
+        b_disp_font <<- list(weight = "bold")
+        font(b_disp) <- b_disp_font
         unblockHandlers(b_disp)
         
         ## autoupdate when option checked and button enabled
@@ -469,7 +471,8 @@ Do you want to proceed?', title="Warning", icon="warning")
         }
         #gsb_dfsp$stop()
         #gsb_dfg$widget$remove(gsb_dfsp)
-        font(b_disp) <- list(weight = "normal")
+        b_disp_font <<- list(weight = "normal")
+        font(b_disp) <- b_disp_font
         
         ##update details tab
         ##FIXME ??speed-up: mv this to handler on tab selection
@@ -547,10 +550,12 @@ Do you want to proceed?', title="Warning", icon="warning")
     enabled(b_disp) <- TRUE
     b_disp$set_icon("execute")
     #font(b_disp) <- list(weight = "bold")
+    
     ## allow to automatically update the viewed subset
     cb_autoupdate <- gcheckbox('Update automatically', cont=ggroup(cont=f_side1))
     tooltip(cb_autoupdate) <- "If checked refresh the displayed dataset \nas soon as the column or row selections change."
     
+    ##FIXME full editing support for some other time
     ##??editable checkbox (freeze_attributes=TRUE)
     #         cb_do_btn <- gcheckbox('Allow editing', checked=FALSE, cont=ggroup(cont=f_side1), 
     #                                handler=function(h,...){
@@ -923,6 +928,7 @@ Do you want to proceed?', title="Warning", icon="warning")
                     blockHandlers(b_disp)
                     svalue(b_disp, append=T) <- paste('Describe', h_disp_lab, sep='')
                     b_disp$set_icon("execute")
+                    font(b_disp) <- b_disp_font
                     unblockHandlers(b_disp)
                     #print("switch-to-tab-2 event")
                     #print(paste("new.disp:", new.disp))
@@ -942,6 +948,7 @@ Do you want to proceed?', title="Warning", icon="warning")
                     blockHandlers(b_disp)
                     svalue(b_disp, append=T) <- paste('Display', h_disp_lab, sep='')
                     b_disp$set_icon("execute")
+                    font(b_disp) <- b_disp_font
                     unblockHandlers(b_disp)
                     #print("switch-to-tab-1 event")
                     #print(paste("new.disp:", new.disp))
@@ -970,6 +977,7 @@ Do you want to proceed?', title="Warning", icon="warning")
     size(c_names)[2] <- 5*25
     
     ##initially focus the c_names search box
+    ##FIXME not sure if you want this
     focus(ed) <- TRUE
 
     ##activate hidden panel
