@@ -116,6 +116,7 @@ High priority / ASAP:
 		- pop-up "select filter" dialog with correct var pre-selected
  - REQ ctrl+tab
  - REQ input box: yellow when change, add run button, activate handler on <enter> or button click
+ - REQ gtable name gets reset on [<- 
 
 gfilter.R TODO items:
  - ??sort variable components? or use data frame order?

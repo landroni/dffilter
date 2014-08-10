@@ -1007,7 +1007,6 @@ Do you want to proceed?', title="Warning", icon="warning")
     ##REQ disable c-menu rename column
     ##REQ label variables by factor/char & numeric
     tb_ctab <- gtable(cnms.disp, cont=gg_tb_ctab1)
-    ##REQ name gets reset on [<- 
     ##REQ sorting gets reset on [<- 
     names(tb_ctab) <- "Variables"
     #size(tbl) <- c(100, 300)
@@ -1263,7 +1262,7 @@ Do you want to proceed?', title="Warning", icon="warning")
                 delete(lyt_ctab[1,x], get(g_dnd_name))
 				ctab.dropped <<- ctab.dropped[!(ctab.dropped %in% b_dnd)]
 				#tb_ctab[] <- old_selection[!(old_selection %in% ctab.dropped)]
-                restore.point('f', F)
+                #restore.point('f', F)
                 h_ctab_vars.ins(drop.vars=TRUE)
 				ctab.sel_tmp <- ctab.sel[[as.character(x)]]
 				ctab.sel[[as.character(x)]] <<- ctab.sel_tmp[!(ctab.sel_tmp %in% b_dnd)]
