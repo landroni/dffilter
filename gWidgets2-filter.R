@@ -1078,9 +1078,10 @@ Do you want to proceed?', title="Warning", icon="warning")
         #restore.point('f', F)
         choice <- names(details_choices)[choice]
         if(!drop.vars){
-            tb_ctab[] <<- ins[[choice]]
+            tb_ctab[] <<- data.frame("Variables"=ins[[choice]])
         } else {
-            tb_ctab[] <<- ins[[choice]][!(ins[[choice]] %in% dropped.vars)]
+            tb_ctab[] <<- data.frame("Variables"=
+                ins[[choice]][!(ins[[choice]] %in% dropped.vars)])
         }
     }
     
