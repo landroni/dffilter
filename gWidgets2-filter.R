@@ -5,8 +5,9 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
                      def.col=100, details=TRUE, details.on.tab.sel=TRUE, 
                      confirm.big.df=TRUE, 
                      initial.vars=data.frame(data_set_nms[1], "preset", "preset", 
-                        stringsAsFactors=FALSE), filter.on.tab.sel=TRUE
-                    , hide=FALSE
+                        stringsAsFactors=FALSE), filter.on.tab.sel=TRUE, 
+                     hide=FALSE
+                     , crosstab=TRUE, crosstab.on.tab.sel=TRUE
                      ){
     require(gWidgets2) ## on github not CRAN. (require(devtools); install_github("gWidgets2", "jverzani")
     options(guiToolkit="RGtk2")
@@ -40,7 +41,13 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
     h_disp_lab <- NULL
     hidden.panel <- hide
     b_disp_font <- list(weight = "normal")
-    
+    tb_ctab <- NULL
+    ctab.dropped <- c()
+    ctab.sel <- list()
+    DF_ctab <- NULL
+    has_b_melt_var <- FALSE
+    b_melt_var.ctab <- NULL
+    ctab.vars.init <- list()
     ##if there is no Details tab, we always want to display subset
     if(!details) filter.on.tab.sel <- FALSE
     
@@ -373,7 +380,8 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
         h_disp_lab <<- paste(' selection (', data_set_dim[1], 
                                           ' x ', data_set_dim[2], ')', sep='')
         svalue(b_disp, append=T) <- paste(if(svalue(ntbk)==1) 'Display' else 
-            if(svalue(ntbk)==2) 'Describe', h_disp_lab, sep='')
+            if(svalue(ntbk)==2) 'Describe' else 
+                if(svalue(ntbk)==3) 'Define', h_disp_lab, sep='')
         b_disp$set_icon("execute")
         b_disp_font <<- list(weight = "bold")
         font(b_disp) <- b_disp_font
@@ -490,6 +498,16 @@ Do you want to proceed?', title="Warning", icon="warning")
                 new.descr <<- TRUE
             }
         }
+        
+        if(crosstab){
+            if(any(!crosstab.on.tab.sel, svalue(ntbk)==3)){
+                h_ctab_vars()
+                h_ctab_vars.ins()
+        ##FIXME !!redo table when var selection stays the same
+                h_ctab_clear()
+            }
+        }
+
         #print("end-of-button handler")
         #print(paste("new.disp:", new.disp))
         #print(paste("new.descr:", new.descr))
@@ -601,6 +619,7 @@ Do you want to proceed?', title="Warning", icon="warning")
     
     ############################
     ##Details tab
+    ##FIXME !!details=F is completely broken as it will affect crosstab too, at least
     if(details){
     dgg <- ggroup(cont=ntbk, horizontal=TRUE, label=" Details")
     ntbk$add_tab_icon(2, "info")
@@ -808,12 +827,15 @@ Do you want to proceed?', title="Warning", icon="warning")
 
     ##handler to keep Details radios in sync
     r_sync <- function(h, ...){
+        ##details
         if(radio.inst!="r_descr") svalue(r_descr, index=TRUE) <- radio.sel
         if(radio.inst!="r_summ") svalue(r_summ, index=TRUE) <- radio.sel
         if(radio.inst!="r_lab") svalue(r_lab, index=TRUE) <- radio.sel
         if(radio.inst!="r_lev") svalue(r_lev, index=TRUE) <- radio.sel
         if(radio.inst!="r_var") svalue(r_var, index=TRUE) <- radio.sel
         if(radio.inst!="r_deb") svalue(r_deb, index=TRUE) <- radio.sel
+        ##crosstab
+        if(radio.inst!="r_ctab") svalue(r_ctab, index=TRUE) <- radio.sel
     }
     
     f_details <- function(x=data_set, nm=data_set_name, nms=data_set_nms){
@@ -899,11 +921,406 @@ Do you want to proceed?', title="Warning", icon="warning")
     }
     
     addHandlerChanged(r_descr, function(h, ...){
-        h_details()
-        h_details.ins()
+        if(details.on.tab.sel){
+        ##by default update Details only when the tab is selected
+            if(svalue(ntbk)==2){
+                h_details()
+                h_details.ins()
+            }
+        }
     })
     
+    
+    ############################
+    ##Pivot table tab (cross tabulation)
+    if(crosstab){
+        require(reshape2)
+        require(formula.tools)
+    cgg <- ggroup(cont=ntbk, horizontal=TRUE, label=" Pivot Table")
+    ntbk$add_tab_icon(3, "jump-to")
+    ntbk$add_tab_tooltip(3, "Explore data frame using pivot tables (cross tabulations)")
+    
+    cntbk <- gnotebook(2, cont=cgg, expand=TRUE, fill=TRUE)
+
+
+    #####
+    ##Reshape sub-tab
+    clgg <- ggroup(cont=cntbk, horizontal=FALSE, label="Reshape", expand=TRUE, 
+                   use.scrollwindow = TRUE)
+    #tooltip(clgg) <- "Describe the data set that is currently displayed"
+    ##radio buttons
+    clgg1 <- ggroup(cont=clgg, expand=FALSE)
+    r_ctab <- gradio(details_choices, 2, horizontal=TRUE, cont=clgg1)
+    tooltip(clgg1) <- "Generate pivot tables from the full data set, a column selection (all rows), the currently displayed subset, a row selection (all columns)"
+    
+    h_rshp <- function(h,...){
+        radio.sel <<- svalue(r_ctab, index=TRUE)
+        radio.inst <<- "r_ctab"
+        r_sync()
+    }
+    addHandlerChanged(r_ctab, h_rshp)
+
+    clgg2 <- ggroup(cont=clgg)
+    cb_ctab <- gcheckbox("Pivot table layout", checked=TRUE, cont=clgg2)
+    tooltip(cb_ctab) <- "Uncheck to hide the pivot table layout editor"
+    h_ctab_hide <- function(h, ...){
+        hide_layout.ctab <- !(svalue(cb_ctab))
+        if(hide_layout.ctab){
+            delete(gg_tb_ctab0, gg_tb_ctab1)
+            delete(gg_ctab1, gg_ctab2)
+            svalue(pg_ctab) <- 0
+            enabled(b_ctab_clear) <- FALSE
+        } else {
+            add(gg_tb_ctab0, gg_tb_ctab1, expand=T)
+            add(gg_ctab1, gg_ctab2)
+            svalue(pg_ctab) <- as.integer(size(tb_ctab)[1] + 0)
+            enabled(b_ctab_clear) <- TRUE
+        }
+    }
+    addHandlerChanged(cb_ctab, h_ctab_hide)
+    h_ctab_clear <- function(h, ...){
+        #print(ctab.sel)
+        lapply(1:3, function(x){
+              #tb_ctab[] <<- old_selection
+              h_ctab_vars.ins()
+              ##REQ how to speedy delete all children of container
+              lapply(lyt_ctab[1,x]$children, function(y) delete(lyt_ctab[1,x], y))
+              ctab.dropped <<- c()
+              ctab.sel <<- list()
+            b_melt_var.ctab <<- NULL
+            has_b_melt_var <<- FALSE
+        })
+        delete(g_df_ctab_box, g_df_ctab_box[1])             # remove child
+        DF_ctab <<- glabel("", cont=g_df_ctab_box, expand=TRUE)
+    }
+    b_ctab_clear <- gbutton("Clear", cont=clgg2, handler=h_ctab_clear)
+    tooltip(b_ctab_clear) <- "Clear pivot table and its layout"
+    
+    pg_ctab <- gpanedgroup(cont=clgg, expand=T, fill=T)
+    #svalue(pg_ctab) <- 0.20
+
+    ##FIXME on sync need to check if col sel is incompatible with already added vars
+    gg_tb_ctab0 <- gvbox(cont=pg_ctab, expand=T)
+    gg_tb_ctab1 <- ggroup(cont=gg_tb_ctab0, expand=T)
+    ##REQ programmatically resize gtable/gdf?
+    ##FIXME !!add search box
+    ##REQ disable c-menu rename column
+    ##REQ label variables by factor/char & numeric
+    tb_ctab <- gtable(cnms.disp, cont=gg_tb_ctab1)
+    ##REQ name gets reset on [<- 
+    ##REQ sorting gets reset on [<- 
+    names(tb_ctab) <- "Variables"
+    #size(tbl) <- c(100, 300)
+    gg_ctab0 <- gvbox(cont=pg_ctab)
+    gg_ctab1 <- ggroup(cont=gg_ctab0)
+    gg_ctab2 <- ggroup(cont=gg_ctab1)
+
+    ##FIXME allow multiple DnD
+    addDropSource(tb_ctab, handler=function(h,...){
+        svalue(tb_ctab)
+    })
+    
+    ##FIXME !!rename handler if don't save copy of subset, and rm all unnecessary checks??
+    ##FIXME !!on 'define sel' button, check what vars are already in fields, like this:
+    #tb_ctab[] <- old_selection[!(old_selection %in% ctab.dropped)]
+    h_ctab_vars <- function(h, choice=radio.sel, ...) {
+        choice <- names(details_choices)[choice]
+        #print(choice)
+        if(choice=='full'){
+            ##avoid re-computing if output already exists
+            if(is.null(ctab.vars.init[[choice]])) ctab.vars.init[[choice]] <<- data_set_nms
+        } else if(choice=='col'){
+            ##compute if output does NOT exist
+            if(is.null(ctab.vars.init[[choice]])){
+                ctab.vars.init[[choice]] <<- cnms.disp
+                #ctab.vars.init[[choice]] <<- f_details(droplevels(data_set[ , cnms.disp]))
+            ##avoid re-computing if output already exists & selection same
+            } else if(!isTRUE(all.equal(cnms.disp, cnms.disp_old[[choice]]))){
+                ctab.vars.init[[choice]] <<- cnms.disp
+                #ctab.vars.init[[choice]] <<- f_details(droplevels(data_set[ , cnms.disp]))
+            }
+            ##store selection of displayed details
+            ##FIXME !!need to check if this is appropriate given crosstab
+            cnms.disp_old[[choice]] <<- cnms.disp
+        } else if(choice=='sel'){
+            if(is.null(ctab.vars.init[[choice]])){
+                ##FIXME if possible use DF[] conditionally
+                ctab.vars.init[[choice]] <<- cnms.disp
+                #ctab.vars.init[[choice]] <<- f_details(droplevels(DF[]))
+                #ctab.vars.init[[choice]] <<- f_details(droplevels(data_set[rows.disp, cnms.disp]))
+            } else if(any(!isTRUE(all.equal(cnms.disp, cnms.disp_old[[choice]])), 
+                !isTRUE(all.equal(rows.disp, rows.disp_old[[choice]])))){
+                ctab.vars.init[[choice]] <<- cnms.disp
+                #ctab.vars.init[[choice]] <<- f_details(droplevels(DF[]))
+                #ctab.vars.init[[choice]] <<- f_details(droplevels(data_set[rows.disp, cnms.disp]))
+            }
+            cnms.disp_old[[choice]] <<- cnms.disp
+            rows.disp_old[[choice]] <<- rows.disp
+        } else if(choice=='row'){
+            if(is.null(ctab.vars.init[[choice]])){
+                ctab.vars.init[[choice]] <<- data_set_nms
+                #ctab.vars.init[[choice]] <<- f_details(droplevels(data_set[rows.disp, ]))
+            } else if(!isTRUE(all.equal(rows.disp, rows.disp_old[[choice]]))){
+                ctab.vars.init[[choice]] <<- data_set_nms
+                #ctab.vars.init[[choice]] <<- f_details(droplevels(data_set[rows.disp, ]))
+            }
+            rows.disp_old[[choice]] <<- rows.disp
+        }
+        new.ctab <<- FALSE
+        #print("ctab event")
+        #print(paste("new.disp:", new.disp))
+        #print(paste("new.descr:", new.descr))
+    }
+    
+    h_ctab_vars.ins <- function(h, choice=radio.sel, ins=ctab.vars.init, 
+        drop.vars=FALSE, dropped.vars=ctab.dropped, ...){
+        #print("go-h_ctab_vars.ins")
+        #print(ctab.vars.init)
+        #restore.point('f', F)
+        choice <- names(details_choices)[choice]
+        if(!drop.vars){
+            tb_ctab[] <<- ins[[choice]]
+        } else {
+            tb_ctab[] <<- ins[[choice]][!(ins[[choice]] %in% dropped.vars)]
+        }
+    }
+    
+    lyt_ctab <- glayout(homogeneous=F, cont=gg_ctab2, expand=TRUE, fill=T)
+    ##REQ gframe c-menu to add Clear frame item
+    lyt_ctab[1,1, expand=TRUE, fill=T] <- gframe("Row Fields", horizontal=FALSE,
+                          container=lyt_ctab, expand=TRUE, fill=T)
+    lyt_ctab[1,2, expand=TRUE, fill=T] <- gframe("Column Fields", horizontal=FALSE,
+                          container=lyt_ctab, expand=TRUE, fill=T)
+    lyt_ctab[1,3, expand=TRUE, fill=T] <- gframe("Values", horizontal=FALSE,
+                          container=lyt_ctab, expand=TRUE, fill=T)
+    lyt_ctab[1,4, expand=TRUE, fill=T] <- gframe("Options", horizontal=FALSE,
+                      container=lyt_ctab, expand=TRUE, fill=T)
+    g_cmb.fun_ctab <- ggroup(cont=lyt_ctab[1,4])
+    ##FIXME add margins cb
+    cmb.fun_ctab <- gcombobox(c("length", "sum", "mean", "median", "sd", "var"), editable=TRUE, 
+              use_completion=TRUE, cont=g_cmb.fun_ctab)
+    #size(cmb.fun_ctab) <- c(140,25)
+    cmb.fun.args_ctab <- gcombobox(c("", "na.rm=TRUE"), selected=1, editable=TRUE, 
+              use_completion=TRUE, cont=g_cmb.fun_ctab)
+    
+    g_df_ctab_box <- ggroup(cont=gg_ctab0, expand=T)
+    DF_ctab <- glabel("", cont=g_df_ctab_box, expand=TRUE)
+    
+    h_ctab_reshape <- function(h, choice=radio.sel, ...){
+        #print(ctab.sel[["1"]])
+        #print(ctab.sel[["2"]])
+        choice <- names(details_choices)[choice]
+        ##use melt if two or more Value vars
+        use.melt <- length(ctab.sel[["3"]]) >= 2
+        form.ctab <- formula(paste(
+            if(any(is.null(ctab.sel[["1"]]), length(ctab.sel[["1"]])==0)) "." else 
+                paste(unlist(ctab.sel[["1"]]), collapse=" + "), 
+            if(any(is.null(ctab.sel[["2"]]), length(ctab.sel[["2"]])==0)) 
+                ifelse(!use.melt, ".", "variable") else 
+                    paste(c(unlist(ctab.sel[["2"]]), if(use.melt) "variable"), collapse=" + "), 
+            sep=" ~ "))
+        if(use.melt){
+            form.vars.ctab <- all.vars(form.ctab)
+            form.vars.ctab <- form.vars.ctab[!(form.vars.ctab %in% ".")]
+            form.vars.ctab <- form.vars.ctab[!grepl("variable", form.vars.ctab, fixed=T)]
+            m.data_set <- melt(
+                            if(choice=='full') data_set else 
+                            if(choice=='col') data_set[ , cnms.disp] else 
+                            if(choice=='sel') data_set[rows.disp , cnms.disp] else 
+                            if(choice=='row') data_set[rows.disp , ], 
+                id.vars=form.vars.ctab, 
+                measure.vars=unlist(ctab.sel[["3"]]))
+            #form.ctab <- update(form.ctab, ~ . + variable)
+        }
+        #print(form.ctab)
+        #print(svalue(cmb.fun_ctab))
+        fun.args_ctab <- as.list(parse(text=paste0("f(", svalue(cmb.fun.args_ctab) , ")"))[[1]])[-1]
+        #print(fun.args_ctab)
+        ##assume df is already molten (in long-format)
+        ##FIXME use try to catch incorrect arguments
+        df.ctab <- do.call(dcast, 
+                         c(list(if(use.melt) m.data_set else {
+                         ##FIXME ??speed-up: mv this into h_ctab_vars and have copy of subset (doc consider memory usage, though)
+                            if(choice=='full') data_set else 
+                            if(choice=='col') data_set[ , cnms.disp] else 
+                            if(choice=='sel') data_set[rows.disp , cnms.disp] else 
+                            if(choice=='row') data_set[rows.disp , ]
+                         }, 
+                         form.ctab, fun.aggregate=get(svalue(cmb.fun_ctab))), 
+                         fun.args_ctab, 
+                         list(value.var=if(!use.melt) unlist(ctab.sel[["3"]]) else "value")))
+        ##FIXME fix this wehn melt involved
+        if(!use.melt){
+            cat(paste("dcast(", data_set_name, ", ", form.ctab, ", fun.aggregate=", 
+                    svalue(cmb.fun_ctab), ", ", if(length(fun.args_ctab)!=0) paste(
+                        svalue(cmb.fun.args_ctab), ", ", sep=""),
+                    "value.var='", unlist(ctab.sel[["3"]]), "')", sep=""), "\n\n")
+        }
+        ##update GUI
+        if(use.melt){
+            ##FIXME check that no "variable" var in data_set_nms; work around that case
+            ##FIXME make it possible to move buttonbetween row/col fields
+            ##FIXME use global instance for this special object
+            b_dnd <- "variable"
+            x <- 2
+            g_dnd_name <- paste("g_", b_dnd, x, "...fixed", sep="")
+            if(!has_b_melt_var){
+            #print(g_dnd_name)
+            assign(g_dnd_name, ggroup(cont=lyt_ctab[1,x]))
+            b_melt_var.ctab <<- gbutton(b_dnd, cont=get(g_dnd_name), expand=F, fill=F, 
+				handler=function(h, ...){
+                delete(lyt_ctab[1,x], get(g_dnd_name))
+				#ctab.dropped <<- ctab.dropped[!(ctab.dropped %in% b_dnd)]
+				#tb_ctab[] <- old_selection[!(old_selection %in% ctab.dropped)]
+				#ctab.sel_tmp <- ctab.sel[[as.character(x)]]
+				#ctab.sel[[as.character(x)]] <<- ctab.sel_tmp[!(ctab.sel_tmp %in% b_dnd)]
+				#delete(g_df_ctab_box, g_df_ctab_box[1])             # remove child
+				#DF_ctab <<- glabel("", cont=g_df_ctab_box, expand=TRUE)
+				#lyt_has_child <- try(is.null(lyt_ctab[1,lyt_val]$children[[1]]), silent=T)
+				##FIXME there is an error here
+                #if(names(lyt_ctab[1,x]) != "Values"){
+				#	if(class(lyt_has_child)=="try-error") return()
+				})
+                blockHandlers(b_melt_var.ctab)
+                font(b_melt_var.ctab) <- list(color = "darkblue")
+				has_b_melt_var <<- TRUE
+            }
+        }
+        ##insert resulting cross tab in the gui
+        delete(g_df_ctab_box, g_df_ctab_box[1])             # remove child
+        DF_ctab <<- gdf(df.ctab, cont=g_df_ctab_box, expand=TRUE, 
+                       freeze_attributes=TRUE)
+        sapply(1:ncol(DF_ctab), function(j) editable(DF_ctab, j) <- FALSE) 
+		DF_ctab$set_selectmode("multiple")
+    }
+    ##FIXME Error in get(svalue(cmb.fun_ctab)) : object 'ma' not found
+    ##FIXME need to be more selective when activate h_ctab_reshape here (e.g. it activates even if no Value var)
+    addHandlerChanged(cmb.fun_ctab, function(h, ...){
+		#svalue(cmb.fun.args_ctab) <- ""
+		h_ctab_reshape()
+	})
+    addHandlerChanged(cmb.fun.args_ctab, h_ctab_reshape)
+    
+    addHandlerChanged(r_ctab, function(h, ...){
+        if(crosstab.on.tab.sel){
+        ##by default update Crosstab only when the tab is selected
+            if(svalue(ntbk)==3){
+                h_ctab_vars()
+                h_ctab_vars.ins()
+                h_ctab_clear()
+            }
+        }
+    })
+
+
+    ##FIXME allow duplication of vars from one target to another (using ctrl+DnD)
+    ##FIXME allow reverse DnD, to allow rm of buttons from target area
+    ##FIXME add rm button in front
+    ##REQ can gdf() handle arrays (acast)
+    lapply(1:3, function(x){
+        addDropTarget(lyt_ctab[1,x], handler=function(h,...) {
+            lyt_val <- 3
+            b_dnd <- h$dropdata
+            ##REQ how to disable DnD notification when button is already present
+            ##refuse spurious drops
+            if(!(b_dnd %in% old_selection)) return()
+            ctab.sel[[as.character(x)]] <<- sapply(lyt_ctab[1,x]$children, 
+                               function(y) svalue(y$children[[1]]))
+            #print(b_dnd)
+            #print(unlist(ctab.sel))
+            #print(names(lyt_ctab[1,x]))
+            if(any(unlist(ctab.sel) %in% b_dnd)) return()
+            #gbutton(h$dropdata, cont=lyt_ctab[1,x])
+            #break.point()
+            lyt_has_child <- try(is.null(lyt_ctab[1,lyt_val]$children[[1]]), silent=T)
+            lyt_has_child_2nd <- try(is.null(lyt_ctab[1,lyt_val]$children[[2]]), silent=T)
+            ##FIXME add message to inform users of failed DnD, or tooltip
+            if(names(lyt_ctab[1,x]) == "Values"){
+                ##if only 1 Value exists, rm fixed 'variable' button
+                if(class(lyt_has_child)!="try-error"){
+            if(F){
+                    lyt_val_tmp <- svalue(lyt_ctab[1,x]$children[[1]]$children[[1]])
+                    #print(lyt_val_tmp)
+                    ctab.dropped <<- ctab.dropped[!(ctab.dropped %in% lyt_val_tmp)]
+                    tb_ctab[] <- old_selection[!(old_selection %in% ctab.dropped)]
+                    ctab.sel_tmp <- ctab.sel[[as.character(x)]]
+                    ctab.sel[[as.character(x)]] <<- ctab.sel_tmp[!(ctab.sel_tmp %in% 
+                        lyt_val_tmp)]
+                    #ctab.sel[[as.character(x)]] <<- list()
+                    #print(ctab.sel[["3"]])
+                    delete(lyt_ctab[1,x], lyt_ctab[1,x]$children[[1]])
+            }
+                }
+            }
+            g_dnd_name <- paste("g_", b_dnd, x, sep="")
+            assign(g_dnd_name, ggroup(cont=lyt_ctab[1,x]))
+            gbutton(b_dnd, cont=get(g_dnd_name), expand=F, fill=F, 
+				handler=function(h, ...){
+				#print("asdf")
+                #print(x)
+                #print(ctab.sel[["1"]])
+                #print(ctab.sel[["2"]])
+                delete(lyt_ctab[1,x], get(g_dnd_name))
+				ctab.dropped <<- ctab.dropped[!(ctab.dropped %in% b_dnd)]
+				#tb_ctab[] <- old_selection[!(old_selection %in% ctab.dropped)]
+                restore.point('f', F)
+                h_ctab_vars.ins(drop.vars=TRUE)
+				ctab.sel_tmp <- ctab.sel[[as.character(x)]]
+				ctab.sel[[as.character(x)]] <<- ctab.sel_tmp[!(ctab.sel_tmp %in% b_dnd)]
+				delete(g_df_ctab_box, g_df_ctab_box[1])             # remove child
+				DF_ctab <<- glabel("", cont=g_df_ctab_box, expand=TRUE)
+				lyt_has_child <- try(is.null(lyt_ctab[1,lyt_val]$children[[1]]), silent=T)
+				if(class(lyt_has_child)=="try-error") return()
+                ##FIXME !!some error still lurking with many changes to layout: click 1st Value button and then 'var' doesn't get rmed
+                ##Error in eval(expr, envir, enclos) : object 'variable' not found
+                if(names(lyt_ctab[1,x]) == "Values"){
+                    if(all(class(lyt_has_child_2nd)=="try-error", has_b_melt_var)){
+                        #print('go')
+                        #restore.point('f', F)
+                        #lyt_ctab[1,2]$children[[1]]
+                        #for(i in 1:2)
+                        #    try(delete(lyt_ctab[1,i], 
+                        #               get(paste("g_", "variable", 2, "...fixed", sep=""))))
+                        unblockHandlers(b_melt_var.ctab)
+                        b_melt_var.ctab$invoke_change_handler()
+                        b_melt_var.ctab <<- NULL
+                        has_b_melt_var <<- FALSE
+                    }
+                }
+                #print("go2")
+				#print(ctab.sel[["1"]])
+				#print(ctab.sel[["2"]])
+                #break.point()
+				h_ctab_reshape()
+            })
+#             b_dnd_name <- paste("b_", b_dnd, sep="")
+#             assign(b_dnd_name, gbutton(b_dnd, cont=get(g_dnd_name), expand=F, fill=F))
+#             addHandlerRightclick(get(b_dnd_name), handler=function(h, ...){
+# 				print("asdf")
+# 				delete(lyt_ctab[1,x], h$parent)
+#             })
+            #gg_val <- ggroup(cont=lyt_ctab[1,x])
+            #gbutton(h$dropdata, cont=gg_val)
+            #addSpring(gg_val)
+            ctab.dropped <<- c(ctab.dropped, b_dnd)
+            #tb_ctab[] <- old_selection[!(old_selection %in% ctab.dropped)]
+            #print("here")
+            #restore.point('f', F)
+            h_ctab_vars.ins(drop.vars=TRUE)
+            ctab.sel[[as.character(x)]] <<- c(ctab.sel[[as.character(x)]], b_dnd)
+            #print(ctab.sel)
+            ##do not initiate cross-tab if no value.var selected
+            if(names(lyt_ctab[1,x]) != "Values"){
+                if(class(lyt_has_child)=="try-error") return()
+            }
+            h_ctab_reshape()
+        })
+    })
+    
+    }
+    
     ##init Details tab on start-up
+    ##default to column selection
     radio.sel <- 2
     radio.inst <- ""
     r_sync()
@@ -912,18 +1329,24 @@ Do you want to proceed?', title="Warning", icon="warning")
         h_details()
         h_details.ins()
     }
+    ##by default update Crosstab only when the tab is selected
+    if(!crosstab.on.tab.sel){
+        h_ctab_vars()
+        h_ctab_vars.ins()
+    }
 
     ##focus Filter tab
     svalue(ntbk) <- 1
+    ##FIXME thoroughly test !details.on.tab.sel
     if(details.on.tab.sel){
         ##by default update Details only when the tab is selected
         ##and if there is a newly displayed data frame
         addHandlerChanged(ntbk, function(h, ...){
                 if(h$page.no==2){
+                ##FIXME !!new.ctab
                     if(new.disp){
                         h_details()
                         h_details.ins()
-                        #new.descr <<- TRUE
                     }
                     blockHandlers(b_disp)
                     svalue(b_disp, append=T) <- paste('Describe', h_disp_lab, sep='')
@@ -942,6 +1365,7 @@ Do you want to proceed?', title="Warning", icon="warning")
         ##and if there is a newly displayed data frame
         addHandlerChanged(ntbk, function(h, ...){
                 if(h$page.no==1){
+                ##FIXME !!new.ctab
                     if(new.descr){
                         h_filter()
                     }
@@ -956,6 +1380,30 @@ Do you want to proceed?', title="Warning", icon="warning")
                 }
             })
     }
+
+    if(crosstab.on.tab.sel){
+        ##by default update Crosstab only when the tab is selected
+        ##and if there is a newly displayed data frame
+        addHandlerChanged(ntbk, function(h, ...){
+                if(h$page.no==3){
+                    if(any(new.disp, new.descr)){
+                        h_ctab_vars()
+                        h_ctab_vars.ins()
+                        ##FIXME think of a more elegant way to deal with existing vars in ctab
+                        h_ctab_clear()
+                    }
+                    blockHandlers(b_disp)
+                    svalue(b_disp, append=T) <- paste('Define', h_disp_lab, sep='')
+                    b_disp$set_icon("execute")
+                    font(b_disp) <- b_disp_font
+                    unblockHandlers(b_disp)
+                    #print("switch-to-tab-3 event")
+                    #print(paste("new.disp:", new.disp))
+                    #print(paste("new.descr:", new.descr))
+                }
+            })
+    }
+
 
     ##update button label given tab selection
     ##FIXME something doesn't work as expected
@@ -975,6 +1423,19 @@ Do you want to proceed?', title="Warning", icon="warning")
     #svalue(pg) <- 250L
     ## use 5 lines as hight of selection box (less claustrophobic)
     size(c_names)[2] <- 5*25
+    ##FIXME it works here, but not above
+    svalue(pg_ctab) <- 0.15
+    #size(gg_ctab2) <- c(1000, 300)
+    ##REQ setting one dim makes the other stuck (prove with DnD)
+    #size(lyt_ctab)[2] <- 100
+    #size(lyt_ctab[1,1])[1] <- c(250)
+    #size(lyt_ctab[1,4]) <- c(100, 100)
+    size(lyt_ctab[1,4])[2] <- c(100)
+    #print(size(gg_ctab2))
+    #print(size(lyt_ctab))
+    #print(size(lyt_ctab[1,1]))
+    #print(size(lyt_ctab[1,2]))
+
     
     ##initially focus the c_names search box
     ##FIXME not sure if you want this
