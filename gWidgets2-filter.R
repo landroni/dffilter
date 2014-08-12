@@ -429,17 +429,13 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
          old_selection <<- setdiff(old_selection, removed)
        }
        old_selection <<- data_set_nms[data_set_nms %in% old_selection]
+       
        ##update display button
        len_cnms_update()
        h_disp()
      })
     
     ##init dummy handler funs to avoid "not found" error
-    #h_descr <- function() invisible(NULL)
-    #h_lev <- function() invisible(NULL)
-    #h_var <- function() invisible(NULL)
-    #h_summ <- function() invisible(NULL)
-    #h_deb <- function() invisible(NULL)
     h_details <- function() invisible(NULL)
     h_details.ins <- function() invisible(NULL)
     
@@ -493,12 +489,6 @@ Do you want to proceed?', title="Warning", icon="warning")
         ##update details tab
         ##FIXME ??speed-up: mv this to handler on tab selection
         if(details){
-            ##FIXME this looks obsolete and should be removed
-            #h_descr()
-            #h_lev()
-            #h_var()
-            #h_summ()
-            #h_deb()
             #print(svalue(ntbk))
             if(any(!details.on.tab.sel, svalue(ntbk)==2)){
                 h_details()
@@ -1030,7 +1020,6 @@ Do you want to proceed?', title="Warning", icon="warning")
     ##REQ disable c-menu rename column
     ##REQ label variables by factor/char & numeric
     tb_ctab <- gtable(cnms.disp, cont=gg_tb_ctab1)
-    ##REQ sorting gets reset on [<- 
     names(tb_ctab) <- "Variables"
     #size(tbl) <- c(100, 300)
     gg_ctab0 <- gvbox(cont=pg_ctab)
@@ -1134,6 +1123,12 @@ Do you want to proceed?', title="Warning", icon="warning")
     DF_ctab <- glabel("", cont=g_df_ctab_box, expand=TRUE)
     
     h_ctab_reshape <- function(h, choice=radio.sel, ...){
+        ##FIXME !!strange issue with varname_varname when:
+        ##'    adding two value vars
+        ##'    adding grp on col field
+        ##'    rm grp in col field
+        ##'    rm 1 value var
+        ##'    Error in eval(expr, envir, enclos) : object 'variable' not found
         #print(ctab.sel[["1"]])
         #print(ctab.sel[["2"]])
         choice <- names(details_choices)[choice]
