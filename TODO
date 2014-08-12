@@ -104,10 +104,7 @@ High priority / ASAP:
      Warning messages:
     1: In `[<-.data.frame`(`*tmp*`, i, , value = list(Sepal.Length = c("labelled",  :
       replacement element 1 has 2 rows to replace 1 rows
- - FIXME how to manipulate tabs by label/name (NOT by nr)
-    - add filter=F
-    -  dfview() & dfdescr()
- - FIXME prev/next buttons: ctrl+click to go first/last
+ - REQ prev/next buttons: right-click to go first/last
  - FIXME keybindings: alt+c, alt+d
  - add length/ncol in debugging
  - DnD from c_names to gfilter 
@@ -116,7 +113,11 @@ High priority / ASAP:
 		- pop-up "select filter" dialog with correct var pre-selected
  - REQ ctrl+tab
  - REQ input box: yellow when change, add run button, activate handler on <enter> or button click
- - REQ gtable name gets reset on [<- 
+ - REQ gtable sorting gets reset on [<- 
+ - REQ how to manipulate tabs by label/name (NOT by nr)
+    - add filter=F & crosstab=F
+    - dfview() & dfdescr() & dfcrosstab()
+
 
 gfilter.R TODO items:
  - ??sort variable components? or use data frame order?

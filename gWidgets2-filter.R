@@ -19,11 +19,11 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
     DF <- NULL                      # global gdf instance
     rows <- NULL                    # global rows index
     rows.disp <- NULL               # global rows index (subset currently displayed)
-    rows.disp_old <- list()               # global rows index (subset previously displayed)
+    rows.descr_old <- list()               # global rows index (subset previously displayed)
     idxs <- NULL                    # global set of indices that are being edited
     cnms <- NULL                    # global column names
     cnms.disp <- NULL               # global column names (subset currently displayed)
-    cnms.disp_old <- list()               # global column names (subset currently displayed)
+    cnms.descr_old <- list()               # global column names (subset currently displayed)
     len_idxs <- NULL                # global set of indices that are being edited (length)
     len_cnms <- NULL                # global column names (length)
     data_set_dim <- NULL            # global df dim
@@ -33,8 +33,9 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
     radio.sel <- NULL
     DF_deb <- NULL
     details.out <- list()
-    new.disp <- FALSE
-    new.descr <- FALSE
+    new.disp <- TRUE
+    new.descr <- TRUE
+    new.ctab <- TRUE
     rows.df.deb <- NULL               # global rows index (subset currently displayed)
     filter.types <- c("single"="RadioItem", "multiple"="ChoiceItem", 
         "range"="RangeItem", "preset"="PresetItem")
@@ -48,6 +49,10 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
     has_b_melt_var <- FALSE
     b_melt_var.ctab <- NULL
     ctab.vars.init <- list()
+    rows.ctab_old <- list()               # global rows index (subset previously displayed)
+    cnms.ctab_old <- list()               # global column names (subset currently displayed)
+    
+    
     ##if there is no Details tab, we always want to display subset
     if(!details) filter.on.tab.sel <- FALSE
     
@@ -467,7 +472,10 @@ Do you want to proceed?', title="Warning", icon="warning")
         ##by default Display data frame only when the tab is selected
         if(any(!filter.on.tab.sel, svalue(ntbk)==1)){
             h_filter()
-            new.disp <<- TRUE
+            ##signal new display event via button
+            #new.disp <<- TRUE
+            new.descr <<- TRUE
+            new.ctab <<- TRUE
         }
         
         ## custom message when displaying full database.
@@ -495,7 +503,10 @@ Do you want to proceed?', title="Warning", icon="warning")
             if(any(!details.on.tab.sel, svalue(ntbk)==2)){
                 h_details()
                 h_details.ins()
-                new.descr <<- TRUE
+                ##signal new describe event via button
+                #new.descr <<- TRUE
+                new.disp <<- TRUE
+                new.ctab <<- TRUE
             }
         }
         
@@ -503,8 +514,12 @@ Do you want to proceed?', title="Warning", icon="warning")
             if(any(!crosstab.on.tab.sel, svalue(ntbk)==3)){
                 h_ctab_vars()
                 h_ctab_vars.ins()
-        ##FIXME !!redo table when var selection stays the same
+        ##FIXME !!redo ctab when var selection stays the same
                 h_ctab_clear()
+                ##signal new ctab event via button
+                #new.ctab <<- TRUE
+                new.disp <<- TRUE
+                new.descr <<- TRUE
             }
         }
 
@@ -556,10 +571,14 @@ Do you want to proceed?', title="Warning", icon="warning")
             enabled(do_btn) <- FALSE
             svalue(w) <- paste( substr(svalue(w), 1, (nchar(svalue(w))-1)), sep='')
         }
-        new.descr <<- FALSE
         #print("display event")
         #print(paste("new.disp:", new.disp))
         #print(paste("new.descr:", new.descr))
+        
+        ##signal that no new display is necessary
+        #new.descr <<- FALSE
+        #new.ctab <<- FALSE
+        new.disp <<- FALSE
     }
     
     b_disp <- gbutton(paste("Display selection (", data_set_dim_orig[1], ' x ', 
@@ -862,35 +881,39 @@ Do you want to proceed?', title="Warning", icon="warning")
             if(is.null(details.out[[choice]])){
                 details.out[[choice]] <<- f_details(droplevels(data_set[ , cnms.disp]))
             ##avoid re-computing if output already exists & selection same
-            } else if(!isTRUE(all.equal(cnms.disp, cnms.disp_old[[choice]]))){
+            } else if(!isTRUE(all.equal(cnms.disp, cnms.descr_old[[choice]]))){
                 details.out[[choice]] <<- f_details(droplevels(data_set[ , cnms.disp]))
             }
             ##store selection of displayed details
-            cnms.disp_old[[choice]] <<- cnms.disp
+            cnms.descr_old[[choice]] <<- cnms.disp
         } else if(choice=='sel'){
             if(is.null(details.out[[choice]])){
                 ##FIXME if possible use DF[] conditionally
                 #details.out[[choice]] <<- f_details(droplevels(DF[]))
                 details.out[[choice]] <<- f_details(droplevels(data_set[rows.disp, cnms.disp]))
-            } else if(any(!isTRUE(all.equal(cnms.disp, cnms.disp_old[[choice]])), 
-                !isTRUE(all.equal(rows.disp, rows.disp_old[[choice]])))){
+            } else if(any(!isTRUE(all.equal(cnms.disp, cnms.descr_old[[choice]])), 
+                !isTRUE(all.equal(rows.disp, rows.descr_old[[choice]])))){
                 #details.out[[choice]] <<- f_details(droplevels(DF[]))
                 details.out[[choice]] <<- f_details(droplevels(data_set[rows.disp, cnms.disp]))
             }
-            cnms.disp_old[[choice]] <<- cnms.disp
-            rows.disp_old[[choice]] <<- rows.disp
+            cnms.descr_old[[choice]] <<- cnms.disp
+            rows.descr_old[[choice]] <<- rows.disp
         } else if(choice=='row'){
             if(is.null(details.out[[choice]])){
                 details.out[[choice]] <<- f_details(droplevels(data_set[rows.disp, ]))
-            } else if(!isTRUE(all.equal(rows.disp, rows.disp_old[[choice]]))){
+            } else if(!isTRUE(all.equal(rows.disp, rows.descr_old[[choice]]))){
                 details.out[[choice]] <<- f_details(droplevels(data_set[rows.disp, ]))
             }
-            rows.disp_old[[choice]] <<- rows.disp
+            rows.descr_old[[choice]] <<- rows.disp
         }
-        new.disp <<- FALSE
         #print("describe event")
         #print(paste("new.disp:", new.disp))
         #print(paste("new.descr:", new.descr))
+        
+        ##signal that no new describe is necessary
+        #new.disp <<- FALSE
+        #new.ctab <<- FALSE
+        new.descr <<- FALSE
     }
 
     h_details.ins <- function(h, choice=radio.sel, ins=details.out, ...){
@@ -1034,37 +1057,41 @@ Do you want to proceed?', title="Warning", icon="warning")
                 ctab.vars.init[[choice]] <<- cnms.disp
                 #ctab.vars.init[[choice]] <<- f_details(droplevels(data_set[ , cnms.disp]))
             ##avoid re-computing if output already exists & selection same
-            } else if(!isTRUE(all.equal(cnms.disp, cnms.disp_old[[choice]]))){
+            } else if(!isTRUE(all.equal(cnms.disp, cnms.ctab_old[[choice]]))){
                 ctab.vars.init[[choice]] <<- cnms.disp
                 #ctab.vars.init[[choice]] <<- f_details(droplevels(data_set[ , cnms.disp]))
             }
             ##store selection of displayed details
             ##FIXME !!need to check if this is appropriate given crosstab
-            cnms.disp_old[[choice]] <<- cnms.disp
+            cnms.ctab_old[[choice]] <<- cnms.disp
         } else if(choice=='sel'){
             if(is.null(ctab.vars.init[[choice]])){
                 ##FIXME if possible use DF[] conditionally
                 ctab.vars.init[[choice]] <<- cnms.disp
                 #ctab.vars.init[[choice]] <<- f_details(droplevels(DF[]))
                 #ctab.vars.init[[choice]] <<- f_details(droplevels(data_set[rows.disp, cnms.disp]))
-            } else if(any(!isTRUE(all.equal(cnms.disp, cnms.disp_old[[choice]])), 
-                !isTRUE(all.equal(rows.disp, rows.disp_old[[choice]])))){
+            } else if(any(!isTRUE(all.equal(cnms.disp, cnms.ctab_old[[choice]])), 
+                !isTRUE(all.equal(rows.disp, rows.ctab_old[[choice]])))){
                 ctab.vars.init[[choice]] <<- cnms.disp
                 #ctab.vars.init[[choice]] <<- f_details(droplevels(DF[]))
                 #ctab.vars.init[[choice]] <<- f_details(droplevels(data_set[rows.disp, cnms.disp]))
             }
-            cnms.disp_old[[choice]] <<- cnms.disp
-            rows.disp_old[[choice]] <<- rows.disp
+            cnms.ctab_old[[choice]] <<- cnms.disp
+            rows.ctab_old[[choice]] <<- rows.disp
         } else if(choice=='row'){
             if(is.null(ctab.vars.init[[choice]])){
                 ctab.vars.init[[choice]] <<- data_set_nms
                 #ctab.vars.init[[choice]] <<- f_details(droplevels(data_set[rows.disp, ]))
-            } else if(!isTRUE(all.equal(rows.disp, rows.disp_old[[choice]]))){
+            } else if(!isTRUE(all.equal(rows.disp, rows.ctab_old[[choice]]))){
                 ctab.vars.init[[choice]] <<- data_set_nms
                 #ctab.vars.init[[choice]] <<- f_details(droplevels(data_set[rows.disp, ]))
             }
-            rows.disp_old[[choice]] <<- rows.disp
+            rows.ctab_old[[choice]] <<- rows.disp
         }
+        
+        ##signal that no new ctab is necessary
+        #new.disp <<- FALSE
+        #new.descr <<- FALSE
         new.ctab <<- FALSE
         #print("ctab event")
         #print(paste("new.disp:", new.disp))
@@ -1343,8 +1370,7 @@ Do you want to proceed?', title="Warning", icon="warning")
         ##and if there is a newly displayed data frame
         addHandlerChanged(ntbk, function(h, ...){
                 if(h$page.no==2){
-                ##FIXME !!new.ctab
-                    if(new.disp){
+                    if(new.descr){
                         h_details()
                         h_details.ins()
                     }
@@ -1365,8 +1391,7 @@ Do you want to proceed?', title="Warning", icon="warning")
         ##and if there is a newly displayed data frame
         addHandlerChanged(ntbk, function(h, ...){
                 if(h$page.no==1){
-                ##FIXME !!new.ctab
-                    if(new.descr){
+                    if(new.disp){
                         h_filter()
                     }
                     blockHandlers(b_disp)
@@ -1386,7 +1411,7 @@ Do you want to proceed?', title="Warning", icon="warning")
         ##and if there is a newly displayed data frame
         addHandlerChanged(ntbk, function(h, ...){
                 if(h$page.no==3){
-                    if(any(new.disp, new.descr)){
+                    if(new.ctab){
                         h_ctab_vars()
                         h_ctab_vars.ins()
                         ##FIXME think of a more elegant way to deal with existing vars in ctab
