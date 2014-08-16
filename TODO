@@ -1,9 +1,5 @@
 High priority / ASAP:
  - !!add numSummary tab (RcmdrMisc)
- - !!make.names() & set editable=F & message to inform user
-    - ??disallow data frames with duplicate names to avoid assignment issues
-    - bug with cbind() & check.names=F
- - focus input box after pressing buttons in c_names
  - respect selected tab on reload
 
  - !!tweak preset
@@ -44,6 +40,10 @@ High priority / ASAP:
         check if digest of object is still the same and if not inform the user that 
         the object had already been modified and ask for additional confirmation 
 
+ - !!make.names() & set editable=F & message to inform user
+    - ??disallow data frames with duplicate names to avoid assignment issues
+    - bug with cbind() & check.names=F
+ - focus input box after pressing buttons in c_names
  - !!search.opts=list(), auto.update=F
  - !!allow to display df[x, 1, drop=F]
  - !!FIXME scrolling perf issues (probably related to >128 chars in a cell)
@@ -114,6 +114,11 @@ High priority / ASAP:
  - REQ ctrl+tab
  - REQ input box: yellow when change, add run button, activate handler on <enter> or button click
  - REQ gtable sorting gets reset on [<- 
+    - This calls the setFrame RGtk2 method on the underlying RGtk2DataFrame. 
+        Just replace col_index as you see fit.
+            DF <- tbl$get_model()
+            ind <- order(DF[,col_index], decreasing=FALSE)
+            DF$setFrame(DF[][ind,])
  - REQ how to manipulate tabs by label/name (NOT by nr)
     - add filter=F & crosstab=F
     - dfview() & dfdescr() & dfcrosstab()

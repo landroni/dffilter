@@ -51,7 +51,7 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
     ctab.vars.init <- list()
     rows.ctab_old <- list()               # global rows index (subset previously displayed)
     cnms.ctab_old <- list()               # global column names (subset currently displayed)
-    
+    tb_ctab.tmp.sel <- NULL
     
     ##if there is no Details tab, we always want to display subset
     if(!details) filter.on.tab.sel <- FALSE
@@ -1015,13 +1015,103 @@ Do you want to proceed?', title="Warning", icon="warning")
     ##FIXME on sync need to check if col sel is incompatible with already added vars
     gg_tb_ctab0 <- gvbox(cont=pg_ctab, expand=T)
     gg_tb_ctab1 <- ggroup(cont=gg_tb_ctab0, expand=T)
+    gg_tb_ctab1bis <- gvbox(cont=gg_tb_ctab1, expand=T)
+
+    ##fancy search for selecting ctab variables
+    ##prepare the search input box & handler
+     vb_search_ctab <- gvbox(container=gg_tb_ctab1bis)
+     search_type_ctab <-  list(ignore.case=TRUE, perl=FALSE, fixed=FALSE)  ##init global instance
+     gp_search_ctab <- ggroup(cont=vb_search_ctab)
+       
+       ed_search_ctab <- gedit("", initial.msg="Filter variables by...", expand=TRUE, 
+                    container=gp_search_ctab)
+       ed_search_ctab$set_icon("ed-search", "start")
+       ed_search_ctab$set_icon("ed-remove", "end")
+       ed_search_ctab$set_icon_handler(function(h,...) {
+         svalue(ed_search_ctab) <- ""
+         focus(ed_search_ctab) <- TRUE
+       }, where="end")
+       ed_search_ctab$widget$setIconActivatable("primary", FALSE)
+       
+       search_handler_ctab <- function(h,..., do_old=TRUE, 
+            choice=radio.sel, ins=ctab.vars.init, dropped.vars=ctab.dropped){
+         choice <- names(details_choices)[choice]
+         ## we keep track of old selection here
+         ## that updates only when user changes selection, not when filter does
+         #cur_sel <- old_selection_search_ctab
+         blockHandlers(tb_ctab)
+         on.exit(unblockHandlers(tb_ctab))
+         val <- svalue(ed_search_ctab)
+
+         if(val == "") {
+           ##revert to default `gtable` behavior
+           tb_ctab.tmp.sel <<- NULL
+           h_ctab_vars.ins(drop.vars=TRUE)
+           ed_search_ctab$widget$modifyBase(GtkStateType["normal"], NULL)
+           ed_search_ctab$widget$modifyText(GtkStateType["normal"], NULL) 
+         } else {
+           l <- c(list(pattern=val, x=cnms.disp), search_type_ctab)
+           #avail_vals <- h_ctab_vars.ins(drop.vars=TRUE, ret=TRUE)
+           ##initially do for all vars in gtable..
+           avail_vals <- h_ctab_vars.ins(ret=TRUE)
+           new_vals <- avail_vals[do.call(grepl, l)]
+           #new_vals <- new_vals[!is.na(new_vals)]
+           #print(avail_vals)
+           #print(new_vals)
+           if (length(new_vals)) {
+             tb_ctab.tmp.sel <<- new_vals
+             h_ctab_vars.ins(drop.vars=TRUE, tmp.sel=tb_ctab.tmp.sel)
+             #tb_ctab[] <<- new_vals
+             #tb_ctab[] <<- na.omit(new_vals)
+             ed_search_ctab$widget$modifyBase(GtkStateType["normal"], NULL)
+             ed_search_ctab$widget$modifyText(GtkStateType["normal"], NULL) 
+           } else {
+             tb_ctab.tmp.sel <<- character(0)
+             h_ctab_vars.ins(null.sel=TRUE)
+             ed_search_ctab$widget$modifyBase(GtkStateType["normal"], "#FF6666")
+             ed_search_ctab$widget$modifyText(GtkStateType["normal"], "white") 
+             return()
+           }
+         }
+         #svalue(tb_ctab) <<- cur_sel
+       }
+
+       b_search_ctab <- gbutton("", cont=gp_search_ctab)
+       tooltip(b_search_ctab) <- "Search options"
+       b_search_ctab$set_icon("properties")
+       cbs_search_ctab <- list(gcheckbox("Ignore case", checked=TRUE, handler=function(h,...) {
+                             search_type_ctab[["ignore.case"]] <<- svalue(h$obj)
+                             search_handler_ctab(do_old=FALSE)
+                             }),
+                   gcheckbox("Regex", checked=TRUE, handler=function(h,...) {
+                     search_type_ctab[["fixed"]] <<- !svalue(h$obj)
+                     search_handler_ctab(do_old=FALSE)                                                     
+                   }),
+                   gcheckbox("Perl compatible", checked=FALSE, handler=function(h,...) {
+                     search_type_ctab[["perl"]] <<- svalue(h$obj)
+                     search_handler_ctab(do_old=FALSE)                                                     
+                   })
+                   )
+       
+       addPopupMenu(b_search_ctab, gmenu(cbs_search_ctab, popup=TRUE))
+
+       addHandlerKeystroke(ed_search_ctab, search_handler_ctab)
+       addHandlerChanged(ed_search_ctab, search_handler_ctab)
+
+
     ##REQ programmatically resize gtable/gdf?
-    ##FIXME !!add search box
     ##REQ disable c-menu rename column
     ##REQ label variables by factor/char & numeric
-    tb_ctab <- gtable(cnms.disp, cont=gg_tb_ctab1)
+    tb_ctab <- gtable(cnms.disp, cont=gg_tb_ctab1bis)
     names(tb_ctab) <- "Variables"
     #size(tbl) <- c(100, 300)
+
+    ##continue fancy search functionality
+    ##initialize old_selection which will be the output value of tb_ctab
+    ##!!may rm this as not  used
+    #old_selection_search_ctab <- svalue(tb_ctab)
+
+
     gg_ctab0 <- gvbox(cont=pg_ctab)
     gg_ctab1 <- ggroup(cont=gg_ctab0)
     gg_ctab2 <- ggroup(cont=gg_ctab1)
@@ -1031,7 +1121,7 @@ Do you want to proceed?', title="Warning", icon="warning")
         svalue(tb_ctab)
     })
     
-    ##FIXME !!rename handler if don't save copy of subset, and rm all unnecessary checks??
+    ##FIXME rename handler if don't save copy of subset, and rm all unnecessary checks??
     ##FIXME !!on 'define sel' button, check what vars are already in fields, like this:
     #tb_ctab[] <- old_selection[!(old_selection %in% ctab.dropped)]
     h_ctab_vars <- function(h, choice=radio.sel, ...) {
@@ -1088,16 +1178,35 @@ Do you want to proceed?', title="Warning", icon="warning")
     }
     
     h_ctab_vars.ins <- function(h, choice=radio.sel, ins=ctab.vars.init, 
-        drop.vars=FALSE, dropped.vars=ctab.dropped, ...){
+        drop.vars=FALSE, dropped.vars=ctab.dropped, ret=FALSE, 
+        null.sel=FALSE, tmp.sel=NULL, ...){
         #print("go-h_ctab_vars.ins")
         #print(ctab.vars.init)
         #restore.point('f', F)
+        
+        ##displayed sel should be NULL
+        if(null.sel){
+            tb_ctab[] <<- data.frame("Variables"=character(0))
+            return()
+        }
+
+        ##displayed sel is !NULL
         choice <- names(details_choices)[choice]
+        selection <- ins[[choice]]
+        if(!is.null(tmp.sel)) selection <- tmp.sel
+        #if(!is.null(tmp.sel)){
+        #    tb_ctab[] <<- data.frame("Variables"=
+        #        tmp.sel[!(tmp.sel %in% dropped.vars)])
+        #    return()
+        #}
         if(!drop.vars){
-            tb_ctab[] <<- data.frame("Variables"=ins[[choice]])
+            out <- selection
+            if(ret) return(out) else 
+                tb_ctab[] <<- data.frame("Variables"=out)
         } else {
-            tb_ctab[] <<- data.frame("Variables"=
-                ins[[choice]][!(ins[[choice]] %in% dropped.vars)])
+            out <- selection[!(selection %in% dropped.vars)]
+            if(ret) return(out) else 
+                tb_ctab[] <<- data.frame("Variables"=out)
         }
     }
     
@@ -1286,7 +1395,13 @@ Do you want to proceed?', title="Warning", icon="warning")
 				ctab.dropped <<- ctab.dropped[!(ctab.dropped %in% b_dnd)]
 				#tb_ctab[] <- old_selection[!(old_selection %in% ctab.dropped)]
                 #restore.point('f', F)
-                h_ctab_vars.ins(drop.vars=TRUE)
+                ##take into account if there is an active search
+                if(is.null(tb_ctab.tmp.sel)){
+                    h_ctab_vars.ins(drop.vars=TRUE)
+                } else {
+                    ##active search
+                    h_ctab_vars.ins(drop.vars=TRUE, tmp.sel=tb_ctab.tmp.sel)
+                }
 				ctab.sel_tmp <- ctab.sel[[as.character(x)]]
 				ctab.sel[[as.character(x)]] <<- ctab.sel_tmp[!(ctab.sel_tmp %in% b_dnd)]
 				delete(g_df_ctab_box, g_df_ctab_box[1])             # remove child
@@ -1328,7 +1443,13 @@ Do you want to proceed?', title="Warning", icon="warning")
             #tb_ctab[] <- old_selection[!(old_selection %in% ctab.dropped)]
             #print("here")
             #restore.point('f', F)
-            h_ctab_vars.ins(drop.vars=TRUE)
+            ##take into account if there is an active search
+            if(is.null(tb_ctab.tmp.sel)){
+                h_ctab_vars.ins(drop.vars=TRUE)
+            } else {
+                ##active search
+                h_ctab_vars.ins(drop.vars=TRUE, tmp.sel=tb_ctab.tmp.sel)
+            }
             ctab.sel[[as.character(x)]] <<- c(ctab.sel[[as.character(x)]], b_dnd)
             #print(ctab.sel)
             ##do not initiate cross-tab if no value.var selected
