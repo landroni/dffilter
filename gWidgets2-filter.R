@@ -1468,8 +1468,8 @@ Do you want to proceed?', title="Warning", icon="warning")
     }
     
     ##init Details tab on start-up
-    ##default to column selection
-    radio.sel <- 2
+    ##default to column selection or subset selection ??
+    radio.sel <- 3
     radio.inst <- ""
     r_sync()
     ##by default update Details only when the tab is selected
