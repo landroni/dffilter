@@ -244,7 +244,10 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
          svalue(c_names) <<- cur_sel
        }
 
-       b <- gbutton("opts", cont=gp)
+       b <- gbutton("", cont=gp)
+       tooltip(b) <- "Search options"
+       b$set_icon("properties")
+
        cbs <- list(gcheckbox("Ignore case", checked=TRUE, handler=function(h,...) {
                              search_type[["ignore.case"]] <<- svalue(h$obj)
                              search_handler(do_old=FALSE)
