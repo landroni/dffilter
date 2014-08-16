@@ -206,7 +206,7 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
      vb <- gvbox(container=c_gp)
      search_type <-  list(ignore.case=TRUE, perl=FALSE, fixed=FALSE)  ##init global instance
        gp <- ggroup(cont=vb)
-       ed <- gedit("", initial.msg="Filter values by...", expand=TRUE, container=gp)
+       ed <- gedit("", initial.msg="Filter column names by...", expand=TRUE, container=gp)
        ed$set_icon("ed-search", "start")
        ed$set_icon("ed-remove", "end")
        ed$set_icon_handler(function(h,...) {
@@ -976,6 +976,7 @@ Do you want to proceed?', title="Warning", icon="warning")
     clgg2 <- ggroup(cont=clgg)
     cb_ctab <- gcheckbox("Pivot table layout", checked=TRUE, cont=clgg2)
     tooltip(cb_ctab) <- "Uncheck to hide the pivot table layout editor"
+    
     h_ctab_hide <- function(h, ...){
         hide_layout.ctab <- !(svalue(cb_ctab))
         if(hide_layout.ctab){
@@ -991,6 +992,7 @@ Do you want to proceed?', title="Warning", icon="warning")
         }
     }
     addHandlerChanged(cb_ctab, h_ctab_hide)
+    
     h_ctab_clear <- function(h, ...){
         #print(ctab.sel)
         lapply(1:3, function(x){
@@ -1141,7 +1143,6 @@ Do you want to proceed?', title="Warning", icon="warning")
                 #ctab.vars.init[[choice]] <<- f_details(droplevels(data_set[ , cnms.disp]))
             }
             ##store selection of displayed details
-            ##FIXME !!need to check if this is appropriate given crosstab
             cnms.ctab_old[[choice]] <<- cnms.disp
         } else if(choice=='sel'){
             if(is.null(ctab.vars.init[[choice]])){
