@@ -1008,6 +1008,7 @@ Do you want to proceed?', title="Warning", icon="warning")
             b_melt_var.ctab <<- NULL
             has_b_melt_var <<- FALSE
         })
+        svalue(ed_search_ctab) <- ""
         delete(g_df_ctab_box, g_df_ctab_box[1])             # remove child
         DF_ctab <<- glabel("", cont=g_df_ctab_box, expand=TRUE)
     }
