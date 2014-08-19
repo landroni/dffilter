@@ -12,7 +12,7 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
     require(gWidgets2) ## on github not CRAN. (require(devtools); install_github("gWidgets2", "jverzani")
     options(guiToolkit="RGtk2")
     require(RGtk2)
-    ##FIXME put this in the handler
+    ##FIXME !!put *like these* in the handler
     if(details) require(Hmisc)
     
 
@@ -353,6 +353,7 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
     ## centralized handler helper fun to update size of row/col selection
     len_idxs_update <- function(h, ...) {
         rows <<- svalue(row_filter)
+        ##FIXME sometimes this catch is buggy
         ##catch if row_filter outputs all FALSE or empty selection
         if(!any(rows)){
             idxs <<- integer()
@@ -506,9 +507,9 @@ Do you want to proceed?', title="Warning", icon="warning")
         if(crosstab){
             if(any(!crosstab.on.tab.sel, svalue(ntbk)==3)){
                 h_ctab_vars()
-                h_ctab_vars.ins()
-        ##FIXME !!redo ctab when var selection stays the same
-                h_ctab_clear()
+                h_ctab_vars.ins(drop.vars=TRUE)
+                #h_ctab_clear()
+
                 ##signal new ctab event via button
                 #new.ctab <<- TRUE
                 new.disp <<- TRUE
@@ -838,6 +839,7 @@ Do you want to proceed?', title="Warning", icon="warning")
     svalue(dntbk) <- 1
 
     ##handler to keep Details radios in sync
+    ##FIXME !!sync fails when switching radio then switching tab
     r_sync <- function(h, ...){
         ##details
         if(radio.inst!="r_descr") svalue(r_descr, index=TRUE) <- radio.sel
@@ -1128,11 +1130,21 @@ Do you want to proceed?', title="Warning", icon="warning")
     })
     
     ##FIXME rename handler if don't save copy of subset, and rm all unnecessary checks??
-    ##FIXME !!on 'define sel' button, check what vars are already in fields, like this:
-    #tb_ctab[] <- old_selection[!(old_selection %in% ctab.dropped)]
     h_ctab_vars <- function(h, choice=radio.sel, ...) {
         choice <- names(details_choices)[choice]
         #print(choice)
+        
+        ##FIXME !!on 'define sel' button, when sel is different..
+        ##..check what vars are already in fields:
+        #tb_ctab[] <- old_selection[!(old_selection %in% ctab.dropped)]
+        ##FIXME can this check be put below? 
+        if(!isTRUE(all.equal(cnms.disp, cnms.ctab_old[[choice]]))){
+            h_ctab_clear()
+        } else {
+            ##FIXME check if this can be avoided
+            svalue(ed_search_ctab) <- ""
+        }
+        
         if(choice=='full'){
             ##avoid re-computing if output already exists
             if(is.null(ctab.vars.init[[choice]])) ctab.vars.init[[choice]] <<- data_set_nms
@@ -1171,6 +1183,13 @@ Do you want to proceed?', title="Warning", icon="warning")
                 #ctab.vars.init[[choice]] <<- f_details(droplevels(data_set[rows.disp, ]))
             }
             rows.ctab_old[[choice]] <<- rows.disp
+        }
+        
+        {
+            lyt_val <- 3
+            lyt_has_child <- try(is.null(lyt_ctab[1,lyt_val]$children[[1]]), silent=T)
+            if(!(class(lyt_has_child)=="try-error"))
+                h_ctab_reshape()
         }
         
         ##signal that no new ctab is necessary
@@ -1342,8 +1361,8 @@ Do you want to proceed?', title="Warning", icon="warning")
         ##by default update Crosstab only when the tab is selected
             if(svalue(ntbk)==3){
                 h_ctab_vars()
-                h_ctab_vars.ins()
-                h_ctab_clear()
+                h_ctab_vars.ins(drop.vars=TRUE)
+                #h_ctab_clear()
             }
         }
     })
@@ -1534,9 +1553,8 @@ Do you want to proceed?', title="Warning", icon="warning")
                 if(h$page.no==3){
                     if(new.ctab){
                         h_ctab_vars()
-                        h_ctab_vars.ins()
-                        ##FIXME think of a more elegant way to deal with existing vars in ctab
-                        h_ctab_clear()
+                        h_ctab_vars.ins(drop.vars=TRUE)
+                        #h_ctab_clear()
                     }
                     blockHandlers(b_disp)
                     svalue(b_disp, append=T) <- paste('Define', h_disp_lab, sep='')

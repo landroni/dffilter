@@ -122,6 +122,7 @@ High priority / ASAP:
  - REQ how to manipulate tabs by label/name (NOT by nr)
     - add filter=F & crosstab=F
     - dfview() & dfdescr() & dfcrosstab()
+    - ??detach tab functionality
 
 
 gfilter.R TODO items:
