@@ -12,7 +12,7 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
     require(gWidgets2) ## on github not CRAN. (require(devtools); install_github("gWidgets2", "jverzani")
     options(guiToolkit="RGtk2")
     require(RGtk2)
-    ##FIXME !!put *like these* in the handler
+    ##FIXME !!put package require() in appropriate handlers
     if(details) require(Hmisc)
     
 
@@ -52,6 +52,8 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
     rows.ctab_old <- list()               # global rows index (subset previously displayed)
     cnms.ctab_old <- list()               # global column names (subset currently displayed)
     tb_ctab.tmp.sel <- NULL
+    new.descr.sync <- TRUE
+    new.ctab.sync <- TRUE
     
     ##if there is no Details tab, we always want to display subset
     if(!details) filter.on.tab.sel <- FALSE
@@ -120,6 +122,7 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
     tooltip(b_hide) <- "Hide panel"
 
     ## have a reload button
+    ##FIXME !!restore the sel of row filters
     #addSpring(f_side0g)
     b_reload <- gbutton("Reload", cont=f_side0g1)
     h_reload <- function(h, ...) {
@@ -692,6 +695,7 @@ Do you want to proceed?', title="Warning", icon="warning")
 
     #####
     ##Labels sub-tab
+    ##FIXME !!labels tab is broken
     dlabgg <- ggroup(cont=dntbk, horizontal=FALSE, label="Labels", expand=TRUE, 
                    use.scrollwindow = TRUE)
     dlabgg2 <- ggroup(cont=dlabgg, expand=FALSE)
@@ -839,7 +843,6 @@ Do you want to proceed?', title="Warning", icon="warning")
     svalue(dntbk) <- 1
 
     ##handler to keep Details radios in sync
-    ##FIXME !!sync fails when switching radio then switching tab
     r_sync <- function(h, ...){
         ##details
         if(radio.inst!="r_descr") svalue(r_descr, index=TRUE) <- radio.sel
@@ -909,6 +912,9 @@ Do you want to proceed?', title="Warning", icon="warning")
         #new.disp <<- FALSE
         #new.ctab <<- FALSE
         new.descr <<- FALSE
+
+        ##signal that no new describe after sync is necessary
+        new.descr.sync <<- FALSE
     }
 
     h_details.ins <- function(h, choice=radio.sel, ins=details.out, ...){
@@ -938,12 +944,14 @@ Do you want to proceed?', title="Warning", icon="warning")
         DF_deb$set_selectmode("multiple")
     }
     
+    ##handle change of radio choice in Details tab
     addHandlerChanged(r_descr, function(h, ...){
         if(details.on.tab.sel){
         ##by default update Details only when the tab is selected
             if(svalue(ntbk)==2){
                 h_details()
                 h_details.ins()
+                new.ctab.sync <<- TRUE
             }
         }
     })
@@ -1003,7 +1011,7 @@ Do you want to proceed?', title="Warning", icon="warning")
         lapply(1:3, function(x){
               #tb_ctab[] <<- old_selection
               h_ctab_vars.ins()
-              ##REQ how to speedy delete all children of container
+              ##REQ !!how to speedy delete all children of container
               lapply(lyt_ctab[1,x]$children, function(y) delete(lyt_ctab[1,x], y))
               ctab.dropped <<- c()
               ctab.sel <<- list()
@@ -1112,6 +1120,8 @@ Do you want to proceed?', title="Warning", icon="warning")
     ##REQ label variables by factor/char & numeric
     tb_ctab <- gtable(cnms.disp, cont=gg_tb_ctab1bis)
     names(tb_ctab) <- "Variables"
+    ##REQ tb_ctab$set_selectmode("multiple")
+    #tb_ctab$set_selectmode("multiple")
     #size(tbl) <- c(100, 300)
 
     ##continue fancy search functionality
@@ -1135,7 +1145,7 @@ Do you want to proceed?', title="Warning", icon="warning")
         #print(choice)
         
         ##FIXME !!on 'define sel' button, when sel is different..
-        ##..check what vars are already in fields:
+        ##..check what vars are already in fields and drop them with a msg:
         #tb_ctab[] <- old_selection[!(old_selection %in% ctab.dropped)]
         ##FIXME can this check be put below? 
         if(!isTRUE(all.equal(cnms.disp, cnms.ctab_old[[choice]]))){
@@ -1199,6 +1209,9 @@ Do you want to proceed?', title="Warning", icon="warning")
         #print("ctab event")
         #print(paste("new.disp:", new.disp))
         #print(paste("new.descr:", new.descr))
+
+        ##signal that no new ctab after sync is necessary
+        new.ctab.sync <<- FALSE
     }
     
     h_ctab_vars.ins <- function(h, choice=radio.sel, ins=ctab.vars.init, 
@@ -1356,6 +1369,7 @@ Do you want to proceed?', title="Warning", icon="warning")
 	})
     addHandlerChanged(cmb.fun.args_ctab, h_ctab_reshape)
     
+    ##handle change of radio choice in Crosstab tab
     addHandlerChanged(r_ctab, function(h, ...){
         if(crosstab.on.tab.sel){
         ##by default update Crosstab only when the tab is selected
@@ -1363,14 +1377,15 @@ Do you want to proceed?', title="Warning", icon="warning")
                 h_ctab_vars()
                 h_ctab_vars.ins(drop.vars=TRUE)
                 #h_ctab_clear()
+                new.descr.sync <<- TRUE
             }
         }
     })
 
 
-    ##FIXME allow duplication of vars from one target to another (using ctrl+DnD)
+    ##FIXME ??allow duplication of vars from one target to another (using ctrl+DnD)
     ##FIXME allow reverse DnD, to allow rm of buttons from target area
-    ##FIXME add rm button in front
+    ##FIXME ??add rm button in front (or have buttons with close buttons)
     ##REQ can gdf() handle arrays (acast)
     lapply(1:3, function(x){
         addDropTarget(lyt_ctab[1,x], handler=function(h,...) {
@@ -1378,6 +1393,7 @@ Do you want to proceed?', title="Warning", icon="warning")
             b_dnd <- h$dropdata
             ##REQ how to disable DnD notification when button is already present
             ##refuse spurious drops
+            ##FIXME !!on drop, must respect radio sel: old_selection | data_set_nms
             if(!(b_dnd %in% old_selection)) return()
             ctab.sel[[as.character(x)]] <<- sapply(lyt_ctab[1,x]$children, 
                                function(y) svalue(y$children[[1]]))
@@ -1510,7 +1526,7 @@ Do you want to proceed?', title="Warning", icon="warning")
         ##and if there is a newly displayed data frame
         addHandlerChanged(ntbk, function(h, ...){
                 if(h$page.no==2){
-                    if(new.descr){
+                    if(any(new.descr, new.descr.sync)){
                         h_details()
                         h_details.ins()
                     }
@@ -1551,7 +1567,7 @@ Do you want to proceed?', title="Warning", icon="warning")
         ##and if there is a newly displayed data frame
         addHandlerChanged(ntbk, function(h, ...){
                 if(h$page.no==3){
-                    if(new.ctab){
+                    if(any(new.ctab, new.ctab.sync)){
                         h_ctab_vars()
                         h_ctab_vars.ins(drop.vars=TRUE)
                         #h_ctab_clear()

@@ -89,7 +89,6 @@ High priority / ASAP:
  - FIXME gWidgets vs gWidgets2 compat
  - FIXME bug with ESC to close window when WM menu is poped-up
  - REQ gcombobox(use_completion=T): when only available item has been auto-completed, drop pop-up menu automatically
- - REQ gcomboboxgrp: search, then jerky jump on focus
  - REQ gdf(): rm row numbers or improve separation between row.nr and data
  - FIXME search for `a\` or `asdf[.` in c_names
  Error in (function (pattern, x, ignore.case = FALSE, perl = FALSE, fixed = FALSE,  : 
