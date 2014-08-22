@@ -523,6 +523,7 @@ Do you want to proceed?', title="Warning", icon="warning")
         #print("end-of-button handler")
         #print(paste("new.disp:", new.disp))
         #print(paste("new.descr:", new.descr))
+        #print(paste("new.ctab:", new.ctab))
     }
     
     h_filter <- function(h, ...){
@@ -568,14 +569,15 @@ Do you want to proceed?', title="Warning", icon="warning")
             enabled(do_btn) <- FALSE
             svalue(w) <- paste( substr(svalue(w), 1, (nchar(svalue(w))-1)), sep='')
         }
-        #print("display event")
-        #print(paste("new.disp:", new.disp))
-        #print(paste("new.descr:", new.descr))
         
         ##signal that no new display is necessary
         #new.descr <<- FALSE
         #new.ctab <<- FALSE
         new.disp <<- FALSE
+        #print("display event")
+        #print(paste("new.disp:", new.disp))
+        #print(paste("new.descr:", new.descr))
+        #print(paste("new.ctab:", new.ctab))
     }
     
     b_disp <- gbutton(paste("Display selection (", data_set_dim_orig[1], ' x ', 
@@ -904,17 +906,20 @@ Do you want to proceed?', title="Warning", icon="warning")
             }
             rows.descr_old[[choice]] <<- rows.disp
         }
-        #print("describe event")
-        #print(paste("new.disp:", new.disp))
-        #print(paste("new.descr:", new.descr))
         
         ##signal that no new describe is necessary
         #new.disp <<- FALSE
         #new.ctab <<- FALSE
         new.descr <<- FALSE
+        #print("describe event")
+        #print(paste("new.disp:", new.disp))
+        #print(paste("new.descr:", new.descr))
+        #print(paste("new.ctab:", new.ctab))
 
         ##signal that no new describe after sync is necessary
         new.descr.sync <<- FALSE
+        #print(paste("new.descr.sync:", new.descr.sync))
+        #print(paste("new.ctab.sync:", new.ctab.sync))
     }
 
     h_details.ins <- function(h, choice=radio.sel, ins=details.out, ...){
@@ -952,6 +957,9 @@ Do you want to proceed?', title="Warning", icon="warning")
                 h_details()
                 h_details.ins()
                 new.ctab.sync <<- TRUE
+                #print("describe sync event")
+                #print(paste("new.descr.sync:", new.descr.sync))
+                #print(paste("new.ctab.sync:", new.ctab.sync))
             }
         }
     })
@@ -1209,9 +1217,12 @@ Do you want to proceed?', title="Warning", icon="warning")
         #print("ctab event")
         #print(paste("new.disp:", new.disp))
         #print(paste("new.descr:", new.descr))
+        #print(paste("new.ctab:", new.ctab))
 
         ##signal that no new ctab after sync is necessary
         new.ctab.sync <<- FALSE
+        #print(paste("new.descr.sync:", new.descr.sync))
+        #print(paste("new.ctab.sync:", new.ctab.sync))
     }
     
     h_ctab_vars.ins <- function(h, choice=radio.sel, ins=ctab.vars.init, 
@@ -1378,6 +1389,9 @@ Do you want to proceed?', title="Warning", icon="warning")
                 h_ctab_vars.ins(drop.vars=TRUE)
                 #h_ctab_clear()
                 new.descr.sync <<- TRUE
+                #print("ctab sync event")
+                #print(paste("new.descr.sync:", new.descr.sync))
+                #print(paste("new.ctab.sync:", new.ctab.sync))
             }
         }
     })
@@ -1538,6 +1552,7 @@ Do you want to proceed?', title="Warning", icon="warning")
                     #print("switch-to-tab-2 event")
                     #print(paste("new.disp:", new.disp))
                     #print(paste("new.descr:", new.descr))
+                    #print(paste("new.ctab:", new.ctab))
                 }
             })
     }
@@ -1558,6 +1573,7 @@ Do you want to proceed?', title="Warning", icon="warning")
                     #print("switch-to-tab-1 event")
                     #print(paste("new.disp:", new.disp))
                     #print(paste("new.descr:", new.descr))
+                    #print(paste("new.ctab:", new.ctab))
                 }
             })
     }
@@ -1580,6 +1596,7 @@ Do you want to proceed?', title="Warning", icon="warning")
                     #print("switch-to-tab-3 event")
                     #print(paste("new.disp:", new.disp))
                     #print(paste("new.descr:", new.descr))
+                    #print(paste("new.ctab:", new.ctab))
                 }
             })
     }
