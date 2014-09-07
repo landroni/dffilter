@@ -55,6 +55,9 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
     tb_ctab.tmp.sel <- NULL
     new.descr.sync <- TRUE
     new.ctab.sync <- TRUE
+    l_lyt_ctab <- list()
+    f_lyt_ctab <- list()
+    g_variable2...fixed <- NULL     ## global instance of special 'variable' obj in ctab
     
     ##if there is no Details tab, we always want to display subset
     if(!details) filter.on.tab.sel <- FALSE
@@ -1016,23 +1019,70 @@ Do you want to proceed?', title="Warning", icon="warning")
     }
     addHandlerChanged(cb_ctab, h_ctab_hide)
     
-    h_ctab_clear <- function(h, ...){
+    h_ctab_clear <- function(h, all.fields=TRUE, field.nr=NULL, ...){
         #print(ctab.sel)
-        lapply(1:3, function(x){
-              #tb_ctab[] <<- old_selection
-              h_ctab_vars.ins()
+        #print(all.fields)
+        #print(field.nr)
+
+        ##reset all fields or one field in particular
+        idx <- if(all.fields) 1:3 else field.nr
+        stopifnot(!is.null(idx))
+        #print(idx)
+        lapply(idx, function(x){
               ##REQ !!how to speedy delete all children of container
               lapply(lyt_ctab[1,x]$children, function(y) delete(lyt_ctab[1,x], y))
-              ctab.dropped <<- c()
-              ctab.sel <<- list()
+        })
+        
+        ##reinit global instances
+        if(all.fields){
+            ##reset all fields
+            ctab.dropped <<- c()
+            ctab.sel <<- list()
+            ##reinit search box
+            svalue(ed_search_ctab) <- ""
+            ##update gtable variables
+            h_ctab_vars.ins()
+        } else {
+            ##reset one field in particular
+            stopifnot(!is.null(field.nr), length(field.nr)==1)
+            x <- field.nr
+            #print(x)
+            ctab.sel_tmp <- ctab.sel[[as.character(x)]]
+            ctab.dropped <<- ctab.dropped[!(ctab.dropped %in% ctab.sel_tmp)]
+            ctab.sel[[as.character(x)]] <<- character(0)
+            #ctab.sel[[as.character(x)]] <<- sapply(lyt_ctab[1,x]$children, 
+            #       function(y) svalue(y$children[[1]]))
+            #tb_ctab[] <- old_selection[!(old_selection %in% ctab.dropped)]
+            ##update gtable variables
+            ##active search
+            h_ctab_vars.ins(drop.vars=TRUE, tmp.sel=tb_ctab.tmp.sel)
+        }
+
+        if(length(ctab.sel[["3"]])!=0){
+            h_ctab_reshape()
+        } else {
+            ##rm displayed ctab
+            delete(g_df_ctab_box, g_df_ctab_box[1])             # remove child
+            DF_ctab <<- glabel("", cont=g_df_ctab_box, expand=TRUE)
+        }
+        
+        ##take care of Values field
+        if(any(all.fields, field.nr == 3)){
             b_melt_var.ctab <<- NULL
             has_b_melt_var <<- FALSE
-        })
-        svalue(ed_search_ctab) <- ""
-        delete(g_df_ctab_box, g_df_ctab_box[1])             # remove child
-        DF_ctab <<- glabel("", cont=g_df_ctab_box, expand=TRUE)
+            ##delete special 'variable` button
+            ##FIXME if(field.nr == 3), do NOT rm  g_variable2...fixed
+            ##FIXME some related (R:21444): Gtk-CRITICAL **: 
+            ##'IA__gtk_container_remove: assertion 'GTK_IS_TOOLBAR (container) || widget->parent == GTK_WIDGET (container)' failed
+            #g_dnd_name <- paste("g_", "variable", 2, "...fixed", sep="")
+            #try(delete(lyt_ctab[1,2], get(g_dnd_name)), silent=F)
+            try(delete(lyt_ctab[1,2], g_variable2...fixed), silent=T)
+            g_variable2...fixed <<- NULL
+        }
     }
-    b_ctab_clear <- gbutton("Clear", cont=clgg2, handler=h_ctab_clear)
+    b_ctab_clear <- gbutton("Clear", cont=clgg2, handler=function(h, ...){ 
+                            h_ctab_clear(all.fields=TRUE)
+                            })
     tooltip(b_ctab_clear) <- "Clear pivot table and its layout"
     
     pg_ctab <- gpanedgroup(cont=clgg, expand=T, fill=T)
@@ -1159,7 +1209,7 @@ Do you want to proceed?', title="Warning", icon="warning")
         #tb_ctab[] <- old_selection[!(old_selection %in% ctab.dropped)]
         ##FIXME can this check be put below? 
         if(!isTRUE(all.equal(cnms.disp, cnms.ctab_old[[choice]]))){
-            h_ctab_clear()
+            h_ctab_clear(all.fields=TRUE)
         } else {
             ##FIXME check if this can be avoided
             svalue(ed_search_ctab) <- ""
@@ -1227,6 +1277,7 @@ Do you want to proceed?', title="Warning", icon="warning")
         #print(paste("new.ctab.sync:", new.ctab.sync))
     }
     
+    ##handler to update variables in gtable instance
     h_ctab_vars.ins <- function(h, choice=radio.sel, ins=ctab.vars.init, 
         drop.vars=FALSE, dropped.vars=ctab.dropped, ret=FALSE, 
         null.sel=FALSE, tmp.sel=NULL, ...){
@@ -1261,13 +1312,41 @@ Do you want to proceed?', title="Warning", icon="warning")
     }
     
     lyt_ctab <- glayout(homogeneous=F, cont=gg_ctab2, expand=TRUE, fill=T)
-    ##REQ gframe c-menu to add Clear frame item
-    lyt_ctab[1,1, expand=TRUE, fill=T] <- gframe("Row Fields", horizontal=FALSE,
-                          container=lyt_ctab, expand=TRUE, fill=T)
-    lyt_ctab[1,2, expand=TRUE, fill=T] <- gframe("Column Fields", horizontal=FALSE,
-                          container=lyt_ctab, expand=TRUE, fill=T)
-    lyt_ctab[1,3, expand=TRUE, fill=T] <- gframe("Values", horizontal=FALSE,
-                          container=lyt_ctab, expand=TRUE, fill=T)
+    ##FIXME ??add clear button and DnD area to gframe (render 'clear field' more visible UI)
+    ##FIXME disable c-menu clear when not needed
+    field.nms <- c("Row Fields", "Column Fields", "Values")
+    for(i in 1:3){
+        lyt_ctab[1,i, expand=TRUE, fill=T] <- 
+                f_lyt_ctab[[i]] <- gframe("", horizontal=FALSE,
+                              container=lyt_ctab, expand=TRUE, fill=T)
+        ##have gframe with custom label (and context menu)
+        l_lyt_ctab[[i]] <- glabel(field.nms[i])
+        tooltip(l_lyt_ctab[[i]]) <- paste(
+            "Right-click on", field.nms[i], "to clear field variables")
+        #print(i)
+        #print(field.nms[i])
+        h_ctab_clear.force <- function(i){
+            force(i)
+            #print(i)
+            function(h, ...){
+                h_ctab_clear(all.fields=FALSE, field.nr=i)
+            }
+        }
+        #addRightclickPopupMenu(l_lyt_ctab[[i]], 
+        addPopupMenu(l_lyt_ctab[[i]], 
+            list(a=gaction("Clear field", icon="clear", 
+                    handler=h_ctab_clear.force(i)
+                        #function(h, ...){
+                        #    h_ctab_clear(all.fields=FALSE, field.nr=i)
+                        #}
+                        )))
+        f_lyt_ctab[[i]]$block$setLabelWidget(l_lyt_ctab[[i]]$block)         # the voodoo
+        l_lyt_ctab[[i]]$widget$setSelectable(FALSE)           # may not be needed
+    }
+    #lyt_ctab[1,2, expand=TRUE, fill=T] <- gframe("Column Fields", horizontal=FALSE,
+    #                      container=lyt_ctab, expand=TRUE, fill=T)
+    #lyt_ctab[1,3, expand=TRUE, fill=T] <- gframe("Values", horizontal=FALSE,
+    #                      container=lyt_ctab, expand=TRUE, fill=T)
     lyt_ctab[1,4, expand=TRUE, fill=T] <- gframe("Options", horizontal=FALSE,
                       container=lyt_ctab, expand=TRUE, fill=T)
     g_cmb.fun_ctab <- ggroup(cont=lyt_ctab[1,4])
@@ -1339,29 +1418,33 @@ Do you want to proceed?', title="Warning", icon="warning")
         }
         ##update GUI
         if(use.melt){
-            ##FIXME check that no "variable" var in data_set_nms; work around that case
-            ##FIXME make it possible to move buttonbetween row/col fields
-            ##FIXME use global instance for this special object
-            b_dnd <- "variable"
-            x <- 2
-            g_dnd_name <- paste("g_", b_dnd, x, "...fixed", sep="")
+            ##FIXME check that no clash with "variable" var in data_set_nms
+            ##FIXME make it possible to move buttons between row/col fields
+            #b_dnd <- "variable"
+            #x <- 2
+            #g_dnd_name <- paste("g_", b_dnd, x, "...fixed", sep="")
             if(!has_b_melt_var){
-            #print(g_dnd_name)
-            assign(g_dnd_name, ggroup(cont=lyt_ctab[1,x]))
-            b_melt_var.ctab <<- gbutton(b_dnd, cont=get(g_dnd_name), expand=F, fill=F, 
-				handler=function(h, ...){
-                delete(lyt_ctab[1,x], get(g_dnd_name))
-				#ctab.dropped <<- ctab.dropped[!(ctab.dropped %in% b_dnd)]
-				#tb_ctab[] <- old_selection[!(old_selection %in% ctab.dropped)]
-				#ctab.sel_tmp <- ctab.sel[[as.character(x)]]
-				#ctab.sel[[as.character(x)]] <<- ctab.sel_tmp[!(ctab.sel_tmp %in% b_dnd)]
-				#delete(g_df_ctab_box, g_df_ctab_box[1])             # remove child
-				#DF_ctab <<- glabel("", cont=g_df_ctab_box, expand=TRUE)
-				#lyt_has_child <- try(is.null(lyt_ctab[1,lyt_val]$children[[1]]), silent=T)
-				##FIXME there is an error here
-                #if(names(lyt_ctab[1,x]) != "Values"){
-				#	if(class(lyt_has_child)=="try-error") return()
-				})
+                #print(g_dnd_name)
+                #g_variable2...fixed <<- ggroup(cont=lyt_ctab[1,x])
+                g_variable2...fixed <<- ggroup(cont=lyt_ctab[1,2])
+                #assign(g_dnd_name, ggroup(cont=lyt_ctab[1,x]))
+                #b_melt_var.ctab <<- gbutton(b_dnd, cont=get(g_dnd_name), expand=F, fill=F, 
+                b_melt_var.ctab <<- gbutton("variable", cont=g_variable2...fixed, expand=F, fill=F, 
+                    handler=function(h, ...){
+                    #delete(lyt_ctab[1,x], get(g_dnd_name))
+                    delete(lyt_ctab[1,2], g_variable2...fixed)
+                    g_variable2...fixed <<- NULL
+                    #ctab.dropped <<- ctab.dropped[!(ctab.dropped %in% b_dnd)]
+                    #tb_ctab[] <- old_selection[!(old_selection %in% ctab.dropped)]
+                    #ctab.sel_tmp <- ctab.sel[[as.character(x)]]
+                    #ctab.sel[[as.character(x)]] <<- ctab.sel_tmp[!(ctab.sel_tmp %in% b_dnd)]
+                    #delete(g_df_ctab_box, g_df_ctab_box[1])             # remove child
+                    #DF_ctab <<- glabel("", cont=g_df_ctab_box, expand=TRUE)
+                    #lyt_has_child <- try(is.null(lyt_ctab[1,lyt_val]$children[[1]]), silent=T)
+                    ##FIXME there is an error here
+                    #if(names(lyt_ctab[1,x]) != "Values"){
+                    #	if(class(lyt_has_child)=="try-error") return()
+                    })
                 blockHandlers(b_melt_var.ctab)
                 font(b_melt_var.ctab) <- list(color = "darkblue")
 				has_b_melt_var <<- TRUE
@@ -1410,22 +1493,25 @@ Do you want to proceed?', title="Warning", icon="warning")
         addDropTarget(lyt_ctab[1,x], handler=function(h,...) {
             lyt_val <- 3
             b_dnd <- h$dropdata
+            field.nm <- svalue(l_lyt_ctab[[x]])
+            #print(b_dnd)
+            #print(field.nm)
             ##REQ how to disable DnD notification when button is already present
             ##refuse spurious drops
-            ##FIXME !!on drop, must respect radio sel: old_selection | data_set_nms
+            ##FIXME !!radio sync: respect radio sel on drop: old_selection | data_set_nms
+            ##'use a r_sync.sel global var
             if(!(b_dnd %in% old_selection)) return()
+            #print(length(lyt_ctab[1,x]$children))
             ctab.sel[[as.character(x)]] <<- sapply(lyt_ctab[1,x]$children, 
                                function(y) svalue(y$children[[1]]))
-            #print(b_dnd)
             #print(unlist(ctab.sel))
-            #print(names(lyt_ctab[1,x]))
             if(any(unlist(ctab.sel) %in% b_dnd)) return()
             #gbutton(h$dropdata, cont=lyt_ctab[1,x])
             #break.point()
             lyt_has_child <- try(is.null(lyt_ctab[1,lyt_val]$children[[1]]), silent=T)
             lyt_has_child_2nd <- try(is.null(lyt_ctab[1,lyt_val]$children[[2]]), silent=T)
             ##FIXME add message to inform users of failed DnD, or tooltip
-            if(names(lyt_ctab[1,x]) == "Values"){
+            if(field.nm == "Values"){
                 ##if only 1 Value exists, rm fixed 'variable' button
                 if(class(lyt_has_child)!="try-error"){
             if(F){
@@ -1469,7 +1555,7 @@ Do you want to proceed?', title="Warning", icon="warning")
 				if(class(lyt_has_child)=="try-error") return()
                 ##FIXME !!some error still lurking with many changes to layout: click 1st Value button and then 'var' doesn't get rmed
                 ##Error in eval(expr, envir, enclos) : object 'variable' not found
-                if(names(lyt_ctab[1,x]) == "Values"){
+                if(field.nm == "Values"){
                     if(all(class(lyt_has_child_2nd)=="try-error", has_b_melt_var)){
                         #print('go')
                         #restore.point('f', F)
@@ -1512,7 +1598,7 @@ Do you want to proceed?', title="Warning", icon="warning")
             ctab.sel[[as.character(x)]] <<- c(ctab.sel[[as.character(x)]], b_dnd)
             #print(ctab.sel)
             ##do not initiate cross-tab if no value.var selected
-            if(names(lyt_ctab[1,x]) != "Values"){
+            if(field.nm != "Values"){
                 if(class(lyt_has_child)=="try-error") return()
             }
             h_ctab_reshape()
