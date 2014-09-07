@@ -122,6 +122,7 @@ High priority / ASAP:
     - add filter=F & crosstab=F
     - dfview() & dfdescr() & dfcrosstab()
     - ??detach tab functionality
+ - REQ on reload gtk window to stay open (maybe just blank; maybe message)
 
 
 gfilter.R TODO items:

@@ -12,6 +12,7 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
     require(gWidgets2) ## on github not CRAN. (require(devtools); install_github("gWidgets2", "jverzani")
     options(guiToolkit="RGtk2")
     require(RGtk2)
+    ##FIXME !!proper CRAN packaging
     ##FIXME !!put package require() in appropriate handlers
     if(details) require(Hmisc)
     
@@ -637,7 +638,7 @@ Do you want to proceed?', title="Warning", icon="warning")
     
     ############################
     ##Details tab
-    ##FIXME !!details=F is completely broken as it will affect crosstab too, at least
+    ##FIXME !!details=F is completely broken (as it will affect crosstab too)
     if(details){
     dgg <- ggroup(cont=ntbk, horizontal=TRUE, label=" Details")
     ntbk$add_tab_icon(2, "info")
@@ -649,6 +650,7 @@ Do you want to proceed?', title="Warning", icon="warning")
 
     #####
     ##Describe sub-tab
+    ##FIXME !!add numSummary tab (RcmdrMisc)
     dlgg <- ggroup(cont=dntbk, horizontal=FALSE, label="Describe", expand=TRUE, 
                    use.scrollwindow = TRUE)
     #tooltip(dlgg) <- "Describe the data set that is currently displayed"
@@ -697,7 +699,6 @@ Do you want to proceed?', title="Warning", icon="warning")
 
     #####
     ##Labels sub-tab
-    ##FIXME !!labels tab is broken
     dlabgg <- ggroup(cont=dntbk, horizontal=FALSE, label="Labels", expand=TRUE, 
                    use.scrollwindow = TRUE)
     dlabgg2 <- ggroup(cont=dlabgg, expand=FALSE)
@@ -861,7 +862,8 @@ Do you want to proceed?', title="Warning", icon="warning")
         out <- list()
         out[["descr"]] <- describe(x, descript=nm)
         out[["summ"]] <- capture.output(summary(x))
-        out[["lab.df"]] <- capture.output(list_lab(x))
+        out[["lab.df"]] <- capture.output(list_lab()) ##use only data_set
+        ##FIXME need to check if this works after subset
         out[["lab.var"]] <- capture.output(label(x))
         out[["lev"]] <- capture.output(list_levs(x, NULL))
         out[["var"]] <- capture.output(dput(names(x)))
@@ -1142,7 +1144,7 @@ Do you want to proceed?', title="Warning", icon="warning")
     gg_ctab1 <- ggroup(cont=gg_ctab0)
     gg_ctab2 <- ggroup(cont=gg_ctab1)
 
-    ##FIXME allow multiple DnD
+    ##FIXME !!implement multiple DnD
     addDropSource(tb_ctab, handler=function(h,...){
         svalue(tb_ctab)
     })
@@ -1373,11 +1375,14 @@ Do you want to proceed?', title="Warning", icon="warning")
 		DF_ctab$set_selectmode("multiple")
     }
     ##FIXME Error in get(svalue(cmb.fun_ctab)) : object 'ma' not found
-    ##FIXME need to be more selective when activate h_ctab_reshape here (e.g. it activates even if no Value var)
+    ##FIXME !!need to be more selective when activate h_ctab_reshape here (e.g. it activates even if no Value var)
+	#    Error in if (!(value.var %in% names(data))) { : 
+	#  argument is of length zero
     addHandlerChanged(cmb.fun_ctab, function(h, ...){
 		#svalue(cmb.fun.args_ctab) <- ""
 		h_ctab_reshape()
 	})
+	##FIXME need to think of a way to request confirmatoin from user when finished inputting args
     addHandlerChanged(cmb.fun.args_ctab, h_ctab_reshape)
     
     ##handle change of radio choice in Crosstab tab
@@ -1627,6 +1632,8 @@ Do you want to proceed?', title="Warning", icon="warning")
     #size(lyt_ctab)[2] <- 100
     #size(lyt_ctab[1,1])[1] <- c(250)
     #size(lyt_ctab[1,4]) <- c(100, 100)
+    ##REQ/FIXME generates assertion
+    ##(R:18255): Gtk-CRITICAL **: IA__gtk_table_attach: assertion 'child->parent == NULL' failed
     size(lyt_ctab[1,4])[2] <- c(100)
     #print(size(gg_ctab2))
     #print(size(lyt_ctab))
