@@ -992,6 +992,7 @@ Do you want to proceed?', title="Warning", icon="warning")
     r_ctab <- gradio(details_choices, 2, horizontal=TRUE, cont=clgg1)
     tooltip(clgg1) <- "Generate pivot tables from the full data set, a column selection (all rows), the currently displayed subset, a row selection (all columns)"
     
+    ##FIXME !!on radio sync, gracefully redo ctab
     h_rshp <- function(h,...){
         radio.sel <<- svalue(r_ctab, index=TRUE)
         radio.inst <<- "r_ctab"
@@ -1332,8 +1333,8 @@ Do you want to proceed?', title="Warning", icon="warning")
                 h_ctab_clear(all.fields=FALSE, field.nr=i)
             }
         }
-        #addRightclickPopupMenu(l_lyt_ctab[[i]], 
-        addPopupMenu(l_lyt_ctab[[i]], 
+        addRightclickPopupMenu(l_lyt_ctab[[i]], 
+        #addPopupMenu(l_lyt_ctab[[i]], 
             list(a=gaction("Clear field", icon="clear", 
                     handler=h_ctab_clear.force(i)
                         #function(h, ...){
@@ -1367,6 +1368,11 @@ Do you want to proceed?', title="Warning", icon="warning")
         ##'    rm grp in col field
         ##'    rm 1 value var
         ##'    Error in eval(expr, envir, enclos) : object 'variable' not found
+        ##FIXME !!error when row selection is zero
+        ##Error in dim(ordered) <- ns : 
+		##  dims [product 1] do not match the length of object [0]
+		##Error in names(details_choices)[choice] : 
+		##  invalid subscript type 'externalptr'
         #print(ctab.sel[["1"]])
         #print(ctab.sel[["2"]])
         choice <- names(details_choices)[choice]
@@ -1457,8 +1463,10 @@ Do you want to proceed?', title="Warning", icon="warning")
         sapply(1:ncol(DF_ctab), function(j) editable(DF_ctab, j) <- FALSE) 
 		DF_ctab$set_selectmode("multiple")
     }
+    
     ##FIXME Error in get(svalue(cmb.fun_ctab)) : object 'ma' not found
-    ##FIXME !!need to be more selective when activate h_ctab_reshape here (e.g. it activates even if no Value var)
+    ##FIXME !!be more selective when activate h_ctab_reshape: put check inside fun
+    ##(e.g. it activates even if no Value var)
 	#    Error in if (!(value.var %in% names(data))) { : 
 	#  argument is of length zero
     addHandlerChanged(cmb.fun_ctab, function(h, ...){
