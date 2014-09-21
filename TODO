@@ -1,6 +1,6 @@
 High priority / ASAP:
  - !!add numSummary tab (RcmdrMisc)
- - respect selected tab on reload
+ - !!proper packaging for CRAN
 
  - !!tweak preset
     - !!'preserve/freeze set.seed()' cb with 'some' preset filter
@@ -40,6 +40,7 @@ High priority / ASAP:
         check if digest of object is still the same and if not inform the user that 
         the object had already been modified and ask for additional confirmation 
 
+ - respect selected tab on reload
  - !!make.names() & set editable=F & message to inform user
     - ??disallow data frames with duplicate names to avoid assignment issues
     - bug with cbind() & check.names=F
@@ -55,12 +56,11 @@ High priority / ASAP:
      - multiple selection mode (isntead of shift+select on cehckboxes); 
         or via c-menu item "select to here"
 
- - !!proper packaging for CRAN
-    - name ideas: 
-		- "interactive data manipulation"
-		- "The Data Explorer"
-		- "Data exploration and interactive data manipulation"
-		- ??exploratory
+ - name ideas: 
+	- "interactive data manipulation"
+	- "The Data Explorer"
+	- "Data exploration and interactive data manipulation"
+	- ??exploratory
  - investigate what happens on merge for such a "tmp" df
  - ??add subs=NULL option & col.subs=NULL (&disallow [] in df name)
  - REQ gdf() precision of decimal points

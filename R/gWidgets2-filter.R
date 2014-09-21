@@ -1351,8 +1351,8 @@ Do you want to proceed?', title="Warning", icon="warning")
     lyt_ctab[1,4, expand=TRUE, fill=T] <- gframe("Options", horizontal=FALSE,
                       container=lyt_ctab, expand=TRUE, fill=T)
     g_cmb.fun_ctab <- ggroup(cont=lyt_ctab[1,4])
-    ##FIXME add margins cb
-    cmb.fun_ctab <- gcombobox(c("length", "sum", "mean", "median", "sd", "var"), editable=TRUE, 
+    ##FIXME !!add margins cb
+    cmb.fun_ctab <- gcombobox(c("length", "length2", "mean", "median", "sd", "var", "sum"), editable=TRUE, 
               use_completion=TRUE, cont=g_cmb.fun_ctab)
     #size(cmb.fun_ctab) <- c(140,25)
     cmb.fun.args_ctab <- gcombobox(c("", "na.rm=TRUE"), selected=1, editable=TRUE, 
@@ -1744,8 +1744,16 @@ Do you want to proceed?', title="Warning", icon="warning")
     
     ##set some key-bindings
     if(esc){
-        addHandlerKeystroke(w, function(h, ...){
+        h_esc <- addHandlerKeystroke(w, function(h, ...){
             if(h$key=="\033") dispose(w)
+        })
+        #print(h_esc)
+        #break.point()
+        addHandlerBlur(w, function(h, ...){
+            #print(h_signal <- addHandler(w, "key-release-event"))
+            #print(addHandler(h_esc))
+            blockHandler(w, h_esc)
+            #on.exit(unblockHandler(w, h_esc))
         })
     }
 }
