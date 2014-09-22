@@ -68,6 +68,7 @@ High priority / ASAP:
  - ??'Enter' should activate display button
  - opts c-menu & automatically update cbs: 
     - 'Automatically update Details' tab cb
+ - in Variables tab, have a "as.data.frame()" cb that would display a gdf() obj
 
  - REQ when viewing gdf(), possible to c-menu "copy" cell?
     - min window with up to 5th digit nrs, restore window, hover cells, 

@@ -1743,19 +1743,19 @@ Do you want to proceed?', title="Warning", icon="warning")
     if(hide) b_hide$invoke_change_handler()
     
     ##set some key-bindings
-    if(esc){
-        h_esc <- addHandlerKeystroke(w, function(h, ...){
-            if(h$key=="\033") dispose(w)
-        })
-        #print(h_esc)
-        #break.point()
-        addHandlerBlur(w, function(h, ...){
-            #print(h_signal <- addHandler(w, "key-release-event"))
-            #print(addHandler(h_esc))
-            blockHandler(w, h_esc)
-            #on.exit(unblockHandler(w, h_esc))
-        })
-    }
+#     if(esc){
+#         h_esc <- addHandlerKeystroke(w, function(h, ...){
+#             if(h$key=="\033") dispose(w)
+#         })
+#         #print(h_esc)
+#         #break.point()
+#         addHandlerBlur(w, function(h, ...){
+#             #print(h_signal <- addHandler(w, "key-release-event"))
+#             #print(addHandler(h_esc))
+#             blockHandler(w, h_esc)
+#             #on.exit(unblockHandler(w, h_esc))
+#         })
+#     }
 }
 
 # require(MASS)
