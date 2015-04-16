@@ -1,0 +1,11 @@
+Package: dffilter
+Version: 0.0.1-0
+Date: 2015-04-15
+Title: gWidgets2 GUI to view, search, subset and edit a data frame in R (alpha)
+Author: Liviu Andronic
+Maintainer: Liviu Andronic <landronimirc@gmail.com>
+Depends: gWidgets2 (>= 1.0-6), gWidgets2RGtk2 (>= 1.0-3)
+Description: The GUI allows the user to search and filter rows in a data frame, select only the desired columns and display the resulting subset. Optionally the user can edit the subset and merge the changes into the original data frame (experimental). 
+
+At the moment the software is alpha, and the editing feature is ***experimental***. Testers welcome. 
+License: GPL (== 3)
