@@ -3,6 +3,7 @@ High priority / ASAP:
  - !!proper packaging for CRAN
  - !!"By index" cb in c_names to "Select columns by index" (would accept/match 1:32)
 	- when checked, append indices to var names 
+ - !!check pdata.frame are supported throughout
 
  - !!tweak preset
     - !!'preserve/freeze set.seed()' cb with 'some' preset filter
@@ -169,7 +170,7 @@ Low priority / maybe / later:
     - rstudio usage ideas: View <- dffilter
     - REQ Rcmdr option for viewer editor
  - !!check compatibility with tcltk
- - ??investigate dffilter() compatibility with data.table package & plm
+ - ??investigate dffilter() compatibility with data.table package
  - ??possible to use Rgtk2Extras widget (rgtk2editdf)
  - ??what of 5gb dataset or 21297 integer levels: 
     - it shouldn't be too slow; 

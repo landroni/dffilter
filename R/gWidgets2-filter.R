@@ -216,6 +216,7 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
      search_type <-  list(ignore.case=TRUE, perl=FALSE, fixed=FALSE)  ##init global instance
        gp <- ggroup(cont=vb)
        ed <- gedit("", initial.msg="Filter column names by...", expand=TRUE, container=gp)
+       tooltip(ed) <- "Select columns by searching for a (partial) variable name (e.g. 'vari'). If the search string contains a ':' or a ',' (e.g. '1:3, 5, 10'), we attempt to parse it as e.g. c(1:3, 5, 10) and use it as an index to select columns."
        ed$set_icon("ed-search", "start")
        ed$set_icon("ed-remove", "end")
        ed$set_icon_handler(function(h,...) {
@@ -237,6 +238,30 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
            c_names[] <<- data_set_nms
            ed$widget$modifyBase(GtkStateType["normal"], NULL)
            ed$widget$modifyText(GtkStateType["normal"], NULL) 
+           #break.point("f", F)
+         } else if(any(grepl(":", val), grepl(",", val))){
+               val.parse <- paste("c(", val, ")", sep="")
+               val.numeric <- try(eval(parse(text=val.parse)), TRUE)
+               #print(val.numeric)
+               if(class(val.numeric) == "try-error"){
+                   new_vals <- NULL
+               } else {
+                   ##drop values outside range of column index
+                   val.numeric <- val.numeric[ val.numeric >= 1 ]
+                   val.numeric <- val.numeric[ val.numeric <= length(data_set_nms) ]
+                   #print(sort(unique(val.numeric)))
+                   new_vals <- data_set_nms[sort(unique(val.numeric))]
+               }
+               if(length(new_vals)){
+                   c_names[] <<- new_vals
+                   ed$widget$modifyBase(GtkStateType["normal"], NULL)
+                   ed$widget$modifyText(GtkStateType["normal"], NULL) 
+               } else {
+                   c_names[] <<- character(0) 
+                   ed$widget$modifyBase(GtkStateType["normal"], "#FF6666")
+                   ed$widget$modifyText(GtkStateType["normal"], "white") 
+                   return()
+               }
          } else {
            l <- c(list(pattern=val, x=data_set_nms), search_type)
            new_vals <- data_set_nms[do.call(grepl, l)]
