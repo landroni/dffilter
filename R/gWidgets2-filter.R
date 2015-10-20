@@ -80,6 +80,8 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
     w <- gwindow(paste(data_set_name, " (", data_set_dim_orig[1], ' x ', 
                        data_set_dim_orig[2], ')', sep=''), visible=FALSE, 
                  handler=function(h,...){
+                     ##attempt to free memory
+                     gc(TRUE)
                      #if(identical)
                      #return(data_set)
                  })
@@ -222,21 +224,22 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
        }, where="end")
        ed$widget$setIconActivatable("primary", FALSE)
        
-       search_handler <- function(h,..., do_old=TRUE) {
+       search_handler <- function(h,..., do_old=TRUE){
          ## we keep track of old selection here
          ## that updates only when user changes selection, not when filter does
          cur_sel <- old_selection
          blockHandlers(c_names)
          on.exit(unblockHandlers(c_names))
          val <- svalue(ed)
+         #print(val)
 
-         if(val == "") {
+         if(val == ""){
            c_names[] <<- data_set_nms
            ed$widget$modifyBase(GtkStateType["normal"], NULL)
            ed$widget$modifyText(GtkStateType["normal"], NULL) 
          } else {
            l <- c(list(pattern=val, x=data_set_nms), search_type)
-           new_vals = data_set_nms[do.call(grepl, l)]
+           new_vals <- data_set_nms[do.call(grepl, l)]
            if (length(new_vals)) {
              c_names[] <<- new_vals
              ed$widget$modifyBase(GtkStateType["normal"], NULL)
