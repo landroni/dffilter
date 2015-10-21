@@ -76,6 +76,8 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
     ##FIXME find most efficient way to determine size of df
     data_set_dim_orig <- dim(data_set)
     stopifnot(all(data_set_dim_orig >= c(1,2)))
+    ##if pdata.frame, don't use droplevels()
+    is_pdata.frame <- isTRUE(class(data_set)[1] == "pdata.frame")
     
     w <- gwindow(paste(data_set_name, " (", data_set_dim_orig[1], ' x ', 
                        data_set_dim_orig[2], ')', sep=''), visible=FALSE, 
@@ -912,10 +914,18 @@ Do you want to proceed?', title="Warning", icon="warning")
         } else if(choice=='col'){
             ##compute if output does NOT exist
             if(is.null(details.out[[choice]])){
-                details.out[[choice]] <<- f_details(droplevels(data_set[ , cnms.disp]))
+                if(!is_pdata.frame){
+                    details.out[[choice]] <<- f_details(droplevels(data_set[ , cnms.disp]))
+                } else {
+                    details.out[[choice]] <<- f_details(data_set[ , cnms.disp])
+                }
             ##avoid re-computing if output already exists & selection same
             } else if(!isTRUE(all.equal(cnms.disp, cnms.descr_old[[choice]]))){
-                details.out[[choice]] <<- f_details(droplevels(data_set[ , cnms.disp]))
+                if(!is_pdata.frame){
+                    details.out[[choice]] <<- f_details(droplevels(data_set[ , cnms.disp]))
+                } else {
+                    details.out[[choice]] <<- f_details(data_set[ , cnms.disp])
+                }
             }
             ##store selection of displayed details
             cnms.descr_old[[choice]] <<- cnms.disp
@@ -923,19 +933,35 @@ Do you want to proceed?', title="Warning", icon="warning")
             if(is.null(details.out[[choice]])){
                 ##FIXME if possible use DF[] conditionally
                 #details.out[[choice]] <<- f_details(droplevels(DF[]))
-                details.out[[choice]] <<- f_details(droplevels(data_set[rows.disp, cnms.disp]))
+                if(!is_pdata.frame){
+                    details.out[[choice]] <<- f_details(droplevels(data_set[rows.disp, cnms.disp]))
+                } else {
+                    details.out[[choice]] <<- f_details(data_set[rows.disp, cnms.disp])
+                }
             } else if(any(!isTRUE(all.equal(cnms.disp, cnms.descr_old[[choice]])), 
                 !isTRUE(all.equal(rows.disp, rows.descr_old[[choice]])))){
                 #details.out[[choice]] <<- f_details(droplevels(DF[]))
-                details.out[[choice]] <<- f_details(droplevels(data_set[rows.disp, cnms.disp]))
+                if(!is_pdata.frame){
+                    details.out[[choice]] <<- f_details(droplevels(data_set[rows.disp, cnms.disp]))
+                } else {
+                    details.out[[choice]] <<- f_details(data_set[rows.disp, cnms.disp])
+                }
             }
             cnms.descr_old[[choice]] <<- cnms.disp
             rows.descr_old[[choice]] <<- rows.disp
         } else if(choice=='row'){
             if(is.null(details.out[[choice]])){
-                details.out[[choice]] <<- f_details(droplevels(data_set[rows.disp, ]))
+                if(!is_pdata.frame){
+                    details.out[[choice]] <<- f_details(droplevels(data_set[rows.disp, ]))
+                } else {
+                    details.out[[choice]] <<- f_details(data_set[rows.disp, ])
+                }
             } else if(!isTRUE(all.equal(rows.disp, rows.descr_old[[choice]]))){
-                details.out[[choice]] <<- f_details(droplevels(data_set[rows.disp, ]))
+                if(!is_pdata.frame){
+                    details.out[[choice]] <<- f_details(droplevels(data_set[rows.disp, ]))
+                } else {
+                    details.out[[choice]] <<- f_details(data_set[rows.disp, ])
+                }
             }
             rows.descr_old[[choice]] <<- rows.disp
         }
