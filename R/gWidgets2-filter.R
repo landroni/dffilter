@@ -793,7 +793,11 @@ Do you want to proceed?', title="Warning", icon="warning")
     ##helper fun to list levels in a dataframe
     list_levs <- function(data=data_set, vars=NULL){
         if(is.null(vars)) vars <- names(data)
-        lev_nms <- vars[sapply(data, class)=="factor"]
+        lev_logi <- sapply(data, class)=="factor"
+        if(is_pdata.frame){
+            lev_logi <- lev_logi | sapply(data, inherits, "factor")
+        }
+        lev_nms <- vars[lev_logi]
         if(length(lev_nms)==0) return(NULL)
         levs <- lapply(lev_nms, function(x) levels(data[ , x]))
         names(levs) <- lev_nms
