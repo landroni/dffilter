@@ -898,7 +898,8 @@ Do you want to proceed?', title="Warning", icon="warning")
     f_details <- function(x=data_set, nm=data_set_name, nms=data_set_nms){
         out <- list()
         out[["descr"]] <- describe(x, descript=nm)
-        out[["summ"]] <- capture.output(summary(x))
+        if(!is_pdata.frame) out[["summ"]] <- capture.output(summary(x)) else
+            out[["summ"]] <- "NULL"
         out[["lab.df"]] <- capture.output(list_lab()) ##use only data_set
         ##FIXME need to check if this works after subset
         out[["lab.var"]] <- capture.output(label(x))
