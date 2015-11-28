@@ -912,7 +912,7 @@ Do you want to proceed?', title="Warning", icon="warning")
         out[["lab.var"]] <- capture.output(label(x))
         out[["lev"]] <- capture.output(list_levs(x, NULL))
         out[["var"]] <- capture.output(dput(names(x)))
-        out[["deb"]] <- debug_data.frame(x)
+        out[["deb"]] <- debug_data.frame(x, full.names = nms)
         return(out)
     }
     
@@ -1855,31 +1855,37 @@ dffilter_reload <- function(...){
 }
 
 ##FIXME more efficient way of doing this? 
-debug_data.frame <- function(data, funs.def=c("class"=class, "mode"=mode, 
-                             "complete.cases"=function(x) sum(complete.cases(x)), 
-                             "is.na"=function(x) sum(is.na(x)), 
-                             "is.nan"=function(x) sum(is.nan(x)),
-                             "is.finite"=function(x) sum(is.finite(x)),
-                             "is.infinite"=function(x) sum(is.infinite(x)),
-                             "length(unique(nchar(x)))"=function(x) 
-                                 length(unique(nchar(as.character(x)))),
-                             "unique(nchar(x))"=function(x) 
-                                 paste(sort(unique(nchar(as.character(x)))), 
-                                       collapse=" "), 
-                             "is_alnum"=function(x) sum(is_alnum(x)),
-                             "is_alpha"=function(x) sum(is_alpha(x)),
-                             "is_digit"=function(x) sum(is_digit(x)),
-                             "is_punct"=function(x) sum(is_punct(x)),
-                             "is_notalnum"=function(x) sum(is_notalnum(x))
+debug_data.frame <- function(data, 
+                             funs.def=c("position"=invisible, 
+                                        "class"=class, "mode"=mode, 
+                                        "complete.cases"=function(x) sum(complete.cases(x)), 
+                                        "is.na"=function(x) sum(is.na(x)), 
+                                        "is.nan"=function(x) sum(is.nan(x)),
+                                        "is.finite"=function(x) sum(is.finite(x)),
+                                        "is.infinite"=function(x) sum(is.infinite(x)),
+                                        "length(unique(nchar(x)))"=function(x) 
+                                            length(unique(nchar(as.character(x)))),
+                                        "unique(nchar(x))"=function(x) 
+                                            paste(sort(unique(nchar(as.character(x)))), 
+                                                  collapse=" "), 
+                                        "is_alnum"=function(x) sum(is_alnum(x)),
+                                        "is_alpha"=function(x) sum(is_alpha(x)),
+                                        "is_digit"=function(x) sum(is_digit(x)),
+                                        "is_punct"=function(x) sum(is_punct(x)),
+                                        "is_notalnum"=function(x) sum(is_notalnum(x))
                              ), 
-                             funs.add=NULL){
+                             funs.add=NULL, full.names=data_set_nms){
     funs <- c(funs.def, funs.add)
     #out <- data[ FALSE , ]
     out <- as.data.frame(lapply(data[ FALSE , ], as.character), stringsAsFactors=FALSE)
+    ##FIXME put checks on what fun outputs
     for(i in 1:length(funs)){
+        ##DEBUG
         #if(names(funs[i])=="unique(nchar())") break.point()
-        ##FIXME put checks on what fun outputs
-        out[i, ] <- sapply(data, funs[[i]])
+        # browser()
+        if(names(funs[i])=="position") 
+            out[i, ] <- sapply(names(data), grep, full.names) else
+                out[i, ] <- sapply(data, funs[[i]])
         row.names(out)[i] <- names(funs[i])
     }
     return(out)
