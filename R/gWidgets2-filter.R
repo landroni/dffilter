@@ -73,12 +73,19 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
     if(is.null(data_set_name)) data_set_name <- deparse(substitute(data_set))
     if(!is.character(data_set_name)) data_set_name <- as.character(data_set_name)
     data_set_nms <- names(data_set)
-    ##FIXME find most efficient way to determine size of df
     data_set_dim_orig <- dim(data_set)
     stopifnot(all(data_set_dim_orig >= c(1,2)))
     ##if pdata.frame, don't use droplevels()
     is_pdata.frame <- isTRUE(class(data_set)[1] == "pdata.frame")
-    
+
+    ##deal with duplicate names 
+    ##inform user after window becomes visible
+    dupl.names <- any(duplicated(data_set_nms))
+    if(dupl.names){ 
+        data_set_nms <- make.names(data_set_nms, unique = TRUE)
+        names(data_set) <- data_set_nms
+    }
+        
     w <- gwindow(paste(data_set_name, " (", data_set_dim_orig[1], ' x ', 
                        data_set_dim_orig[2], ')', sep=''), visible=FALSE, 
                  handler=function(h,...){
@@ -1800,6 +1807,12 @@ Do you want to proceed?', title="Warning", icon="warning")
 
     ##activate hidden panel
     if(hide) b_hide$invoke_change_handler()
+    
+    ###pop up notifications to users
+    ##inform users of previous fixes to duplicate names
+    if(dupl.names){
+        gmessage("Duplicate column names have been detected and made unique.", "Duplicate names")
+    }
     
     ##set some key-bindings
 #     if(esc){
