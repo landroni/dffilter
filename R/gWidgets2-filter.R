@@ -1816,7 +1816,7 @@ Do you want to proceed?', title="Warning", icon="warning")
     
     ##inform users of failure to restore column selection
     if(!is.null(sel.col)){
-        gmessage("Column selection couldn't be restored as the structure of the data frame changed.", "Column selection")
+        gmessage("Column selection couldn't be restored as the structure of the data frame has changed. Reverting to default selection.", "Column selection")
     } 
     
     
