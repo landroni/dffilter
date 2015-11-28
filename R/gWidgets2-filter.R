@@ -322,9 +322,9 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
         svalue(c_names, index=TRUE) <- 1:min(def.col, data_set_dim_orig[2])
     }
     if(!is.null(sel.col)){
-        ##FIXME message to inform user when selection couldn't be restored
+        ##message to inform user when selection couldn't be restored after window is visible
         if(all(sel.col %in% data_set_nms)) svalue(c_names) <- sel.col
-    } 
+    }
 
     ##continue fancy search functionality
     ##initialize old_selection which will be the output value of c_names
@@ -1813,6 +1813,12 @@ Do you want to proceed?', title="Warning", icon="warning")
     if(dupl.names){
         gmessage("Duplicate column names have been detected and made unique.", "Duplicate names")
     }
+    
+    ##inform users of failure to restore column selection
+    if(!is.null(sel.col)){
+        gmessage("Column selection couldn't be restored as the structure of the data frame changed.", "Column selection")
+    } 
+    
     
     ##set some key-bindings
 #     if(esc){
