@@ -170,8 +170,9 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
     delete(f_side0g, f_side0g2)  ##init the vertical buttons
 
 
-    f_side1 <- gvbox(cont=f_side0, use.scrollwindow=TRUE, expand=TRUE)
-
+    #f_side1 <- gvbox(cont=f_side0, use.scrollwindow=TRUE, expand=TRUE)
+    f_side1 <- gpanedgroup(FALSE, cont=f_side0, expand=TRUE)
+    
     ##FIXME mv this to appropriate location in code
     ############################
     ##Filter *tab*
@@ -389,7 +390,8 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
        #row_filter <- sel.row
        #row_filter$l[[1]]$initialize_item()
     }
-    r_gp <- gframe("<b>Filter rows:</b>", markup=TRUE, cont=f_side1, horizontal=FALSE)
+    f_side1bis <- gvbox(cont=f_side1, use.scrollwindow=TRUE, expand=TRUE)
+    r_gp <- gframe("<b>Filter rows:</b>", markup=TRUE, cont=f_side1bis, horizontal=FALSE)
     row_filter <- gfilter(data_set, initial.vars=initial.vars, 
                           cont=r_gp, expand=TRUE, head.def=500)
 
@@ -623,13 +625,13 @@ Do you want to proceed?', title="Warning", icon="warning")
     
     b_disp <- gbutton(paste("Display selection (", data_set_dim_orig[1], ' x ', 
                             data_set_dim_orig[2], ')', sep=''), expand=TRUE, 
-                      cont=ggroup(cont=f_side1), handler=hb_disp)
+                      cont=ggroup(cont=f_side1bis), handler=hb_disp)
     enabled(b_disp) <- TRUE
     b_disp$set_icon("execute")
     #font(b_disp) <- list(weight = "bold")
     
     ## allow to automatically update the viewed subset
-    cb_autoupdate <- gcheckbox('Update automatically', cont=ggroup(cont=f_side1))
+    cb_autoupdate <- gcheckbox('Update automatically', cont=ggroup(cont=f_side1bis))
     tooltip(cb_autoupdate) <- "If checked refresh the displayed dataset \nas soon as the column or row selections change."
     
     ##FIXME full editing support for some other time
@@ -1778,6 +1780,7 @@ Do you want to proceed?', title="Warning", icon="warning")
     ##set GUI window parameters
     ##set sizes
     size(w) <- c(750, 600)
+    
     ##FIXME if mv visible call down, then pg doesn't resize correctly
     visible(w) <- TRUE
     svalue(pg) <- as.integer(size(b_disp)[1] + 20)
@@ -1785,6 +1788,7 @@ Do you want to proceed?', title="Warning", icon="warning")
     #svalue(pg) <- 250L
     ## use 5 lines as hight of selection box (less claustrophobic)
     size(c_names)[2] <- 5*25
+    svalue(f_side1) <- 0.33
     ##FIXME it works here, but not above
     svalue(pg_ctab) <- 0.15
     #size(gg_ctab2) <- c(1000, 300)
