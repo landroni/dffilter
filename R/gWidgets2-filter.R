@@ -2,7 +2,7 @@
 
 dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE, 
                      data_set_name=NULL, sel.col=NULL, sel.row=NULL, esc=FALSE, 
-                     def.col=100, details=TRUE, details.on.tab.sel=TRUE, 
+                     def.col=50, details=TRUE, details.on.tab.sel=TRUE, 
                      confirm.big.df=TRUE, 
                      initial.vars=data.frame(data_set_nms[1], "preset", "preset", 
                         stringsAsFactors=FALSE), filter.on.tab.sel=TRUE, 
