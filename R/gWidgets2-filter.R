@@ -1815,12 +1815,16 @@ Do you want to proceed?', title="Warning", icon="warning")
     ###pop up notifications to users
     ##inform users of previous fixes to duplicate names
     if(dupl.names){
-        gmessage("Duplicate column names have been detected and made unique.", "Duplicate names")
+        galert("Duplicate column names have been detected and made unique.", 
+               "Duplicate names", 
+               delay = 7, parent = w)
     }
     
     ##inform users of failure to restore column selection
     if(!is.null(sel.col)){
-        gmessage("Column selection couldn't be restored as the structure of the data frame has changed. Reverting to default selection.", "Column selection")
+        galert("Column selection couldn't be restored as the structure of the data frame has changed. Reverting to default selection.", 
+               "Column selection", 
+               delay = 7, parent = w)
     } 
     
     
