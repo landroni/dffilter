@@ -569,16 +569,34 @@ Do you want to proceed?', title="Warning", icon="warning")
         #print(paste("new.ctab:", new.ctab))
     }
     
+    ##deal with display of logicals
+    as_factor.logical <- function(x){
+        out <- factor(rep("TRUE", length(x)), 
+                      levels=c("TRUE", "FALSE", "NA"))
+        out[is.na(x)] <- "NA"
+        out[!x] <- "FALSE"
+        out
+    }
+    
     h_filter <- function(h, ...){
         ## now add a data frame
         delete(df_box, df_box[1])             # remove child
         
         ## disable editing if so requested
         if(!editable){
-            DF <<- gdf(data_set[rows, cnms], cont=df_box, expand=TRUE, 
+            ##FIXME check how tweaked logical display works
+            ##coerce logical vectors to factors for display
+            DF.disp <- data_set[rows, cnms]
+            x.logi <- names(DF.disp)[sapply(DF.disp, is.logical)]
+            ##FIXME has to be a quicker way than this using apply funs
+            for(i in x.logi){
+                DF.disp[[i]] <- as_factor.logical(DF.disp[[i]])
+            }
+            DF <<- gdf(DF.disp, cont=df_box, expand=TRUE, 
                        freeze_attributes=TRUE)
             sapply(1:data_set_dim[2], function(j) editable(DF, j) <- FALSE)
-            
+
+            rm(DF.disp)
             ## if(editable), disallow row/col c-menu when not all columns/rows are displayed (freeze_attributes=TRUE)
         } else if( all(data_set_dim == data_set_dim_orig) ){
             ## display full data set

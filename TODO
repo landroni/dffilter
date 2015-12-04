@@ -1,9 +1,12 @@
 High priority / ASAP:
- - !!add numSummary tab (RcmdrMisc)
  - !!proper packaging for CRAN
  - !!"By index" cb in c_names to "Select columns by index" (would accept/match 1:32)
 	- when checked, append indices to var names 
- - !!check pdata.frame are supported throughout
+ - !!REQ multiple selection in gcomboboxgroup()
+     - multiple selection mode (instead of shift+select on checkboxes); 
+        or via c-menu item "select to here"
+        or via mouse right-click
+
 
  - !!tweak preset
     - !!'preserve/freeze set.seed()' cb with 'some' preset filter
@@ -43,11 +46,9 @@ High priority / ASAP:
         check if digest of object is still the same and if not inform the user that 
         the object had already been modified and ask for additional confirmation 
 
+ - !!add numSummary tab (RcmdrMisc)
  - !!toggle button to display only unique()/duplicated2() matches (can gdf() support this?)
  - respect selected tab on reload
- - !!make.names() & set editable=F & message to inform user
-    - ??disallow data frames with duplicate names to avoid assignment issues
-    - bug with cbind() & check.names=F
  - ??focus input box after pressing buttons in c_names
  - !!search.opts=list(), auto.update=F
  - !!allow to display df[x, 1, drop=F]
@@ -56,9 +57,6 @@ High priority / ASAP:
     - jerky re-size of cols (re-adj of col width)
     - CPU load on scroll
     - come up with *big* Test data frame with NAs, NA vars, various data types, Date, labels, etc.
- - !!REQ multiple selection in gcomboboxgroup()
-     - multiple selection mode (isntead of shift+select on cehckboxes); 
-        or via c-menu item "select to here"
 
  - name ideas: 
 	- "interactive data manipulation"
@@ -68,7 +66,7 @@ High priority / ASAP:
  - investigate what happens on merge for such a "tmp" df
  - ??add subs=NULL option & col.subs=NULL (&disallow [] in df name)
  - REQ gdf() precision of decimal points
- - !!mv some funs to a Lmisc package
+ - !!mv some funs to a livmisc package
  - ??'Enter' should activate display button
  - opts c-menu & automatically update cbs: 
     - 'Automatically update Details' tab cb
@@ -77,9 +75,6 @@ High priority / ASAP:
  - REQ when viewing gdf(), possible to c-menu "copy" cell?
     - min window with up to 5th digit nrs, restore window, hover cells, 
         changes to displaying only up to 4th digit
- - gdf(): 
-    - REQ do not treat NA logical as TRUE
-    - REQ rethink display of checboxes for logical (e.g. NAs or visibility with dark themes)
  - REQ investigate: gtk_tree_view_unref_tree_helper errors
  - investigate Debug tab: 
      [1] "col"
