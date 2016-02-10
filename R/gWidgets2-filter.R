@@ -7,13 +7,15 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
                      initial.vars=data.frame(data_set_nms[1], "preset", "preset", 
                         stringsAsFactors=FALSE), filter.on.tab.sel=TRUE, 
                      hide=FALSE
-                     , crosstab=TRUE, crosstab.on.tab.sel=TRUE
+                     , crosstab=TRUE, crosstab.on.tab.sel=TRUE, 
+                     free.mem=1
                      ){
     require(gWidgets2) ## on github not CRAN. (require(devtools); install_github("gWidgets2", "jverzani")
     options(guiToolkit="RGtk2")
     require(RGtk2)
     ##FIXME !!proper CRAN packaging
     ##FIXME !!put package require() in appropriate handlers
+    ##free.mem: 2 - periodic, 1 - on.close, 0 - never
     if(details) require(Hmisc)
     
 
@@ -58,9 +60,11 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
     l_lyt_ctab <- list()
     f_lyt_ctab <- list()
     g_variable2...fixed <- NULL     ## global instance of special 'variable' obj in ctab
+    free.mem.nr <- 0
     
     ##if there is no Details tab, we always want to display subset
     if(!details) filter.on.tab.sel <- FALSE
+    free.mem <- free.mem[1]
     
      #print(data_set_name)
      #print(class(sel.row))
@@ -89,11 +93,22 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
     w <- gwindow(paste(data_set_name, " (", data_set_dim_orig[1], ' x ', 
                        data_set_dim_orig[2], ')', sep=''), visible=FALSE, 
                  handler=function(h,...){
-                     ##attempt to free memory
-                     gc(TRUE)
-                     #if(identical)
                      #return(data_set)
                  })
+    
+    h_free.mem <- function(h,...) {
+        if(free.mem %in% 1:2){
+            a <- gwindow("", width=50, height=30, parent=w)
+            glabel("Freeing up memory...", cont=a)
+            Sys.sleep(0.01)
+            gc(FALSE)
+            ##FIXME add spinner
+            #gtkSpinner()
+            dispose(a)
+        }
+        FALSE
+    }
+    addHandlerUnrealize(w, handler=h_free.mem)
     
     ##set WM icon (gtk-only)
     w_img <- gdkPixbufNewFromFile("gtk-logo-rgb.gif")
@@ -146,6 +161,7 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
         #for(i in sel.row) print(class(i)[1])
         #for(i in 1:length(sel.row)) print(svalue(sel.row[[i]]))
         
+        h_free.mem()
         dispose(w)
         dffilter_reload(data_set=get(data_set_name), display=display, maximize=maximize, 
                         editable=editable, data_set_name=data_set_name, 
@@ -193,6 +209,7 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
     }
     addSpring(btn_gp)
     close_btn <- gbutton("Close", cont=btn_gp, handler=function(h,...){
+        h_free.mem()
         dispose(w)
     })
     #gsb_df <- gstatusbar('', cont=df_side)  ##uncomment to enable gtkSpinner() functionality
@@ -571,6 +588,15 @@ Do you want to proceed?', title="Warning", icon="warning")
     
     
     h_filter <- function(h, ...){
+        ##periodically free up memory
+        if(free.mem == 2){
+            free.mem.nr <<- free.mem.nr + 1
+            if(free.mem.nr == 5){
+                h_free.mem()
+                free.mem.nr <<- 0
+            }
+        }
+        
         ## now add a data frame
         delete(df_box, df_box[1])             # remove child
         
