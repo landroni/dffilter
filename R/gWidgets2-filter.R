@@ -98,9 +98,11 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
     
     h_free.mem <- function(h,...) {
         if(free.mem %in% 1:2){
-            a <- gwindow("", width=50, height=30, parent=w)
-            glabel("Freeing up memory...", cont=a)
-            Sys.sleep(0.01)
+            a <- gwindow("", visible = FALSE, width=50, height=30, parent=w)
+            a$widget$setDecorated(FALSE)
+            glabel(" Freeing up memory... ", cont=a)
+            visible(a) <- TRUE
+            Sys.sleep(0.02)
             gc(FALSE)
             ##FIXME add spinner
             #gtkSpinner()
