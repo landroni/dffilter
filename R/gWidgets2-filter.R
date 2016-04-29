@@ -98,6 +98,7 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
     
     h_free.mem <- function(h,...) {
         if(free.mem %in% 1:2){
+            ##FIXME block user closing window
             a <- gwindow("", visible = FALSE, width=50, height=30, parent=w)
             a$widget$setDecorated(FALSE)
             glabel(" Freeing up memory... ", cont=a)
@@ -935,7 +936,7 @@ Do you want to proceed?', title="Warning", icon="warning")
     
     f_details <- function(x=data_set, nm=data_set_name, nms=data_set_nms){
         out <- list()
-        out[["descr"]] <- describe(x, descript=nm)
+        out[["descr"]] <- try(describe(x, descript=nm))
         if(!is_pdata.frame) out[["summ"]] <- capture.output(summary(x)) else
             out[["summ"]] <- "NULL"
         out[["lab.df"]] <- capture.output(list_lab()) ##use only data_set
