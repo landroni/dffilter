@@ -101,12 +101,20 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
             ##FIXME block user closing window
             a <- gwindow("", visible = FALSE, width=50, height=30, parent=w)
             a$widget$setDecorated(FALSE)
-            glabel(" Freeing up memory... ", cont=a)
+            gw <- ggroup(cont=a)
+            glabel(" ", cont=gw)
+            gspin <- gtkSpinner()
+            
+            ##inital spin
+            add(gw, gspin)
+            gspin$start()
+            #gsb_dfsp$stop()
+            #gsb_dfg$widget$remove(gsb_dfsp)
+            
+            glabel("Freeing up memory... ", cont=gw)
             visible(a) <- TRUE
             Sys.sleep(0.02)
             gc(FALSE)
-            ##FIXME add spinner
-            #gtkSpinner()
             dispose(a)
         }
         FALSE
