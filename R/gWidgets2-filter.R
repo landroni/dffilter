@@ -10,6 +10,7 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
                      , crosstab=TRUE, crosstab.on.tab.sel=TRUE, 
                      free.mem=1
                      ){
+    require(gWidgets2RGtk2)
     require(gWidgets2) ## on github not CRAN. (require(devtools); install_github("gWidgets2", "jverzani")
     options(guiToolkit="RGtk2")
     require(RGtk2)
