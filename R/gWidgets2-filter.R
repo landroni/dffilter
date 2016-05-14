@@ -104,6 +104,7 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
             a$widget$setDecorated(FALSE)
             gw <- ggroup(cont=a)
             glabel(" ", cont=gw)
+            Sys.sleep(0.01)
             gspin <- gtkSpinner()
             
             ##inital spin
