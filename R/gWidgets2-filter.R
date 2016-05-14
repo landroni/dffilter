@@ -301,6 +301,7 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
                    c_names[] <<- character(0) 
                    ed$widget$modifyBase(GtkStateType["normal"], "#FF6666")
                    ed$widget$modifyText(GtkStateType["normal"], "white") 
+                   tooltip(c_names) <- c_names_tip()
                    return()
                }
          } else {
@@ -314,10 +315,12 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
              c_names[] <<- character(0) 
              ed$widget$modifyBase(GtkStateType["normal"], "#FF6666")
              ed$widget$modifyText(GtkStateType["normal"], "white") 
+             tooltip(c_names) <- c_names_tip()
              return()
            }
          }
          svalue(c_names) <<- cur_sel
+         tooltip(c_names) <- c_names_tip()
        }
 
        b <- gbutton("", cont=gp)
@@ -336,7 +339,7 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
                      search_type[["perl"]] <<- svalue(h$obj)
                      search_handler(do_old=FALSE)                                                     
                    })
-                   )
+       )
        
        addPopupMenu(b, gmenu(cbs, popup=TRUE))
 
@@ -345,9 +348,17 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
 
 
     c_names <- gcheckboxgroup(data_set_nms, checked=TRUE, cont=c_gp, 
-                              use.table=TRUE, expand=TRUE, fill=TRUE)
-                              
+                              use.table=TRUE, expand=TRUE, fill=TRUE, 
+                              handler = function(h,...){
+                                  tooltip(c_names) <- c_names_tip()
+                              })
+    c_names_tip <- function(){
+        paste("Displaying:", length(c_names), "/", length(data_set_nms),
+              "\nSelected:", length(svalue(c_names)), "/", length(c_names))
+    }
+    tooltip(c_names) <- c_names_tip()
     
+    ##FIXME sel.col logic is broken
     ##if sel.col is supplied (e.g. for reload) check structure to see if all 
     ##selected variables are still present in reloaded data frame
     if(def.col!=0){
@@ -356,6 +367,7 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
     if(!is.null(sel.col)){
         ##message to inform user when selection couldn't be restored after window is visible
         if(all(sel.col %in% data_set_nms)) svalue(c_names) <- sel.col
+        tooltip(c_names) <- c_names_tip()
     }
 
     ##continue fancy search functionality
