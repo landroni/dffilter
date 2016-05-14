@@ -85,7 +85,8 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
     ##deal with duplicate names 
     ##inform user after window becomes visible
     dupl.names <- any(duplicated(data_set_nms))
-    if(dupl.names){ 
+    na.names <- any(is.na(data_set_nms))
+    if(dupl.names || na.names){
         data_set_nms <- make.names(data_set_nms, unique = TRUE)
         names(data_set) <- data_set_nms
     }
@@ -1853,8 +1854,15 @@ Do you want to proceed?', title="Warning", icon="warning")
     ###pop up notifications to users
     ##inform users of previous fixes to duplicate names
     if(dupl.names){
-        galert("Duplicate column names have been detected and made unique.", 
+        galert("Duplicate names detected and made unique.", 
                "Duplicate names", 
+               delay = 7, parent = w)
+    }
+    
+    ##BUG only last one makes it through
+    if(na.names){
+        galert("NA names detected and made unique.", 
+               "NA names", 
                delay = 7, parent = w)
     }
     
