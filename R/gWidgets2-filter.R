@@ -355,8 +355,8 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
                                   tooltip(c_names) <- c_names_tip()
                               })
     c_names_tip <- function(){
-        paste("Displaying:", length(c_names), "/", length(data_set_nms),
-              "\nSelected:", length(svalue(c_names)), "/", length(c_names))
+        paste(#"Visible:", length(c_names), "/", length(data_set_nms),
+              "Selected:", length(svalue(c_names)), "/", length(c_names))
     }
     tooltip(c_names) <- c_names_tip()
     
