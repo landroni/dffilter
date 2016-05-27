@@ -105,17 +105,19 @@ dffilter <- function(data_set, display=TRUE, maximize=TRUE, editable=FALSE,
             a$widget$setDecorated(FALSE)
             gw <- ggroup(cont=a)
             glabel(" ", cont=gw)
-            Sys.sleep(0.01)
-            gspin <- gtkSpinner()
             
-            ##inital spin
-            add(gw, gspin)
+            ##BUG ui drawing is sometimes unreliable and time-dependent
+            ##add spinner
+            gspin <- gtkSpinner()
             gspin$start()
-            #gsb_dfsp$stop()
-            #gsb_dfg$widget$remove(gsb_dfsp)
+            Sys.sleep(0.02)
+            add(gw, gspin)
             
             glabel("Freeing up memory... ", cont=gw)
+            Sys.sleep(0.02)
             visible(a) <- TRUE
+            
+            ##free mem
             Sys.sleep(0.02)
             gc(FALSE)
             dispose(a)
